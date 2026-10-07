@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}
+My Requests | College Students Help Desk
+{% endblock %}
+
+
+{% block content %}
+
+<div class="dashboard-wrapper">
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                🎓
+            </div>
+
+            <div>
+                <strong>College Students</strong>
+                <small>Help Desk</small>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a
+                href="{% url 'dashboard:home' %}"
+                class="nav-item"
+            >
+                🏠
+                Dashboard
+            </a>
+
+            <a
+                href="{% url 'helpdesk:create_request' %}"
+                class="nav-item"
+            >
+                ➕
+                New Request
+            </a>
+
+            <a
+                href="{% url 'helpdesk:requests' %}"
+                class="nav-item active"
+            >
+                📋
+                My Requests
+            </a>
+
+        </nav>
+
+
+        <a
+            href="{% url 'accounts:logout' %}"
+            class="nav-item logout"
+        >
+            🚪
+            Logout
+        </a>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <div class="topbar">
+
+            <div>
+
+                <h2>
+                    My Requests
+                </h2>
+
+                <p>
+                    Track your help-desk requests.
+                </p>
+
+            </div>
+
+            <a
+                href="{% url 'helpdesk:create_request' %}"
+                class="btn btn-primary"
+            >
+                + New Request
+            </a>
+
+        </div>
+
+
+        <div class="dashboard-card">
+
+            <form
+                method="get"
+                class="d-flex gap-2 mb-4"
+            >
+
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ query }}"
+                    class="form-control"
+                    placeholder="Search ticket or subject..."
+                >
+
+                <button
+                    class="btn btn-outline-primary"
+                    type="submit"
+                >
+                    Search
+                </button>
+
+            </form>
+
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Ticket</th>
+
+                            <th>Subject</th>
+
+                            <th>Department</th>
+
+                            <th>Priority</th>
+
+                            <th>Status</th>
+
+                            <th>Date</th>
+
+                            <th></th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    {% for item in requests %}
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    {{ item.ticket_number }}
+                                </strong>
+                            </td>
+
+                            <td>
+                                {{ item.subject }}
+                            </td>
+
+                            <td>
+                                {{ item.department.name }}
+                            </td>
+
+                            <td>
+                                {{ item.get_priority_display }}
+                            </td>
+
+                            <td>
+
+                                <span class="badge
+                                    {% if item.status == 'PENDING' %}
+                                        bg-warning text-dark
+                                    {% elif item.status == 'IN_PROGRESS' %}
+                                        bg-primary
+                                    {% elif item.status == 'RESOLVED' %}
+                                        bg-success
+                                    {% elif item.status == 'CLOSED' %}
+                                        bg-secondary
+                                    {% else %}
+                                        bg-info
+                                    {% endif %}
+                                ">
+
+                                    {{ item.get_status_display }}
+
+                                </span>
+
+                            </td>
+
+                            <td>
+                                {{ item.created_at|date:"d M Y" }}
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="{% url 'helpdesk:request_detail' item.ticket_number %}"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    View
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="7"
+                                class="text-center py-5"
+                            >
+
+                                <h5>
+                                    No requests found
+                                </h5>
+
+                                <p class="text-muted">
+                                    Create your first help-desk request.
+                                </p>
+
+                                <a
+                                    href="{% url 'helpdesk:create_request' %}"
+                                    class="btn btn-primary"
+                                >
+                                    Create Request
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+{% endblock %}

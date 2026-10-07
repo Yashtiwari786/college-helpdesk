@@ -429,3 +429,20 @@ body {
     }
 
 }
+
+.message-box {
+    padding: 15px 18px;
+    border-radius: 14px;
+    margin-bottom: 15px;
+    max-width: 80%;
+}
+
+.message-own {
+    background: #e8f0ff;
+    margin-left: auto;
+}
+
+.message-other {
+    background: #f1f3f6;
+    margin-right: auto;
+}

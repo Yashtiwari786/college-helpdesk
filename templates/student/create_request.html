@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}
+New Request | College Students Help Desk
+{% endblock %}
+
+
+{% block content %}
+
+<div class="dashboard-wrapper">
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                🎓
+            </div>
+
+            <div>
+                <strong>College Students</strong>
+                <small>Help Desk</small>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a
+                href="{% url 'dashboard:home' %}"
+                class="nav-item"
+            >
+                🏠 Dashboard
+            </a>
+
+            <a
+                href="{% url 'helpdesk:create_request' %}"
+                class="nav-item active"
+            >
+                ➕ New Request
+            </a>
+
+            <a
+                href="{% url 'helpdesk:requests' %}"
+                class="nav-item"
+            >
+                📋 My Requests
+            </a>
+
+        </nav>
+
+
+        <a
+            href="{% url 'accounts:logout' %}"
+            class="nav-item logout"
+        >
+            🚪 Logout
+        </a>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <div class="topbar">
+
+            <div>
+
+                <h2>
+                    Create New Request
+                </h2>
+
+                <p>
+                    Tell us what you need help with.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-card">
+
+            <form
+                method="post"
+                enctype="multipart/form-data"
+            >
+
+                {% csrf_token %}
+
+
+                {% if form.non_field_errors %}
+
+                    <div class="alert alert-danger">
+
+                        {{ form.non_field_errors }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <div class="row g-4">
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Department
+                        </label>
+
+                        {{ form.department }}
+
+                        {% for error in form.department.errors %}
+                            <div class="text-danger small">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Category
+                        </label>
+
+                        {{ form.category }}
+
+                        {% for error in form.category.errors %}
+                            <div class="text-danger small">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <div class="col-md-8">
+
+                        <label class="form-label">
+                            Subject
+                        </label>
+
+                        {{ form.subject }}
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Priority
+                        </label>
+
+                        {{ form.priority }}
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        <label class="form-label">
+                            Description
+                        </label>
+
+                        {{ form.description }}
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        <label class="form-label">
+                            Attachments
+                        </label>
+
+                        <input
+                            type="file"
+                            name="attachments"
+                            class="form-control"
+                            multiple
+                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.mp4,.mov"
+                        >
+
+                        <div class="form-text">
+                            You can upload screenshots, documents or videos.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-4 d-flex gap-2">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Submit Request
+                    </button>
+
+                    <a
+                        href="{% url 'helpdesk:requests' %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</div>
+
+{% endblock %}
