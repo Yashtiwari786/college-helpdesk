@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <h2 class="fw-bold mb-1">
+        Staff
+    </h2>
+
+    <p class="text-muted mb-4">
+        Manage help desk staff members
+    </p>
+
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="GET">
+
+                <div class="input-group">
+
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ search }}"
+                        class="form-control"
+                        placeholder="Search staff..."
+                    >
+
+                    <button class="btn btn-primary">
+                        Search
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover mb-0">
+
+                <thead>
+
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for member in staff_members %}
+
+                    <tr>
+
+                        <td>
+                            {{ member.get_full_name|default:member.username }}
+                        </td>
+
+                        <td>
+                            {{ member.email }}
+                        </td>
+
+                        <td>
+                            {{ member.phone|default:"-" }}
+                        </td>
+
+                        <td>
+
+                            {% if member.is_active %}
+
+                                <span class="badge bg-success">
+                                    Active
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-danger">
+                                    Disabled
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

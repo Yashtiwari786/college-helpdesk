@@ -1,5 +1,5 @@
 from django.contrib import admin
-
+from .models import FAQ, Announcement
 from .models import (
     Department,
     Category,
@@ -136,4 +136,43 @@ class FeedbackAdmin(admin.ModelAdmin):
 
     list_filter = (
         "rating",
+    )
+
+@admin.register(FAQ)
+class FAQAdmin(admin.ModelAdmin):
+    list_display = (
+        "question",
+        "department",
+        "is_active",
+        "created_at",
+    )
+
+    list_filter = (
+        "department",
+        "is_active",
+    )
+
+    search_fields = (
+        "question",
+        "answer",
+    )
+
+
+@admin.register(Announcement)
+class AnnouncementAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "department",
+        "is_active",
+        "created_at",
+    )
+
+    list_filter = (
+        "department",
+        "is_active",
+    )
+
+    search_fields = (
+        "title",
+        "message",
     )

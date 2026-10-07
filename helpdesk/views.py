@@ -1,6 +1,7 @@
 from django.contrib import messages
 from functools import wraps
-
+from django.contrib.auth import get_user_model
+User = get_user_model()
 from django.contrib.auth.decorators import login_required
 
 from django.shortcuts import get_object_or_404, redirect, render
@@ -27,6 +28,9 @@ from .models import (
     Feedback,
     Notification,
     Request,
+    Department,
+    Category,
+    Announcement
 )
 
 
@@ -618,3 +622,267 @@ def staff_dashboard(request):
         context
     )
 
+def admin_required(view_func):
+    @wraps(view_func)
+    @login_required
+    def wrapper(request, *args, **kwargs):
+
+        if request.user.role != request.user.Roles.ADMIN:
+            messages.error(
+                request,
+                "You do not have administrator access."
+            )
+
+            return redirect("/accounts/login/")
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+@admin_required
+def admin_dashboard(request):
+
+    total_students = User.objects.filter(
+        role=User.Roles.STUDENT
+    ).count()
+
+    total_staff = User.objects.filter(
+        role=User.Roles.STAFF
+    ).count()
+
+    total_requests = Request.objects.count()
+
+    pending_requests = Request.objects.filter(
+        status=Request.Status.PENDING
+    ).count()
+
+    in_progress_requests = Request.objects.filter(
+        status=Request.Status.IN_PROGRESS
+    ).count()
+
+    resolved_requests = Request.objects.filter(
+        status__in=[
+            Request.Status.RESOLVED,
+            Request.Status.CLOSED,
+        ]
+    ).count()
+
+    total_departments = Department.objects.filter(
+        is_active=True
+    ).count()
+
+    total_categories = Category.objects.filter(
+        is_active=True
+    ).count()
+
+    recent_requests = Request.objects.select_related(
+        "student",
+        "department",
+        "category",
+        "assigned_staff",
+    ).order_by("-created_at")[:10]
+
+    recent_announcements = Announcement.objects.filter(
+        is_active=True
+    ).order_by("-created_at")[:5]
+
+    context = {
+        "total_students": total_students,
+        "total_staff": total_staff,
+        "total_requests": total_requests,
+        "pending_requests": pending_requests,
+        "in_progress_requests": in_progress_requests,
+        "resolved_requests": resolved_requests,
+        "total_departments": total_departments,
+        "total_categories": total_categories,
+        "recent_requests": recent_requests,
+        "recent_announcements": recent_announcements,
+    }
+
+    return render(
+        request,
+        "admin_panel/dashboard.html",
+        context
+    )
+
+@admin_required
+def admin_students(request):
+
+    students = User.objects.filter(
+        role=User.Roles.STUDENT
+    ).order_by(
+        "-date_joined"
+    )
+
+    search = request.GET.get("search", "").strip()
+
+    if search:
+        students = students.filter(
+            Q(username__icontains=search)
+            | Q(first_name__icontains=search)
+            | Q(last_name__icontains=search)
+            | Q(email__icontains=search)
+        )
+
+    return render(
+        request,
+        "admin_panel/students.html",
+        {
+            "students": students,
+            "search": search,
+        }
+    )
+
+@admin_required
+def admin_staff(request):
+
+    staff_members = User.objects.filter(
+        role=User.Roles.STAFF
+    ).order_by(
+        "-date_joined"
+    )
+
+    search = request.GET.get("search", "").strip()
+
+    if search:
+        staff_members = staff_members.filter(
+            Q(username__icontains=search)
+            | Q(first_name__icontains=search)
+            | Q(last_name__icontains=search)
+            | Q(email__icontains=search)
+        )
+
+    return render(
+        request,
+        "admin_panel/staff.html",
+        {
+            "staff_members": staff_members,
+            "search": search,
+        }
+    )
+
+@admin_required
+def admin_requests(request):
+
+    requests = Request.objects.select_related(
+        "student",
+        "department",
+        "category",
+        "assigned_staff",
+    ).order_by("-created_at")
+
+    search = request.GET.get("search", "").strip()
+    status = request.GET.get("status", "").strip()
+    department = request.GET.get("department", "").strip()
+
+    if search:
+        requests = requests.filter(
+            Q(ticket_number__icontains=search)
+            | Q(subject__icontains=search)
+            | Q(student__username__icontains=search)
+        )
+
+    if status:
+        requests = requests.filter(
+            status=status
+        )
+
+    if department:
+        requests = requests.filter(
+            department_id=department
+        )
+
+    departments = Department.objects.filter(
+        is_active=True
+    )
+    
+    staff_members = User.objects.filter(
+    role=User.Roles.STAFF,
+    is_active=True
+)
+    return render(
+        request,
+        "admin_panel/requests.html",
+        {
+            "requests": requests,
+            "search": search,
+            "selected_status": status,
+            "selected_department": department,
+            "status_choices": Request.Status.choices,
+            "departments": departments,
+            "staff_members": staff_members,
+        }
+    )
+
+@admin_required
+def admin_assign_request(request, ticket_number):
+
+    help_request = get_object_or_404(
+        Request,
+        ticket_number=ticket_number
+    )
+
+    if request.method == "POST":
+
+        staff_id = request.POST.get(
+            "assigned_staff"
+        )
+
+        if staff_id:
+
+            staff_member = get_object_or_404(
+                User,
+                id=staff_id,
+                role=User.Roles.STAFF
+            )
+
+            help_request.assigned_staff = staff_member
+
+            if help_request.status == Request.Status.PENDING:
+                help_request.status = Request.Status.ASSIGNED
+
+            help_request.save()
+
+            Notification.objects.create(
+                user=staff_member,
+                title="New Request Assigned",
+                message=(
+                    f"Request {help_request.ticket_number} "
+                    f"has been assigned to you."
+                ),
+                notification_type=Notification.Type.REQUEST,
+                request=help_request,
+            )
+
+            Notification.objects.create(
+                user=help_request.student,
+                title="Request Assigned",
+                message=(
+                    f"Your request {help_request.ticket_number} "
+                    f"has been assigned to staff."
+                ),
+                notification_type=Notification.Type.REQUEST,
+                request=help_request,
+            )
+
+            messages.success(
+                request,
+                "Request assigned successfully."
+            )
+
+    return redirect(
+        "helpdesk:admin_requests"
+    )
+
+@admin_required
+def admin_departments(request):
+
+    departments = Department.objects.all().order_by("name")
+
+    return render(
+        request,
+        "admin_panel/departments.html",
+        {
+            "departments": departments
+        }
+    )

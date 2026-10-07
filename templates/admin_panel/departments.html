@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <h2 class="fw-bold">
+        Departments
+    </h2>
+
+    <p class="text-muted mb-4">
+        Manage college help desk departments
+    </p>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover mb-0">
+
+                <thead>
+
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Categories</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for department in departments %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ department.name }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ department.description|default:"-" }}
+                        </td>
+
+                        <td>
+
+                            {% if department.is_active %}
+
+                                <span class="badge bg-success">
+                                    Active
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-danger">
+                                    Inactive
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ department.categories.count }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -68,4 +68,41 @@ urlpatterns = [
         views.staff_send_message,
         name="staff_send_message"
     ),
+
+    # Admin
+path(
+    "admin-panel/",
+    views.admin_dashboard,
+    name="admin_dashboard"
+),
+
+path(
+    "admin-panel/students/",
+    views.admin_students,
+    name="admin_students"
+),
+
+path(
+    "admin-panel/staff/",
+    views.admin_staff,
+    name="admin_staff"
+),
+
+path(
+    "admin-panel/requests/",
+    views.admin_requests,
+    name="admin_requests"
+),
+
+path(
+    "admin-panel/requests/<str:ticket_number>/assign/",
+    views.admin_assign_request,
+    name="admin_assign_request"
+),
+
+path(
+    "admin-panel/departments/",
+    views.admin_departments,
+    name="admin_departments"
+),
 ]
