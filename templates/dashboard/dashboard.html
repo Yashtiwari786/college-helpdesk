@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ title }} | College Students Help Desk
+{% endblock %}
+
+
+{% block content %}
+
+<div class="dashboard-wrapper">
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                🎓
+            </div>
+
+            <div>
+                <strong>College Students</strong>
+                <small>Help Desk</small>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a
+                href="{% url 'dashboard:home' %}"
+                class="nav-item active"
+            >
+                🏠
+                <span>Dashboard</span>
+            </a>
+
+
+            {% if dashboard_type == "student" %}
+
+                <a href="#" class="nav-item">
+                    ➕
+                    <span>New Request</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    📋
+                    <span>My Requests</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    🔔
+                    <span>Notifications</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    👤
+                    <span>Profile</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    ⭐
+                    <span>Feedback</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    ❓
+                    <span>FAQs</span>
+                </a>
+
+            {% endif %}
+
+
+            {% if dashboard_type == "staff" %}
+
+                <a href="#" class="nav-item">
+                    📋
+                    <span>Assigned Requests</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    📂
+                    <span>All Requests</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    💬
+                    <span>Messages</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    👤
+                    <span>Profile</span>
+                </a>
+
+            {% endif %}
+
+
+            {% if dashboard_type == "admin" %}
+
+                <a href="#" class="nav-item">
+                    👨‍🎓
+                    <span>Students</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    👨‍💼
+                    <span>Staff</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    🏢
+                    <span>Departments</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    📋
+                    <span>All Requests</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    📊
+                    <span>Reports</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    ❓
+                    <span>FAQs</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    📢
+                    <span>Announcements</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    ⚙️
+                    <span>Settings</span>
+                </a>
+
+            {% endif %}
+
+        </nav>
+
+
+        <a
+            href="{% url 'accounts:logout' %}"
+            class="nav-item logout"
+        >
+            🚪
+            <span>Logout</span>
+        </a>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main-content">
+
+
+        <header class="topbar">
+
+            <div>
+
+                <h2>
+                    {{ title }}
+                </h2>
+
+                <p>
+                    Welcome back,
+                    <strong>{{ user.first_name|default:user.username }}</strong> 👋
+                </p>
+
+            </div>
+
+
+            <div class="user-info">
+
+                <div class="avatar">
+                    {{ user.username|first|upper }}
+                </div>
+
+                <div>
+
+                    <strong>
+                        {{ user.username }}
+                    </strong>
+
+                    <small>
+                        {{ user.get_role_display }}
+                    </small>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- STUDENT -->
+
+        {% if dashboard_type == "student" %}
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <span>📄</span>
+                <div>
+                    <small>Total Requests</small>
+                    <h3>5</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>🕐</span>
+                <div>
+                    <small>In Progress</small>
+                    <h3>2</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>✅</span>
+                <div>
+                    <small>Resolved</small>
+                    <h3>3</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>⏳</span>
+                <div>
+                    <small>Pending</small>
+                    <h3>1</h3>
+                </div>
+            </div>
+
+        </section>
+
+
+        <section class="dashboard-card">
+
+            <h4>
+                Submit a New Request
+            </h4>
+
+            <p class="text-muted">
+                Get help from the appropriate college department.
+            </p>
+
+            <button class="btn btn-primary">
+                + Create Request
+            </button>
+
+        </section>
+
+        {% endif %}
+
+
+        <!-- STAFF -->
+
+        {% if dashboard_type == "staff" %}
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <span>📄</span>
+                <div>
+                    <small>Total Assigned</small>
+                    <h3>7</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>🕐</span>
+                <div>
+                    <small>In Progress</small>
+                    <h3>4</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>✅</span>
+                <div>
+                    <small>Resolved Today</small>
+                    <h3>2</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>⚠️</span>
+                <div>
+                    <small>Overdue</small>
+                    <h3>1</h3>
+                </div>
+            </div>
+
+        </section>
+
+
+        <section class="dashboard-card">
+
+            <h4>
+                Assigned Requests
+            </h4>
+
+            <div class="table-responsive">
+
+                <table class="table">
+
+                    <thead>
+
+                        <tr>
+                            <th>Ticket</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>REQ-001</td>
+                            <td>Wi-Fi Problem</td>
+                            <td>
+                                <span class="badge bg-warning">
+                                    In Progress
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary">
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        {% endif %}
+
+
+        <!-- ADMIN -->
+
+        {% if dashboard_type == "admin" %}
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <span>👨‍🎓</span>
+                <div>
+                    <small>Total Students</small>
+                    <h3>1,248</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>👨‍💼</span>
+                <div>
+                    <small>Total Staff</small>
+                    <h3>86</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>📄</span>
+                <div>
+                    <small>Total Requests</small>
+                    <h3>342</h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <span>✅</span>
+                <div>
+                    <small>Resolved</small>
+                    <h3>278</h3>
+                </div>
+            </div>
+
+        </section>
+
+
+        <section class="dashboard-card">
+
+            <h4>
+                System Overview
+            </h4>
+
+            <p class="text-muted">
+                Manage students, staff, departments and help-desk
+                requests from the administration panel.
+            </p>
+
+            <div class="quick-actions">
+
+                <button class="btn btn-primary">
+                    Manage Students
+                </button>
+
+                <button class="btn btn-outline-primary">
+                    Manage Staff
+                </button>
+
+                <button class="btn btn-outline-primary">
+                    View Requests
+                </button>
+
+                <button class="btn btn-outline-primary">
+                    Reports
+                </button>
+
+            </div>
+
+        </section>
+
+        {% endif %}
+
+
+    </main>
+
+</div>
+
+{% endblock %}
