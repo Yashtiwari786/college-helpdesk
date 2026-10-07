@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold">
+                {{ help_request.ticket_number }}
+            </h2>
+
+            <p class="text-muted mb-0">
+                {{ help_request.subject }}
+            </p>
+        </div>
+
+        <a href="{% url 'helpdesk:staff_requests' %}"
+           class="btn btn-outline-secondary">
+            ← Back
+        </a>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- Main -->
+
+        <div class="col-lg-8">
+
+            <!-- Request -->
+
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-body">
+
+                    <h5 class="fw-bold mb-3">
+                        Request Details
+                    </h5>
+
+                    <p>
+                        {{ help_request.description|linebreaks }}
+                    </p>
+
+                    <hr>
+
+                    <div class="row">
+
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                Department
+                            </small>
+                            <p>
+                                {{ help_request.department.name }}
+                            </p>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                Category
+                            </small>
+                            <p>
+                                {{ help_request.category.name }}
+                            </p>
+                        </div>
+
+                        <div class="col-md-4">
+                            <small class="text-muted">
+                                Created
+                            </small>
+                            <p>
+                                {{ help_request.created_at|date:"d M Y H:i" }}
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Conversation -->
+
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        Conversation
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    {% for message in messages_list %}
+
+                    <div class="message-box
+                        {% if message.sender == request.user %}
+                            message-own
+                        {% else %}
+                            message-other
+                        {% endif %}
+                    ">
+
+                        <div class="small text-muted mb-1">
+                            <strong>
+                                {{ message.sender.get_full_name|default:message.sender.username }}
+                            </strong>
+
+                            ·
+
+                            {{ message.created_at|date:"d M Y H:i" }}
+                        </div>
+
+                        <div>
+                            {{ message.message|linebreaks }}
+                        </div>
+
+                        {% if message.attachment %}
+
+                        <div class="mt-2">
+                            <a href="{{ message.attachment.url }}"
+                               target="_blank">
+                                View Attachment
+                            </a>
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    {% empty %}
+
+                    <p class="text-muted">
+                        No messages yet.
+                    </p>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <!-- Reply -->
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        Reply to Student
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <form
+                        method="POST"
+                        enctype="multipart/form-data"
+                        action="{% url 'helpdesk:staff_send_message' help_request.ticket_number %}"
+                    >
+
+                        {% csrf_token %}
+
+                        {{ message_form.message }}
+
+                        <div class="mt-3">
+                            {{ message_form.attachment }}
+                        </div>
+
+                        <button class="btn btn-primary mt-3">
+                            Send Reply
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Sidebar -->
+
+        <div class="col-lg-4">
+
+            <!-- Student -->
+
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-body">
+
+                    <h5 class="fw-bold">
+                        Student
+                    </h5>
+
+                    <p class="mb-1">
+                        <strong>
+                            {{ help_request.student.get_full_name|default:help_request.student.username }}
+                        </strong>
+                    </p>
+
+                    <p class="text-muted">
+                        {{ help_request.student.email }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- Update -->
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white">
+
+                    <h5 class="mb-0">
+                        Update Request
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <form
+                        method="POST"
+                        action="{% url 'helpdesk:staff_update_request' help_request.ticket_number %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Status
+                            </label>
+
+                            {{ update_form.status }}
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Priority
+                            </label>
+
+                            {{ update_form.priority }}
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Assigned Staff
+                            </label>
+
+                            {{ update_form.assigned_staff }}
+
+                        </div>
+
+
+                        <button class="btn btn-success w-100">
+                            Update Request
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

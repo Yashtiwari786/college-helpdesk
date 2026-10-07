@@ -152,3 +152,35 @@ def validate_file_size(file):
         raise ValidationError(
             "File size cannot exceed 10 MB."
         )
+
+from django import forms
+from .models import Request, Message
+
+
+class StaffRequestUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Request
+        fields = ["status", "priority", "assigned_staff"]
+        widgets = {
+            "status": forms.Select(attrs={"class": "form-select"}),
+            "priority": forms.Select(attrs={"class": "form-select"}),
+            "assigned_staff": forms.Select(attrs={"class": "form-select"}),
+        }
+
+
+class StaffMessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ["message", "attachment"]
+        widgets = {
+            "message": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": "Write a reply to the student..."
+                }
+            ),
+            "attachment": forms.ClearableFileInput(
+                attrs={"class": "form-control"}
+            ),
+        }

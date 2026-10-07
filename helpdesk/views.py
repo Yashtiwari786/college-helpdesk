@@ -1,4 +1,13 @@
 from django.contrib import messages
+from functools import wraps
+
+from django.contrib.auth.decorators import login_required
+
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+
+from .forms import StaffMessageForm, StaffRequestUpdateForm
+from .models import Request, Message, Notification
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import (
@@ -359,3 +368,253 @@ def submit_feedback(
         "helpdesk:request_detail",
         ticket_number=ticket_number,
     )
+
+def staff_required(view_func):
+    @wraps(view_func)
+    @login_required
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_staff_member:
+            messages.error(request, "You do not have staff access.")
+            return redirect("dashboard")
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+@staff_required
+def staff_requests(request):
+    requests = Request.objects.filter(
+        assigned_staff=request.user
+    ).select_related(
+        "student",
+        "department",
+        "category"
+    )
+
+    search = request.GET.get("search", "").strip()
+    status = request.GET.get("status", "").strip()
+    priority = request.GET.get("priority", "").strip()
+
+    if search:
+        requests = requests.filter(
+            Q(ticket_number__icontains=search)
+            | Q(subject__icontains=search)
+            | Q(description__icontains=search)
+            | Q(student__first_name__icontains=search)
+            | Q(student__last_name__icontains=search)
+        )
+
+    if status:
+        requests = requests.filter(status=status)
+
+    if priority:
+        requests = requests.filter(priority=priority)
+
+    context = {
+        "requests": requests,
+        "search": search,
+        "selected_status": status,
+        "selected_priority": priority,
+        "status_choices": Request.Status.choices,
+        "priority_choices": Request.Priority.choices,
+    }
+
+    return render(
+        request,
+        "staff/requests.html",
+        context
+    )
+
+@staff_required
+def staff_request_detail(request, ticket_number):
+    help_request = get_object_or_404(
+        Request.objects.select_related(
+            "student",
+            "department",
+            "category",
+            "assigned_staff"
+        ),
+        ticket_number=ticket_number
+    )
+
+    messages_list = help_request.messages.select_related(
+        "sender"
+    ).order_by("created_at")
+
+    attachments = help_request.attachments.select_related(
+        "uploaded_by"
+    ).order_by("-uploaded_at")
+
+    update_form = StaffRequestUpdateForm(
+        instance=help_request
+    )
+
+    message_form = StaffMessageForm()
+
+    context = {
+        "help_request": help_request,
+        "messages_list": messages_list,
+        "attachments": attachments,
+        "update_form": update_form,
+        "message_form": message_form,
+    }
+
+    return render(
+        request,
+        "staff/request_detail.html",
+        context
+    )
+
+@staff_required
+def staff_update_request(request, ticket_number):
+    help_request = get_object_or_404(
+        Request,
+        ticket_number=ticket_number
+    )
+
+    if request.method != "POST":
+        return redirect(
+            "helpdesk:staff_request_detail",
+            ticket_number=ticket_number
+        )
+
+    form = StaffRequestUpdateForm(
+        request.POST,
+        instance=help_request
+    )
+
+    if form.is_valid():
+        old_status = help_request.status
+
+        updated_request = form.save()
+
+        if updated_request.status == Request.Status.IN_PROGRESS:
+            if not updated_request.assigned_staff:
+                updated_request.assigned_staff = request.user
+
+            updated_request.save()
+
+        if updated_request.status == Request.Status.RESOLVED:
+            updated_request.resolved_at = timezone.now()
+            updated_request.save()
+
+        if updated_request.status == Request.Status.CLOSED:
+            updated_request.closed_at = timezone.now()
+            updated_request.save()
+
+        if old_status != updated_request.status:
+            Notification.objects.create(
+                user=updated_request.student,
+                title="Request Status Updated",
+                message=(
+                    f"Your request {updated_request.ticket_number} "
+                    f"is now {updated_request.get_status_display()}."
+                ),
+                notification_type=Notification.Type.REQUEST,
+                request=updated_request,
+            )
+
+        messages.success(
+            request,
+            "Request updated successfully."
+        )
+
+    return redirect(
+        "helpdesk:staff_request_detail",
+        ticket_number=ticket_number
+    )
+
+@staff_required
+def staff_send_message(request, ticket_number):
+    help_request = get_object_or_404(
+        Request,
+        ticket_number=ticket_number
+    )
+
+    if request.method != "POST":
+        return redirect(
+            "helpdesk:staff_request_detail",
+            ticket_number=ticket_number
+        )
+
+    form = StaffMessageForm(
+        request.POST,
+        request.FILES
+    )
+
+    if form.is_valid():
+        message = form.save(commit=False)
+
+        message.request = help_request
+        message.sender = request.user
+        message.save()
+
+        Notification.objects.create(
+            user=help_request.student,
+            title="New Reply",
+            message=(
+                f"Staff replied to your request "
+                f"{help_request.ticket_number}."
+            ),
+            notification_type=Notification.Type.MESSAGE,
+            request=help_request,
+        )
+
+        messages.success(
+            request,
+            "Reply sent successfully."
+        )
+
+    return redirect(
+        "helpdesk:staff_request_detail",
+        ticket_number=ticket_number
+    )
+
+@staff_required
+def staff_dashboard(request):
+    assigned_requests = Request.objects.filter(
+        assigned_staff=request.user
+    )
+
+    total_requests = assigned_requests.count()
+
+    pending_requests = assigned_requests.filter(
+        status=Request.Status.PENDING
+    ).count()
+
+    assigned_count = assigned_requests.filter(
+        status=Request.Status.ASSIGNED
+    ).count()
+
+    in_progress_requests = assigned_requests.filter(
+        status=Request.Status.IN_PROGRESS
+    ).count()
+
+    resolved_requests = assigned_requests.filter(
+        status__in=[
+            Request.Status.RESOLVED,
+            Request.Status.CLOSED,
+        ]
+    ).count()
+
+    recent_requests = assigned_requests.select_related(
+        "student",
+        "department",
+        "category"
+    ).order_by("-created_at")[:10]
+
+    context = {
+        "total_requests": total_requests,
+        "pending_requests": pending_requests,
+        "assigned_count": assigned_count,
+        "in_progress_requests": in_progress_requests,
+        "resolved_requests": resolved_requests,
+        "recent_requests": recent_requests,
+    }
+
+    return render(
+        request,
+        "staff/dashboard.html",
+        context
+    )
+
