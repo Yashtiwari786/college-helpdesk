@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-
+import os
 from .storage import HelpdeskCloudinaryStorage
 
 
@@ -207,9 +207,9 @@ class Attachment(models.Model):
     )
 
     file = models.FileField(
-    upload_to="helpdesk/attachments/",
-    storage=HelpdeskCloudinaryStorage()
-)
+        upload_to="",
+        storage=HelpdeskCloudinaryStorage()
+    )
 
     original_name = models.CharField(
         max_length=255,
@@ -223,13 +223,13 @@ class Attachment(models.Model):
     def save(self, *args, **kwargs):
 
         if self.file and not self.original_name:
-            self.original_name = self.file.name
+            self.original_name = os.path.basename(self.file.name)
 
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.original_name or self.file.name
-    
+     
 class Message(models.Model):
 
     request = models.ForeignKey(

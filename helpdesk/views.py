@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from .forms import StaffMessageForm, StaffRequestUpdateForm
-from .models import Request, Message, Notification
+from .models import Request, Attachment, Message, Notification
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import (
@@ -514,7 +514,7 @@ def staff_update_request(request, ticket_number):
                     f"Your request {updated_request.ticket_number} "
                     f"is now {updated_request.get_status_display()}."
                 ),
-                notification_type=Notification.Type.REQUEST,
+                notification_type=Notification.NotificationType.REQUEST,
                 request=updated_request,
             )
 
@@ -560,7 +560,7 @@ def staff_send_message(request, ticket_number):
                 f"Staff replied to your request "
                 f"{help_request.ticket_number}."
             ),
-            notification_type=Notification.Type.MESSAGE,
+            notification_type=Notification.NotificationType.MESSAGE,
             request=help_request,
         )
 
@@ -850,7 +850,7 @@ def admin_assign_request(request, ticket_number):
                     f"Request {help_request.ticket_number} "
                     f"has been assigned to you."
                 ),
-                notification_type=Notification.Type.REQUEST,
+                notification_type=Notification.NotificationType.REQUEST,
                 request=help_request,
             )
 
@@ -861,7 +861,7 @@ def admin_assign_request(request, ticket_number):
                     f"Your request {help_request.ticket_number} "
                     f"has been assigned to staff."
                 ),
-                notification_type=Notification.Type.REQUEST,
+                notification_type=Notification.NotificationType.REQUEST,
                 request=help_request,
             )
 

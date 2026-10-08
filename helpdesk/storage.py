@@ -1,28 +1,14 @@
+import cloudinary
 import cloudinary.uploader
-from cloudinary_storage.storage import MediaCloudinaryStorage
+from django.core.files.storage import Storage
+from django.utils.deconstruct import deconstructible
 
 
-class HelpdeskCloudinaryStorage(MediaCloudinaryStorage):
+@deconstructible
+class HelpdeskCloudinaryStorage(Storage):
 
-    def _get_resource_type(self, content):
-        """
-        Decide how Cloudinary should store the file.
-
-        Images -> image
-        Videos -> video
-        Other files -> raw
-        """
-
-        content_type = getattr(content, "content_type", None)
-
-        if content_type:
-            if content_type.startswith("image/"):
-                return "image"
-
-            if content_type.startswith("video/"):
-                return "video"
-
-        name = getattr(content, "name", "").lower()
+    def _get_resource_type_from_name(self, name):
+        name = name.lower()
 
         image_extensions = (
             ".jpg",
@@ -52,22 +38,46 @@ class HelpdeskCloudinaryStorage(MediaCloudinaryStorage):
 
         return "raw"
 
-    def _upload(self, name, content):
-        """
-        Upload the file to Cloudinary and return
-        the COMPLETE Cloudinary response dictionary.
-        """
+    def _save(self, name, content):
 
-        resource_type = self._get_resource_type(content)
+        content_type = getattr(content, "content_type", "")
+
+        if content_type.startswith("image/"):
+            resource_type = "image"
+
+        elif content_type.startswith("video/"):
+            resource_type = "video"
+
+        else:
+            resource_type = self._get_resource_type_from_name(name)
 
         response = cloudinary.uploader.upload(
             content,
             folder="helpdesk/attachments",
             resource_type=resource_type,
-            tags="media",
             use_filename=True,
+            unique_filename=True,
         )
 
-        # IMPORTANT:
-        # Return the dictionary, NOT response["public_id"]
-        return response
+        return f"{resource_type}:{response['public_id']}"
+
+    def url(self, name):
+
+        if ":" in name:
+            resource_type, public_id = name.split(":", 1)
+        else:
+            resource_type = self._get_resource_type_from_name(name)
+            public_id = name
+
+        return cloudinary.utils.cloudinary_url(
+            public_id,
+            resource_type=resource_type,
+            type="upload",
+            secure=True,
+        )[0]
+
+    def exists(self, name):
+        return False
+
+    def delete(self, name):
+        pass
