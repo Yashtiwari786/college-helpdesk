@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
+from .storage import HelpdeskCloudinaryStorage
+
 
 class Department(models.Model):
 
@@ -205,8 +207,9 @@ class Attachment(models.Model):
     )
 
     file = models.FileField(
-        upload_to="helpdesk/attachments/"
-    )
+    upload_to="helpdesk/attachments/",
+    storage=HelpdeskCloudinaryStorage()
+)
 
     original_name = models.CharField(
         max_length=255,
