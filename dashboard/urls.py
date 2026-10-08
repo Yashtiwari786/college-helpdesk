@@ -10,6 +10,11 @@ urlpatterns = [
     path(
         "",
         views.dashboard,
-        name="home",
+        name="dashboard",
+    ),
+    path(
+        "admin-panel/",
+        views.admin_dashboard,
+        name="admin_dashboard",
     ),
 ]
