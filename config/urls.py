@@ -17,7 +17,7 @@ urlpatterns = [
     ),
     path(
         "",
-        home,
+        lambda request: redirect("accounts:register"),
         name="home",
     ),
 

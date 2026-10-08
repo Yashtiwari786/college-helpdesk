@@ -3,7 +3,7 @@ from functools import wraps
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from django.contrib.auth.decorators import login_required
-
+from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -885,4 +885,70 @@ def admin_departments(request):
         {
             "departments": departments
         }
+    )
+@login_required
+def admin_add_staff(request):
+
+    user = request.user
+
+    if user.role != user.Roles.ADMIN:
+        return redirect("dashboard:dashboard")
+
+    if request.method == "POST":
+
+        username = request.POST.get("username", "").strip()
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+        email = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "")
+
+        if not username or not email or not password:
+            messages.error(
+                request,
+                "Username, email and password are required."
+            )
+            return render(
+                request,
+                "admin_panel/add_staff.html"
+            )
+
+        if User.objects.filter(username=username).exists():
+            messages.error(
+                request,
+                "Username already exists."
+            )
+            return render(
+                request,
+                "admin_panel/add_staff.html"
+            )
+
+        if User.objects.filter(email=email).exists():
+            messages.error(
+                request,
+                "Email already exists."
+            )
+            return render(
+                request,
+                "admin_panel/add_staff.html"
+            )
+
+        staff = User.objects.create(
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            role=User.Roles.STAFF,
+            password=make_password(password),
+        )
+
+        messages.success(
+            request,
+            f"Staff account '{staff.username}' created successfully."
+        )
+
+        return redirect("helpdesk:admin_staff")
+
+    return render(
+        request,
+        "admin_panel/add_staff.html"
     )

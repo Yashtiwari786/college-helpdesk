@@ -89,6 +89,12 @@ path(
 ),
 
 path(
+    "admin-panel/staff/add/",
+    views.admin_add_staff,
+    name="admin_add_staff"
+),
+
+path(
     "admin-panel/requests/",
     views.admin_requests,
     name="admin_requests"
