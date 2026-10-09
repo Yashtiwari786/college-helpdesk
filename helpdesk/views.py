@@ -105,66 +105,65 @@ def student_requests(request):
     )
 
 
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 @student_required
 def create_request(request):
-
     if request.method == "POST":
-
-        form = RequestForm(
-            request.POST
-        )
+        form = RequestForm(request.POST)
 
         if form.is_valid():
-
-            help_request = form.save(
-                commit=False
-            )
-
+            help_request = form.save(commit=False)
             help_request.student = request.user
-
             help_request.save()
 
-
             # Notification for student
-
             Notification.objects.create(
                 user=request.user,
                 title="Request Created",
                 message=(
-                    f"Your request "
-                    f"{help_request.ticket_number} "
-                    f"has been created successfully."
+                    f"Your request {help_request.ticket_number} "
+                    "has been created successfully."
                 ),
-                notification_type=(
-                    Notification.NotificationType.REQUEST
-                ),
+                notification_type=Notification.NotificationType.REQUEST,
                 request=help_request,
             )
 
-
-            # Attachments
-
-            files = request.FILES.getlist(
-                "attachments"
-            )
+            # Save attachments without losing the created request
+            files = request.FILES.getlist("attachments")
+            failed_files = []
 
             for uploaded_file in files:
+                try:
+                    Attachment.objects.create(
+                        request=help_request,
+                        uploaded_by=request.user,
+                        file=uploaded_file,
+                        original_name=uploaded_file.name,
+                    )
+                except Exception:
+                    logger.exception(
+                        "Attachment upload failed for request %s, file %s",
+                        help_request.ticket_number,
+                        uploaded_file.name,
+                    )
+                    failed_files.append(uploaded_file.name)
 
-                Attachment.objects.create(
-                    request=help_request,
-                    uploaded_by=request.user,
-                    file=uploaded_file,
+            if failed_files:
+                messages.warning(
+                    request,
+                    "Your request was created, but one or more attachments "
+                    "could not be uploaded. Please try again or contact support."
                 )
-
-
-            messages.success(
-                request,
-                (
-                    f"Request "
-                    f"{help_request.ticket_number} "
-                    f"created successfully."
+            else:
+                messages.success(
+                    request,
+                    f"Request {help_request.ticket_number} created successfully."
                 )
-            )
 
             return redirect(
                 "helpdesk:request_detail",
@@ -172,17 +171,14 @@ def create_request(request):
             )
 
     else:
-
         form = RequestForm()
-
 
     return render(
         request,
         "student/create_request.html",
-        {
-            "form": form,
-        }
+        {"form": form},
     )
+
 
 
 @student_required
