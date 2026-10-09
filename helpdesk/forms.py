@@ -184,3 +184,51 @@ class StaffMessageForm(forms.ModelForm):
                 attrs={"class": "form-control"}
             ),
         }
+
+
+
+from django import forms
+from .models import Department, Category
+
+
+class DepartmentForm(forms.ModelForm):
+    class Meta:
+        model = Department
+        fields = ["name", "description", "is_active"]
+        widgets = {
+            "name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter department name",
+            }),
+            "description": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Enter department description",
+            }),
+            "is_active": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+            }),
+        }
+
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ["department", "name", "description", "is_active"]
+        widgets = {
+            "department": forms.Select(attrs={
+                "class": "form-select",
+            }),
+            "name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter category name",
+            }),
+            "description": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Enter category description",
+            }),
+            "is_active": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+            }),
+        }

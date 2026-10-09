@@ -111,4 +111,34 @@ path(
     views.admin_departments,
     name="admin_departments"
 ),
+
+
+# Department management
+path(
+    "admin-panel/departments/add/",
+    views.admin_add_department,
+    name="admin_add_department",
+),
+path(
+    "admin-panel/departments/<int:department_id>/edit/",
+    views.admin_edit_department,
+    name="admin_edit_department",
+),
+
+# Category management
+path(
+    "admin-panel/categories/",
+    views.admin_categories,
+    name="admin_categories",
+),
+path(
+    "admin-panel/categories/add/",
+    views.admin_add_category,
+    name="admin_add_category",
+),
+path(
+    "admin-panel/categories/<int:category_id>/edit/",
+    views.admin_edit_category,
+    name="admin_edit_category",
+),
 ]

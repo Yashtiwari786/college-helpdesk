@@ -6,8 +6,17 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.db import models
+from .forms import (
+    FeedbackForm,
+    MessageForm,
+    RequestForm,
+    StaffMessageForm,
+    StaffRequestUpdateForm,
+    DepartmentForm,
+    CategoryForm,
+)
 
-from .forms import StaffMessageForm, StaffRequestUpdateForm
 from .models import Request, Attachment, Message, Notification
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
@@ -952,3 +961,97 @@ def admin_add_staff(request):
         request,
         "admin_panel/add_staff.html"
     )
+
+
+
+# ==============================
+# ADMIN: DEPARTMENT MANAGEMENT
+# ==============================
+
+@admin_required
+def admin_add_department(request):
+    form = DepartmentForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Department added successfully.")
+        return redirect("helpdesk:admin_departments")
+
+    return render(request, "admin_panel/department_form.html", {
+        "form": form,
+        "page_title": "Add Department",
+    })
+
+
+@admin_required
+def admin_edit_department(request, department_id):
+    department = get_object_or_404(Department, pk=department_id)
+    form = DepartmentForm(request.POST or None, instance=department)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Department updated successfully.")
+        return redirect("helpdesk:admin_departments")
+
+    return render(request, "admin_panel/department_form.html", {
+        "form": form,
+        "page_title": "Edit Department",
+        "department": department,
+    })
+
+
+# ==============================
+# ADMIN: CATEGORY MANAGEMENT
+# ==============================
+
+@admin_required
+def admin_categories(request):
+    categories = Category.objects.select_related(
+        "department"
+    ).order_by("department__name", "name")
+
+    return render(request, "admin_panel/categories.html", {
+        "categories": categories,
+    })
+
+
+@admin_required
+def admin_add_category(request):
+    form = CategoryForm(request.POST or None)
+
+    # Only show active departments for new categories.
+    form.fields["department"].queryset = Department.objects.filter(
+        is_active=True
+    ).order_by("name")
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Category added successfully.")
+        return redirect("helpdesk:admin_categories")
+
+    return render(request, "admin_panel/category_form.html", {
+        "form": form,
+        "page_title": "Add Category",
+    })
+
+
+@admin_required
+def admin_edit_category(request, category_id):
+    category = get_object_or_404(Category, pk=category_id)
+    form = CategoryForm(request.POST or None, instance=category)
+
+    # Include the category's current department even if inactive.
+    form.fields["department"].queryset = Department.objects.filter(
+        models.Q(is_active=True) | models.Q(pk=category.department_id)
+    ).order_by("name")
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Category updated successfully.")
+        return redirect("helpdesk:admin_categories")
+
+    return render(request, "admin_panel/category_form.html", {
+        "form": form,
+        "page_title": "Edit Category",
+        "category": category,
+    })

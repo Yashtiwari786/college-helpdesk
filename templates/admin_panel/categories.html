@@ -1,0 +1,103 @@
+```html
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">Manage Categories</h2>
+            <p class="text-muted mb-0">
+                Manage request categories and their departments.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="{% url 'helpdesk:admin_departments' %}"
+               class="btn btn-outline-secondary">
+                Departments
+            </a>
+
+            <a href="{% url 'helpdesk:admin_add_category' %}"
+               class="btn btn-primary">
+                + Add Category
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Category Name</th>
+                        <th>Department</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+
+                        <td>
+                            <strong>{{ category.name }}</strong>
+                        </td>
+
+                        <td>{{ category.department.name }}</td>
+
+                        <td>
+                            {{ category.description|default:"-" }}
+                        </td>
+
+                        <td>
+                            {% if category.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'helpdesk:admin_edit_category' category.id %}"
+                               class="btn btn-sm btn-outline-primary">
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <h5>No categories found</h5>
+                            <p class="text-muted">
+                                Add a category to get started.
+                            </p>
+                            <a href="{% url 'helpdesk:admin_add_category' %}"
+                               class="btn btn-primary">
+                                Add First Category
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+```

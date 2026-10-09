@@ -1,0 +1,67 @@
+```html
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">{{ page_title }}</h2>
+        <p class="text-muted">Enter the department details below.</p>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="mb-3">
+
+                        {% if field.name == "is_active" %}
+                            <div class="form-check">
+                                {{ field }}
+                                <label class="form-check-label"
+                                       for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                </label>
+                            </div>
+                        {% else %}
+                            <label class="form-label fw-semibold"
+                                   for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <div class="text-danger small">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-primary">
+                    Save Department
+                </button>
+
+                <a href="{% url 'helpdesk:admin_departments' %}"
+                   class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+```
