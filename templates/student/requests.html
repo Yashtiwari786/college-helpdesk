@@ -54,13 +54,12 @@ My Requests | College Students Help Desk
         </nav>
 
 
-        <a
-            href="{% url 'accounts:logout' %}"
-            class="nav-item logout"
-        >
-            🚪
-            Logout
-        </a>
+      <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline-danger">
+        Logout
+    </button>
+</form>
 
     </aside>
 
