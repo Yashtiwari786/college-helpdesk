@@ -28,4 +28,10 @@ urlpatterns = [
         name="logout",
     ),
 
+    path(
+    "verify-email/",
+    views.verify_email,
+    name="verify_email",
+),
+
 ]
