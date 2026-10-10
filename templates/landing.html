@@ -1,3 +1,4 @@
+
 {% load static %}
 
 <!DOCTYPE html>
@@ -8,12 +9,187 @@
 
     <title>College Help Desk | Your Campus, Connected</title>
 
-    <meta
-        name="description"
-        content="College Help Desk connects students, staff, and administrators through one centralized campus support system."
-    >
+    <meta name="description"
+          content="College Help Desk connects students, staff, and administrators through one centralized campus support system.">
 
     <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+
+    <style>
+        /* DEPARTMENTS AND FACULTY DIRECTORY */
+        .faculty-section {
+            background: #f7f9fc;
+        }
+
+        .directory-subtitle {
+            margin: 0 0 22px;
+            color: #172554;
+            font-size: 1.45rem;
+        }
+
+        .department-directory,
+        .faculty-directory {
+            margin-top: 38px;
+        }
+
+        .department-grid,
+        .faculty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 22px;
+        }
+
+        .department-card,
+        .faculty-card {
+            background: #fff;
+            border: 1px solid #e5eaf2;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+        }
+
+        .department-icon {
+            font-size: 30px;
+            margin-bottom: 12px;
+        }
+
+        .department-card h4,
+        .faculty-card h4 {
+            color: #172554;
+            font-size: 1.08rem;
+            margin: 0 0 10px;
+            overflow-wrap: anywhere;
+        }
+
+        .department-card p {
+            color: #64748b;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .faculty-filters {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 26px;
+        }
+
+        .filter-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-field label {
+            color: #334155;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .filter-field select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            background: #fff;
+            color: #1e293b;
+            font: inherit;
+        }
+
+        .faculty-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .faculty-photo {
+            flex: 0 0 76px;
+            width: 76px;
+            height: 76px;
+        }
+
+        .faculty-photo img,
+        .faculty-avatar {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .faculty-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e8efff;
+            font-size: 32px;
+        }
+
+        .faculty-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .faculty-designation {
+            color: #4f46e5;
+            font-weight: 600;
+            margin: 0 0 10px;
+        }
+
+        .faculty-department {
+            color: #64748b;
+            margin: 0 0 12px;
+        }
+
+        .faculty-contact {
+            display: block;
+            color: #334155;
+            margin-top: 9px;
+            overflow-wrap: anywhere;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .faculty-contact:hover {
+            color: #4f46e5;
+        }
+
+        .faculty-no-contact,
+        .directory-empty {
+            color: #64748b;
+            line-height: 1.7;
+        }
+
+        .faculty-card[hidden],
+        #noFilterResults[hidden] {
+            display: none !important;
+        }
+
+        @media (max-width: 600px) {
+            .faculty-filters {
+                grid-template-columns: 1fr;
+            }
+
+            .faculty-card {
+                padding: 18px;
+                gap: 12px;
+            }
+
+            .faculty-photo,
+            .faculty-photo img,
+            .faculty-avatar {
+                width: 58px;
+                height: 58px;
+            }
+
+            .faculty-photo {
+                flex-basis: 58px;
+            }
+
+            .faculty-avatar {
+                font-size: 25px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -28,7 +204,8 @@
         </span>
     </a>
 
-    <button class="menu-toggle" id="menuToggle"
+    <button class="menu-toggle"
+            id="menuToggle"
             aria-label="Toggle navigation"
             aria-expanded="false">
         ☰
@@ -38,6 +215,7 @@
         <a href="{% url 'home' %}">Home</a>
         <a href="#about">About Us</a>
         <a href="#services">Services</a>
+        <a href="#faculty">Faculty &amp; Staff</a>
         <a href="#news">Campus Updates</a>
         <a href="#contact">Contact</a>
 
@@ -48,16 +226,13 @@
     </nav>
 </header>
 
-
 <main>
 
     <!-- HERO SECTION -->
     <section class="hero" id="home">
-
         <div class="hero-overlay"></div>
 
         <div class="hero-content">
-
             <span class="eyebrow">
                 YOUR CAMPUS. YOUR VOICE. OUR SUPPORT.
             </span>
@@ -87,7 +262,6 @@
                 <span class="status-dot"></span>
                 A centralized support system for your college community
             </div>
-
         </div>
 
         <div class="hero-badge">
@@ -97,13 +271,10 @@
                 <small>Support made simpler</small>
             </div>
         </div>
-
     </section>
-
 
     <!-- QUICK BENEFITS -->
     <section class="benefit-strip">
-
         <div class="benefit">
             <span class="benefit-icon">📝</span>
             <div>
@@ -135,13 +306,10 @@
                 <p>Stay informed about your requests.</p>
             </div>
         </div>
-
     </section>
-
 
     <!-- ABOUT SECTION -->
     <section class="section about-section" id="about">
-
         <div class="section-heading">
             <span class="section-label">WELCOME TO YOUR CAMPUS</span>
 
@@ -158,7 +326,6 @@
         </div>
 
         <div class="about-grid">
-
             <div class="about-image">
                 <img
                     src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80"
@@ -176,7 +343,6 @@
             </div>
 
             <div class="about-content">
-
                 <span class="section-label">A SMARTER WAY TO GET HELP</span>
 
                 <h2>Support Without the Confusion.</h2>
@@ -223,19 +389,13 @@
                 <a href="/accounts/register/" class="text-link">
                     Join the Campus Help Desk →
                 </a>
-
             </div>
-
         </div>
-
     </section>
-
 
     <!-- SERVICES -->
     <section class="section services-section" id="services">
-
         <div class="section-heading centered">
-
             <span class="section-label">WHAT YOU CAN DO</span>
 
             <h2>
@@ -247,11 +407,9 @@
                 Access the tools you need to report issues and
                 stay connected with your college support team.
             </p>
-
         </div>
 
         <div class="service-grid">
-
             <article class="service-card">
                 <div class="service-icon icon-blue">📝</div>
                 <span class="card-number">01</span>
@@ -285,18 +443,18 @@
             </article>
 
             <article class="service-card">
-                <div class="service-icon icon-green">💬</div>
+                <div class="service-icon icon-green">👨‍🏫</div>
                 <span class="card-number">03</span>
 
-                <h3>Connect With Staff</h3>
+                <h3>Faculty &amp; Staff Directory</h3>
 
                 <p>
-                    Use the request conversation feature to
-                    communicate with your support team.
+                    Find college departments, staff designations,
+                    and available faculty contact information.
                 </p>
 
-                <a href="/accounts/login/" class="card-link">
-                    Open Help Desk →
+                <a href="#faculty" class="card-link">
+                    Find Faculty →
                 </a>
             </article>
 
@@ -304,7 +462,7 @@
                 <div class="service-icon icon-orange">⚙️</div>
                 <span class="card-number">04</span>
 
-                <h3>Staff & Administration</h3>
+                <h3>Staff &amp; Administration</h3>
 
                 <p>
                     Authorized staff and administrators can sign
@@ -315,28 +473,21 @@
                     Staff Login →
                 </a>
             </article>
-
         </div>
-
     </section>
-
 
     <!-- HOW IT WORKS -->
     <section class="section workflow-section">
-
         <div class="section-heading centered">
-
             <span class="section-label">GET STARTED IN THREE STEPS</span>
 
             <h2>
                 Help Is Just
                 <span>A Few Clicks Away.</span>
             </h2>
-
         </div>
 
         <div class="workflow-grid">
-
             <div class="workflow-step">
                 <div class="step-number">01</div>
                 <h3>Create Your Account</h3>
@@ -363,7 +514,6 @@
                     updates from the support team.
                 </p>
             </div>
-
         </div>
 
         <div class="center-action">
@@ -371,15 +521,186 @@
                 Get Started Today →
             </a>
         </div>
-
     </section>
 
+    <!-- DEPARTMENTS & FACULTY DIRECTORY -->
+    <section class="section faculty-section" id="faculty">
+        <div class="section-heading centered">
+            <span class="section-label">MEET YOUR CAMPUS TEAM</span>
+
+            <h2>
+                Departments &amp;
+                <span>Faculty Directory.</span>
+            </h2>
+
+            <p>
+                Find your department and connect with the relevant
+                college staff using their available contact details.
+            </p>
+        </div>
+
+        <!-- DEPARTMENTS -->
+        <div class="department-directory">
+            <h3 class="directory-subtitle">Our Departments</h3>
+
+            <div class="department-grid">
+                {% for department in departments %}
+                    <article class="department-card">
+                        <div class="department-icon">🏛️</div>
+
+                        <h4>{{ department.name }}</h4>
+
+                        <p>
+                            {% if department.description %}
+                                {{ department.description }}
+                            {% else %}
+                                Contact this department for relevant
+                                college support and assistance.
+                            {% endif %}
+                        </p>
+                    </article>
+                {% empty %}
+                    <p class="directory-empty">
+                        No departments are currently available.
+                    </p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- STAFF DIRECTORY -->
+        <div class="faculty-directory">
+            <h3 class="directory-subtitle">
+                Faculty &amp; Staff Contacts
+            </h3>
+
+            <!-- FILTERS -->
+            <div class="faculty-filters">
+                <div class="filter-field">
+                    <label for="departmentFilter">
+                        Filter by department
+                    </label>
+
+                    <select id="departmentFilter">
+                        <option value="all">All Departments</option>
+
+                        {% for department in departments %}
+                            <option value="{{ department.id }}">
+                                {{ department.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-field">
+                    <label for="designationFilter">
+                        Filter by designation
+                    </label>
+
+                    <select id="designationFilter">
+                        <option value="all">All Designations</option>
+
+                        {% for designation in designations %}
+                            <option value="{{ designation|lower|escape }}">
+                                {{ designation }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- STAFF CARDS -->
+            <div class="faculty-grid" id="facultyGrid">
+                {% for profile in staff_profiles %}
+                    <article
+                        class="faculty-card"
+                        data-department="{{ profile.department_id|default_if_none:'' }}"
+                        data-designation="{{ profile.designation|default_if_none:''|lower|escape }}"
+                    >
+                        <div class="faculty-photo">
+                            {% if profile.user.profile_photo %}
+                                <img
+                                    src="{{ profile.user.profile_photo }}"
+                                    alt="{{ profile.user.get_full_name|default:profile.user.username|escape }}"
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer"
+                                    onerror="this.style.display='none'; this.nextElementSibling.hidden=false;"
+                                >
+                                <div class="faculty-avatar"
+                                     hidden
+                                     aria-label="Default staff avatar">
+                                    👤
+                                </div>
+                            {% else %}
+                                <div class="faculty-avatar"
+                                     aria-label="Default staff avatar">
+                                    👤
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="faculty-info">
+                            <h4>
+                                {{ profile.user.get_full_name|default:profile.user.username }}
+                            </h4>
+
+                            <p class="faculty-designation">
+                                {% if profile.designation %}
+                                    {{ profile.designation }}
+                                {% else %}
+                                    College Staff
+                                {% endif %}
+                            </p>
+
+                            <p class="faculty-department">
+                                🏛️
+                                {% if profile.department %}
+                                    {{ profile.department.name }}
+                                {% else %}
+                                    Department not assigned
+                                {% endif %}
+                            </p>
+
+                            {% if profile.user.email %}
+                                <a
+                                    class="faculty-contact"
+                                    href="mailto:{{ profile.user.email }}"
+                                >
+                                    ✉ {{ profile.user.email }}
+                                </a>
+                            {% endif %}
+
+                            {% if profile.user.phone %}
+                                <a
+                                    class="faculty-contact"
+                                    href="tel:{{ profile.user.phone }}"
+                                >
+                                    ☎ {{ profile.user.phone }}
+                                </a>
+                            {% endif %}
+
+                            {% if not profile.user.email and not profile.user.phone %}
+                                <p class="faculty-no-contact">
+                                    Contact details not available.
+                                </p>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% empty %}
+                    <p class="directory-empty" id="noStaffMessage">
+                        No faculty or staff contacts are currently available.
+                    </p>
+                {% endfor %}
+            </div>
+
+            <p class="directory-empty" id="noFilterResults" hidden>
+                No staff members match your selected filters.
+            </p>
+        </div>
+    </section>
 
     <!-- CAMPUS UPDATES -->
     <section class="section news-section" id="news">
-
         <div class="news-heading">
-
             <div>
                 <span class="section-label">CAMPUS INFORMATION</span>
                 <h2>Stay Connected.</h2>
@@ -392,11 +713,9 @@
             <a href="/accounts/login/" class="text-link">
                 Open Your Dashboard →
             </a>
-
         </div>
 
         <div class="news-grid">
-
             <article class="news-card">
                 <img
                     src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80"
@@ -407,10 +726,12 @@
                 <div class="news-body">
                     <span class="news-tag">STUDENT SUPPORT</span>
                     <h3>Your Campus Support Starts Here</h3>
+
                     <p>
                         Use the help desk to organize concerns
                         and follow up on submitted requests.
                     </p>
+
                     <a href="/accounts/register/" class="card-link">
                         Get Started →
                     </a>
@@ -427,46 +748,23 @@
                 <div class="news-body">
                     <span class="news-tag">CAMPUS SERVICES</span>
                     <h3>A More Organized Campus Experience</h3>
+
                     <p>
                         Keep request details, conversations,
                         and status updates in one place.
                     </p>
+
                     <a href="/accounts/login/" class="card-link">
                         Sign In →
                     </a>
                 </div>
             </article>
-
-            <article class="news-card">
-                <img
-                    src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80"
-                    alt="University students working together"
-                    loading="lazy"
-                >
-
-                <div class="news-body">
-                    <span class="news-tag">CAMPUS COMMUNITY</span>
-                    <h3>Better Communication, Better Support</h3>
-                    <p>
-                        Connect with the relevant support team
-                        through your help desk account.
-                    </p>
-                    <a href="/accounts/login/" class="card-link">
-                        Explore the Portal →
-                    </a>
-                </div>
-            </article>
-
         </div>
-
     </section>
-
 
     <!-- CONTACT / CTA -->
     <section class="cta-section" id="contact">
-
         <div class="cta-content">
-
             <span class="section-label">YOUR CAMPUS, CONNECTED</span>
 
             <h2>
@@ -488,19 +786,14 @@
                     Sign In
                 </a>
             </div>
-
         </div>
-
     </section>
 
 </main>
 
-
 <!-- FOOTER -->
 <footer class="footer">
-
     <div class="footer-main">
-
         <a href="{% url 'home' %}" class="brand footer-brand">
             <span class="brand-icon">🎓</span>
             <span>
@@ -518,11 +811,11 @@
             <a href="{% url 'home' %}">Home</a>
             <a href="#about">About</a>
             <a href="#services">Services</a>
+            <a href="#faculty">Faculty &amp; Staff</a>
             <a href="#contact">Contact</a>
             <a href="/accounts/login/">Login</a>
             <a href="/accounts/register/">Register</a>
         </div>
-
     </div>
 
     <div class="footer-bottom">
@@ -532,17 +825,16 @@
 
         <span>Built for a better campus experience.</span>
     </div>
-
 </footer>
 
-
 <script>
+    // MOBILE NAVIGATION
     const menuToggle = document.getElementById("menuToggle");
     const navLinks = document.getElementById("navLinks");
 
     menuToggle.addEventListener("click", function () {
         const isOpen = navLinks.classList.toggle("active");
-        menuToggle.setAttribute("aria-expanded", isOpen);
+        menuToggle.setAttribute("aria-expanded", String(isOpen));
     });
 
     navLinks.querySelectorAll("a").forEach(function (link) {
@@ -551,6 +843,44 @@
             menuToggle.setAttribute("aria-expanded", "false");
         });
     });
+
+    // FACULTY FILTERS
+    const departmentFilter = document.getElementById("departmentFilter");
+    const designationFilter = document.getElementById("designationFilter");
+    const facultyCards = document.querySelectorAll(".faculty-card");
+    const noFilterResults = document.getElementById("noFilterResults");
+
+    function filterFaculty() {
+        const selectedDepartment = departmentFilter.value;
+        const selectedDesignation = designationFilter.value.toLowerCase();
+        let visibleCount = 0;
+
+        facultyCards.forEach(function (card) {
+            const department = card.dataset.department;
+            const designation = card.dataset.designation;
+
+            const departmentMatches =
+                selectedDepartment === "all" ||
+                department === selectedDepartment;
+
+            const designationMatches =
+                selectedDesignation === "all" ||
+                designation === selectedDesignation;
+
+            const visible = departmentMatches && designationMatches;
+
+            card.hidden = !visible;
+
+            if (visible) {
+                visibleCount++;
+            }
+        });
+
+        noFilterResults.hidden = visibleCount !== 0;
+    }
+
+    departmentFilter.addEventListener("change", filterFaculty);
+    designationFilter.addEventListener("change", filterFaculty);
 </script>
 
 </body>
