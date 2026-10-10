@@ -1,9 +1,9 @@
+
 {% extends "base.html" %}
 
 {% block title %}Admin Dashboard | College Help Desk{% endblock %}
 
-{% block content %}
-
+{% block extra_css %}
 <style>
     .admin-wrapper {
         min-height: 100vh;
@@ -17,7 +17,7 @@
     }
 
     .brand {
-        color: white;
+        color: #fff;
         font-size: 20px;
         font-weight: 700;
         margin-bottom: 30px;
@@ -39,17 +39,23 @@
         padding: 12px 14px;
         border-radius: 8px;
         margin-bottom: 6px;
-        transition: 0.2s;
+        transition: background 0.2s ease, color 0.2s ease;
     }
 
     .sidebar-link:hover,
     .sidebar-link.active {
         background: #1683f8;
-        color: white;
+        color: #fff;
+    }
+
+    .sidebar-divider {
+        border-color: #344761;
+        margin: 20px 0;
     }
 
     .admin-content {
         padding: 30px;
+        min-width: 0;
     }
 
     .page-title {
@@ -65,11 +71,17 @@
     }
 
     .stat-card {
-        background: white;
+        background: #fff;
         border-radius: 14px;
         padding: 22px;
         border: 1px solid #e8edf4;
         height: 100%;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 22px rgba(23, 32, 51, 0.06);
     }
 
     .stat-title {
@@ -82,10 +94,11 @@
         font-size: 30px;
         font-weight: 700;
         color: #172033;
+        overflow-wrap: anywhere;
     }
 
     .section-card {
-        background: white;
+        background: #fff;
         border: 1px solid #e8edf4;
         border-radius: 14px;
         padding: 24px;
@@ -104,21 +117,35 @@
         margin-bottom: 20px;
     }
 
+    .request-table {
+        margin-bottom: 0;
+    }
+
     .request-table th {
         color: #718096;
-        font-size: 13px;
+        font-size: 12px;
         text-transform: uppercase;
+        white-space: nowrap;
+        background: #f8fafc;
     }
 
     .request-table td {
         vertical-align: middle;
     }
 
+    .ticket-number {
+        font-weight: 700;
+        color: #2457a6;
+        overflow-wrap: anywhere;
+    }
+
     .status-badge {
+        display: inline-block;
         padding: 6px 10px;
         border-radius: 20px;
         font-size: 12px;
         font-weight: 600;
+        white-space: nowrap;
     }
 
     .status-pending {
@@ -147,406 +174,459 @@
         color: #b42318;
     }
 
+    .status-default {
+        background: #edf0f5;
+        color: #4b5563;
+    }
+
     .empty-state {
         text-align: center;
-        padding: 35px;
+        padding: 35px 15px;
         color: #718096;
     }
-</style>
 
+    .announcement-item:last-child {
+        border-bottom: none !important;
+    }
+
+    .announcement-date {
+        font-size: 12px;
+        color: #718096;
+    }
+
+    .dashboard-actions .btn {
+        margin-bottom: 5px;
+    }
+
+    @media (max-width: 991.98px) {
+        .admin-sidebar {
+            min-height: auto;
+            padding: 20px 15px;
+        }
+
+        .admin-content {
+            padding: 22px;
+        }
+
+        .sidebar-navigation {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .sidebar-link {
+            margin-bottom: 0;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .admin-content {
+            padding: 16px;
+        }
+
+        .page-title {
+            font-size: 25px;
+        }
+
+        .section-card {
+            padding: 16px;
+        }
+
+        .stat-card {
+            padding: 18px;
+        }
+
+        .stat-number {
+            font-size: 26px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
 
 <div class="admin-wrapper">
-
     <div class="row g-0">
 
         <!-- SIDEBAR -->
         <div class="col-lg-2">
-
-            <div class="admin-sidebar">
+            <aside class="admin-sidebar">
 
                 <div class="brand">
                     🎓 College Students
                     <small>Help Desk</small>
                 </div>
 
-                <!-- Dashboard -->
-                <a href="{% url 'helpdesk:admin_dashboard' %}"
-                   class="sidebar-link active">
-                    📊 Dashboard
-                </a>
+                <nav class="sidebar-navigation" aria-label="Admin navigation">
 
-                <!-- Students -->
-                <a href="{% url 'helpdesk:admin_students' %}"
-                   class="sidebar-link">
-                    👨‍🎓 Students
-                </a>
+                    <a href="{% url 'helpdesk:admin_dashboard' %}"
+                       class="sidebar-link active"
+                       aria-current="page">
+                        📊 Dashboard
+                    </a>
 
-                <!-- Staff -->
-                <a href="{% url 'helpdesk:admin_staff' %}"
-                   class="sidebar-link">
-                    👨‍💼 Staff
-                </a>
+                    <a href="{% url 'helpdesk:admin_students' %}"
+                       class="sidebar-link">
+                        👨‍🎓 Students
+                    </a>
 
-                <!-- Departments -->
-                <a href="{% url 'helpdesk:admin_departments' %}"
-                   class="sidebar-link">
-                    🏢 Departments
-                </a>
-                <a href="{% url 'helpdesk:admin_categories' %}"
-   class="btn btn-primary">
-    Manage Categories
-</a>
+                    <a href="{% url 'helpdesk:admin_staff' %}"
+                       class="sidebar-link">
+                        👨‍💼 Staff
+                    </a>
 
-                <!-- Requests -->
-                <a href="{% url 'helpdesk:admin_requests' %}"
-                   class="sidebar-link">
-                    📋 All Requests
-                </a>
+                    <a href="{% url 'helpdesk:admin_departments' %}"
+                       class="sidebar-link">
+                        🏢 Departments
+                    </a>
 
-                <!-- Coming Soon -->
-                <a href="#" class="sidebar-link">
-                    📈 Reports
-                </a>
+                    <a href="{% url 'helpdesk:admin_categories' %}"
+                       class="sidebar-link">
+                        🗂️ Categories
+                    </a>
 
-                <a href="#" class="sidebar-link">
-                    ❓ FAQs
-                </a>
+                    <a href="{% url 'helpdesk:admin_requests' %}"
+                       class="sidebar-link">
+                        📋 All Requests
+                    </a>
 
-                <a href="#" class="sidebar-link">
-                    📢 Announcements
-                </a>
+                </nav>
 
-                <a href="#" class="sidebar-link">
-                    ⚙️ Settings
-                </a>
+                <hr class="sidebar-divider">
 
-                <div style="margin-top: 35px;">
-
-                   
-<form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-outline-danger">
-        Logout
-    </button>
-</form>
-
+                <div class="px-2">
+                    <form method="post"
+                          action="{% url 'accounts:logout' %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-outline-light w-100">
+                            ↪ Logout
+                        </button>
+                    </form>
                 </div>
 
-            </div>
-
+            </aside>
         </div>
-
 
         <!-- MAIN CONTENT -->
         <div class="col-lg-10">
-
-            <div class="admin-content">
+            <main class="admin-content">
 
                 <!-- HEADER -->
-                <h1 class="page-title">
-                    Admin Dashboard
-                </h1>
+                <div class="mb-4">
+                    <h1 class="page-title">Admin Dashboard</h1>
 
-                <p class="welcome-text">
-                    Welcome back,
-                    <strong>{{ request.user.get_full_name|default:request.user.username }}</strong> 👋
-                </p>
+                    <p class="welcome-text mb-0">
+                        Welcome back,
+                        <strong>
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </strong>
+                        👋
+                    </p>
+                </div>
 
+                <!-- DJANGO MESSAGES -->
+                {% if messages %}
+                    <div class="mb-4" aria-live="polite">
+                        {% for message in messages %}
+                            <div class="alert
+                                {% if message.tags == 'error' %}
+                                    alert-danger
+                                {% elif message.tags == 'success' %}
+                                    alert-success
+                                {% elif message.tags == 'warning' %}
+                                    alert-warning
+                                {% else %}
+                                    alert-info
+                                {% endif %}
+                                alert-dismissible fade show"
+                                role="alert">
+
+                                {{ message }}
+
+                                <button type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="alert"
+                                        aria-label="Close">
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
                 <!-- STATISTICS -->
                 <div class="row g-4">
 
-                    <!-- Students -->
-                    <div class="col-md-6 col-xl-3">
-
+                    <!-- TOTAL STUDENTS -->
+                    <div class="col-6 col-xl-3">
                         <div class="stat-card">
-
                             <div class="stat-title">
                                 Total Students
                             </div>
-
                             <div class="stat-number">
-                                {{ total_students }}
+                                {{ total_students|default:0 }}
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    <!-- Staff -->
-                    <div class="col-md-6 col-xl-3">
-
+                    <!-- TOTAL STAFF -->
+                    <div class="col-6 col-xl-3">
                         <div class="stat-card">
-
                             <div class="stat-title">
                                 Total Staff
                             </div>
-
                             <div class="stat-number">
-                                {{ total_staff }}
+                                {{ total_staff|default:0 }}
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    <!-- Requests -->
-                    <div class="col-md-6 col-xl-3">
-
+                    <!-- TOTAL REQUESTS -->
+                    <div class="col-6 col-xl-3">
                         <div class="stat-card">
-
                             <div class="stat-title">
                                 Total Requests
                             </div>
-
                             <div class="stat-number">
-                                {{ total_requests }}
+                                {{ total_requests|default:0 }}
                             </div>
-
                         </div>
-
                     </div>
 
-
-                    <!-- Resolved -->
-                    <div class="col-md-6 col-xl-3">
-
+                    <!-- RESOLVED REQUESTS -->
+                    <div class="col-6 col-xl-3">
                         <div class="stat-card">
-
                             <div class="stat-title">
                                 Resolved Requests
                             </div>
-
                             <div class="stat-number">
-                                {{ resolved_requests }}
+                                {{ resolved_requests|default:0 }}
                             </div>
-
                         </div>
-
                     </div>
 
                 </div>
 
-
                 <!-- SYSTEM OVERVIEW -->
-                <div class="section-card">
-
-                    <div class="section-title">
-                        System Overview
-                    </div>
+                <section class="section-card">
+                    <h2 class="section-title">System Overview</h2>
 
                     <p class="section-description">
-                        Manage students, staff, departments and help-desk requests.
+                        Manage students, staff, departments, categories,
+                        and help-desk requests.
                     </p>
 
-
-                    <div class="d-flex flex-wrap gap-2">
+                    <div class="d-flex flex-wrap gap-2 dashboard-actions">
 
                         <a href="{% url 'helpdesk:admin_students' %}"
                            class="btn btn-primary">
-                            Manage Students
+                            👨‍🎓 Manage Students
                         </a>
 
                         <a href="{% url 'helpdesk:admin_staff' %}"
                            class="btn btn-outline-primary">
-                            Manage Staff
+                            👨‍💼 Manage Staff
                         </a>
 
                         <a href="{% url 'helpdesk:admin_requests' %}"
                            class="btn btn-outline-primary">
-                            View Requests
+                            📋 View Requests
                         </a>
 
                         <a href="{% url 'helpdesk:admin_departments' %}"
                            class="btn btn-outline-primary">
-                            Departments
+                            🏢 Departments
                         </a>
+
                         <a href="{% url 'helpdesk:admin_categories' %}"
-   class="btn btn-primary">
-    Manage Categories
-</a>
+                           class="btn btn-outline-primary">
+                            🗂️ Manage Categories
+                        </a>
 
                     </div>
-
-                </div>
-
+                </section>
 
                 <!-- RECENT REQUESTS -->
-                <div class="section-card">
+                <section class="section-card">
 
-                    <div class="section-title">
-                        Recent Requests
-                    </div>
+                    <h2 class="section-title">Recent Requests</h2>
 
                     <p class="section-description">
                         Latest help-desk requests submitted by students.
                     </p>
 
-
                     {% if recent_requests %}
 
-                    <div class="table-responsive">
+                        <div class="table-responsive">
+                            <table class="table table-hover request-table">
 
-                        <table class="table request-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Ticket</th>
+                                        <th scope="col">Student</th>
+                                        <th scope="col">Department</th>
+                                        <th scope="col">Subject</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Date</th>
+                                    </tr>
+                                </thead>
 
-                            <thead>
+                                <tbody>
+                                    {% for item in recent_requests %}
+                                        <tr>
 
-                                <tr>
-                                    <th>Ticket</th>
-                                    <th>Student</th>
-                                    <th>Department</th>
-                                    <th>Subject</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                </tr>
+                                            <td>
+                                                <span class="ticket-number">
+                                                    {{ item.ticket_number|default:"—" }}
+                                                </span>
+                                            </td>
 
-                            </thead>
+                                            <td>
+                                                {% if item.student %}
+                                                    {{ item.student.get_full_name|default:item.student.username }}
+                                                {% else %}
+                                                    <span class="text-muted">
+                                                        Unknown
+                                                    </span>
+                                                {% endif %}
+                                            </td>
 
+                                            <td>
+                                                {% if item.department %}
+                                                    {{ item.department.name }}
+                                                {% else %}
+                                                    <span class="text-muted">
+                                                        Unassigned
+                                                    </span>
+                                                {% endif %}
+                                            </td>
 
-                            <tbody>
+                                            <td>
+                                                {{ item.subject|default:"No subject"|truncatechars:35 }}
+                                            </td>
 
-                                {% for item in recent_requests %}
+                                            <td>
+                                                {% if item.status == "PENDING" %}
+                                                    <span class="status-badge status-pending">
+                                                        Pending
+                                                    </span>
 
-                                <tr>
+                                                {% elif item.status == "ASSIGNED" %}
+                                                    <span class="status-badge status-assigned">
+                                                        Assigned
+                                                    </span>
 
-                                    <td>
-                                        <strong>
-                                            {{ item.ticket_number }}
-                                        </strong>
-                                    </td>
+                                                {% elif item.status == "IN_PROGRESS" %}
+                                                    <span class="status-badge status-in-progress">
+                                                        In Progress
+                                                    </span>
 
-                                    <td>
-                                        {{ item.student.get_full_name|default:item.student.username }}
-                                    </td>
+                                                {% elif item.status == "RESOLVED" %}
+                                                    <span class="status-badge status-resolved">
+                                                        Resolved
+                                                    </span>
 
-                                    <td>
-                                        {{ item.department.name }}
-                                    </td>
+                                                {% elif item.status == "CLOSED" %}
+                                                    <span class="status-badge status-closed">
+                                                        Closed
+                                                    </span>
 
-                                    <td>
-                                        {{ item.subject|truncatechars:35 }}
-                                    </td>
+                                                {% elif item.status == "REJECTED" %}
+                                                    <span class="status-badge status-rejected">
+                                                        Rejected
+                                                    </span>
 
-                                    <td>
+                                                {% else %}
+                                                    <span class="status-badge status-default">
+                                                        {{ item.get_status_display|default:item.status|default:"Unknown" }}
+                                                    </span>
+                                                {% endif %}
+                                            </td>
 
-                                        {% if item.status == "PENDING" %}
+                                            <td class="text-nowrap">
+                                                {% if item.created_at %}
+                                                    {{ item.created_at|date:"d M Y" }}
+                                                {% else %}
+                                                    —
+                                                {% endif %}
+                                            </td>
 
-                                            <span class="status-badge status-pending">
-                                                Pending
-                                            </span>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
 
-                                        {% elif item.status == "ASSIGNED" %}
-
-                                            <span class="status-badge status-assigned">
-                                                Assigned
-                                            </span>
-
-                                        {% elif item.status == "IN_PROGRESS" %}
-
-                                            <span class="status-badge status-in-progress">
-                                                In Progress
-                                            </span>
-
-                                        {% elif item.status == "RESOLVED" %}
-
-                                            <span class="status-badge status-resolved">
-                                                Resolved
-                                            </span>
-
-                                        {% elif item.status == "CLOSED" %}
-
-                                            <span class="status-badge status-closed">
-                                                Closed
-                                            </span>
-
-                                        {% elif item.status == "REJECTED" %}
-
-                                            <span class="status-badge status-rejected">
-                                                Rejected
-                                            </span>
-
-                                        {% else %}
-
-                                            <span class="status-badge">
-                                                {{ item.status }}
-                                            </span>
-
-                                        {% endif %}
-
-                                    </td>
-
-                                    <td>
-                                        {{ item.created_at|date:"d M Y" }}
-                                    </td>
-
-                                </tr>
-
-                                {% endfor %}
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
+                            </table>
+                        </div>
 
                     {% else %}
 
-                    <div class="empty-state">
-                        No requests found.
-                    </div>
+                        <div class="empty-state">
+                            <div class="fs-1 mb-2">📋</div>
+                            <h5>No requests found</h5>
+                            <p class="mb-0">
+                                Student requests will appear here when submitted.
+                            </p>
+                        </div>
 
                     {% endif %}
 
-                </div>
+                </section>
 
+                <!-- RECENT ANNOUNCEMENTS -->
+                <section class="section-card">
 
-                <!-- ANNOUNCEMENTS -->
-                <div class="section-card">
-
-                    <div class="section-title">
+                    <h2 class="section-title">
                         Recent Announcements
-                    </div>
+                    </h2>
+
+                    <p class="section-description">
+                        Latest announcements for the college help desk.
+                    </p>
 
                     {% if recent_announcements %}
 
                         {% for announcement in recent_announcements %}
+                            <article class="announcement-item border-bottom py-3">
 
-                            <div class="border-bottom py-3">
+                                <h3 class="h6 fw-bold mb-2">
+                                    {{ announcement.title|default:"Announcement" }}
+                                </h3>
 
-                                <h6 class="mb-1">
-                                    {{ announcement.title }}
-                                </h6>
-
-                                <p class="mb-1 text-muted">
-                                    {{ announcement.message|truncatechars:150 }}
+                                <p class="mb-2 text-muted">
+                                    {{ announcement.message|default:"No announcement details available."|truncatechars:150 }}
                                 </p>
 
-                                <small class="text-muted">
-                                    {{ announcement.created_at|date:"d M Y" }}
+                                <small class="announcement-date">
+                                    {% if announcement.created_at %}
+                                        {{ announcement.created_at|date:"d M Y" }}
+                                    {% endif %}
                                 </small>
 
-                            </div>
-
+                            </article>
                         {% endfor %}
 
                     {% else %}
 
                         <div class="empty-state">
-                            No announcements available.
+                            <div class="fs-1 mb-2">📢</div>
+                            <h5>No announcements available</h5>
+                            <p class="mb-0">
+                                New announcements will appear here.
+                            </p>
                         </div>
 
                     {% endif %}
 
-                </div>
+                </section>
 
-            </div>
+                <footer class="text-center text-muted small py-4">
+                    College Students Help Desk
+                </footer>
 
+            </main>
         </div>
 
     </div>
-
 </div>
 
 {% endblock %}
