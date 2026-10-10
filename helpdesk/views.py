@@ -1221,6 +1221,7 @@ def admin_delete_staff(request, staff_id):
     return redirect("helpdesk:admin_staff")
 
 
+
 @admin_required
 def admin_reset_staff_password(request, staff_id):
     staff = get_object_or_404(
@@ -1230,19 +1231,30 @@ def admin_reset_staff_password(request, staff_id):
     )
 
     if request.method == "POST":
-        password = request.POST.get("password", "")
+        # IMPORTANT: Match the input names in the HTML form.
+        password = request.POST.get("new_password", "")
         confirmation = request.POST.get("confirm_password", "")
 
-        if not password:
-            messages.error(request, "Enter a new password.")
+        if not password or not confirmation:
+            messages.error(
+                request,
+                "Please enter and confirm the new password.",
+            )
+
         elif password != confirmation:
-            messages.error(request, "The passwords do not match.")
+            messages.error(
+                request,
+                "The passwords do not match.",
+            )
+
         else:
             try:
                 validate_password(password, user=staff)
+
             except ValidationError as exc:
                 for error in exc.messages:
                     messages.error(request, error)
+
             else:
                 staff.set_password(password)
                 staff.save(update_fields=["password"])
@@ -1251,6 +1263,7 @@ def admin_reset_staff_password(request, staff_id):
                     request,
                     f"Password reset successfully for {staff.username}.",
                 )
+
                 return redirect(
                     "helpdesk:admin_staff_detail",
                     staff_id=staff.pk,
@@ -1259,7 +1272,8 @@ def admin_reset_staff_password(request, staff_id):
     return render(
         request,
         "admin_panel/staff_reset_password.html",
-        {"staff": staff,
-        "staff_member": staff,
+        {
+            "staff": staff,
+            "staff_member": staff,
         },
     )
