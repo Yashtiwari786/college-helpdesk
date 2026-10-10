@@ -1,96 +1,154 @@
-{% extends "base.html" %}
 
-{% block title %}
-Login | College Students Help Desk
-{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080d1c">
+    <title>Sign In | College Help Desk</title>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+<body>
+<main class="auth-page">
+    <section class="auth-shell">
 
+        <aside class="auth-showcase">
+            <a class="auth-brand" href="/">
+                <span class="auth-brand-mark">✦</span>
+                <span>Campus<span style="color:#9aabff">Connect</span></span>
+            </a>
 
-{% block content %}
-
-<div class="auth-page">
-
-    <div class="login-card">
-
-        <div class="brand-icon">
-            🎓
-        </div>
-
-        <h2>
-            College Students
-            <br>
-            Help Desk
-        </h2>
-
-        <p class="text-muted">
-            Sign in to continue
-        </p>
-
-
-        {% if form.errors %}
-
-        <div class="alert alert-danger">
-            Invalid username or password.
-        </div>
-
-        {% endif %}
-
-
-        <form method="post">
-
-            {% csrf_token %}
-
-            <div class="mb-3">
-
-                <label class="form-label">
-                    Username
-                </label>
-
-                <input
-                    type="text"
-                    name="username"
-                    class="form-control"
-                    placeholder="Enter username"
-                    required
-                >
-
+            <div class="auth-hero">
+                <span class="auth-eyebrow">Your campus, connected</span>
+                <h1>
+                    Every issue has
+                    <span class="auth-gradient-text">a solution.</span>
+                </h1>
+                <p>
+                    One place to raise requests, connect with your campus
+                    support team, and stay updated until everything is resolved.
+                </p>
             </div>
 
-
-            <div class="mb-3">
-
-                <label class="form-label">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    name="password"
-                    class="form-control"
-                    placeholder="Enter password"
-                    required
-                >
-
+            <div class="auth-orbit-card">
+                <div class="auth-orbit-top">
+                    <strong>Campus support, simplified</strong>
+                    <span class="auth-live">● ONLINE</span>
+                </div>
+                <div class="auth-stat-row">
+                    <div class="auth-stat">
+                        <strong>01</strong>
+                        <span>Raise a request</span>
+                    </div>
+                    <div class="auth-stat">
+                        <strong>02</strong>
+                        <span>Track progress</span>
+                    </div>
+                    <div class="auth-stat">
+                        <strong>03</strong>
+                        <span>Get support</span>
+                    </div>
+                </div>
             </div>
 
+            <div class="auth-showcase-footer">
+                COLLEGE HELP DESK · SUPPORT THAT MOVES WITH YOU
+            </div>
+        </aside>
 
-            <button
-                type="submit"
-                class="btn btn-primary w-100"
-            >
-                Login
-            </button>
-            <div class="text-center mt-3">
-    <span class="text-muted">Don't have an account?</span>
-    <a href="{% url 'accounts:register' %}">
-        Create Account
-    </a>
-</div>
+        <section class="auth-form-panel">
+            <div class="auth-form-wrap">
 
-        </form>
+                <div class="auth-mobile-brand">
+                    <a class="auth-brand" href="/">
+                        <span class="auth-brand-mark">✦</span>
+                        <span>Campus<span style="color:#9aabff">Connect</span></span>
+                    </a>
+                </div>
 
-    </div>
+                <header class="auth-form-heading">
+                    <span class="auth-small-label">WELCOME BACK</span>
+                    <h2>Sign in to your space.</h2>
+                    <p>Enter your account details to continue to your dashboard.</p>
+                </header>
 
-</div>
+                {% if messages %}
+                    <div class="auth-messages" role="status">
+                        {% for message in messages %}
+                            <div class="{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
+                {% if form.non_field_errors %}
+                    <div class="auth-errors" role="alert">
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
-{% endblock %}
+                <form class="auth-form" method="post"
+                      action="{% url 'accounts:login' %}">
+                    {% csrf_token %}
+
+                    <div class="auth-field">
+                        <label for="id_username">Username</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon" aria-hidden="true">◎</span>
+                            <input
+                                class="auth-input"
+                                type="text"
+                                name="username"
+                                id="id_username"
+                                placeholder="Enter your username"
+                                autocomplete="username"
+                                value="{{ form.username.value|default_if_none:'' }}"
+                                required
+                                autofocus>
+                        </div>
+                        {% for error in form.username.errors %}
+                            <div class="auth-field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="id_password">Password</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon" aria-hidden="true">⌑</span>
+                            <input
+                                class="auth-input"
+                                type="password"
+                                name="password"
+                                id="id_password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required>
+                        </div>
+                        {% for error in form.password.errors %}
+                            <div class="auth-field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <button class="auth-submit" type="submit">
+                        Sign in securely&nbsp; →
+                    </button>
+                </form>
+
+                <div class="auth-divider">YOUR CAMPUS SUPPORT PORTAL</div>
+
+                <p class="auth-switch">
+                    New to CampusConnect?
+                    <a href="{% url 'accounts:register' %}">Create an account</a>
+                </p>
+
+                <p class="auth-security-note">
+                    Your account gives you access to your authorized campus dashboard.
+                </p>
+            </div>
+        </section>
+    </section>
+</main>
+</body>
+</html>

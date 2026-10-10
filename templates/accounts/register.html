@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,199 +7,859 @@
 
     <title>Student Registration | College Help Desk</title>
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+    <meta name="theme-color" content="#080d1c">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #080d1c;
+            --panel: #10182b;
+            --text: #f5f7ff;
+            --muted: #929db5;
+            --blue: #6685ff;
+            --cyan: #52e1e5;
+            --border: rgba(255,255,255,.11);
+            --input: rgba(255,255,255,.045);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100%;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "DM Sans", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(ellipse at 10% 10%, rgba(67,93,204,.15), transparent 38%),
+                radial-gradient(ellipse at 90% 90%, rgba(49,198,208,.10), transparent 38%),
+                var(--bg);
+        }
+
+        button, input {
+            font: inherit;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: minmax(300px, .88fr) minmax(0, 1.12fr);
+        }
+
+        /* LEFT BRAND PANEL */
+
+        .brand-panel {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100vh;
+            padding: 42px clamp(24px, 4vw, 62px);
+            border-right: 1px solid var(--border);
+            background: linear-gradient(145deg, rgba(24,37,70,.93), rgba(10,16,34,.97));
+        }
+
+        .brand-panel::before,
+        .brand-panel::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(2px);
+            animation: float 9s ease-in-out infinite;
+        }
+
+        .brand-panel::before {
+            width: 340px;
+            height: 340px;
+            top: 20%;
+            left: -170px;
+            border: 1px solid rgba(102,133,255,.23);
+            box-shadow: 0 0 100px rgba(102,133,255,.09);
+        }
+
+        .brand-panel::after {
+            width: 230px;
+            height: 230px;
+            right: -100px;
+            bottom: 8%;
+            border: 1px solid rgba(82,225,229,.22);
+            animation-delay: -4s;
+        }
+
+        .brand, .brand-content, .brand-footer {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            display: grid;
+            place-items: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 14px;
+            color: white;
+            background: linear-gradient(135deg, var(--blue), #4556d9);
+            box-shadow: 0 8px 26px rgba(81,105,255,.3);
+        }
+
+        .brand-logo svg {
+            width: 25px;
+            height: 25px;
+        }
+
+        .brand-name {
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            letter-spacing: -.4px;
+            font-size: 18px;
+        }
+
+        .brand-subtitle {
+            color: #a4b1cc;
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .brand-content {
+            max-width: 480px;
+            margin: 65px 0;
+            animation: slideUp .8s ease both;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 13px;
+            border: 1px solid rgba(115,146,255,.28);
+            border-radius: 50px;
+            background: rgba(102,133,255,.08);
+            color: #b9c8ff;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .7px;
+            text-transform: uppercase;
+        }
+
+        .eyebrow-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--cyan);
+            box-shadow: 0 0 12px var(--cyan);
+        }
+
+        .brand-content h1 {
+            margin: 25px 0 18px;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: clamp(36px, 4vw, 59px);
+            line-height: 1.08;
+            letter-spacing: -2.2px;
+        }
+
+        .gradient-text {
+            color: transparent;
+            background: linear-gradient(90deg, #91a8ff, #65e7e6);
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+        .brand-description {
+            max-width: 420px;
+            color: #a7b3cc;
+            font-size: 15px;
+            line-height: 1.9;
+        }
+
+        .feature-list {
+            display: grid;
+            gap: 15px;
+            margin-top: 34px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            color: #e1e8fa;
+            font-size: 14px;
+        }
+
+        .feature-icon {
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            width: 37px;
+            height: 37px;
+            border: 1px solid rgba(255,255,255,.09);
+            border-radius: 12px;
+            background: rgba(255,255,255,.05);
+            color: var(--cyan);
+        }
+
+        .feature-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .brand-footer {
+            color: #8491ad;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        /* RIGHT FORM PANEL */
+
+        .form-panel {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 38px clamp(20px, 5vw, 76px);
+        }
+
+        .form-wrapper {
+            width: 100%;
+            max-width: 540px;
+            padding: 12px 0 30px;
+            animation: slideUp .65s ease both;
+        }
+
+        .mobile-brand {
+            display: none;
+        }
+
+        .form-heading {
+            margin-bottom: 28px;
+        }
+
+        .form-heading .small-label {
+            color: var(--cyan);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+        }
+
+        .form-heading h2 {
+            margin: 11px 0 9px;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: clamp(29px, 3vw, 39px);
+            line-height: 1.2;
+            letter-spacing: -1.3px;
+        }
+
+        .form-heading p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .form-card {
+            padding: clamp(20px, 3vw, 30px);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            background: rgba(16,24,43,.78);
+            box-shadow: 0 25px 80px rgba(0,0,0,.20);
+            backdrop-filter: blur(16px);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .field {
+            min-width: 0;
+            margin-bottom: 19px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 9px;
+            color: #dce3f5;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .field input {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            height: 49px;
+            padding: 0 14px;
+            outline: none;
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 12px;
+            background: var(--input);
+            color: #f6f8ff;
+            transition: border-color .2s, background .2s, box-shadow .2s;
+        }
+
+        .field input::placeholder {
+            color: #68758f;
+        }
+
+        .field input:hover {
+            border-color: rgba(139,158,255,.38);
+        }
+
+        .field input:focus {
+            border-color: var(--blue);
+            background: rgba(102,133,255,.065);
+            box-shadow: 0 0 0 4px rgba(102,133,255,.12);
+        }
+
+        .field input:-webkit-autofill,
+        .field input:-webkit-autofill:hover,
+        .field input:-webkit-autofill:focus {
+            -webkit-text-fill-color: #f6f8ff;
+            transition: background-color 9999s ease-in-out 0s;
+        }
+
+        .password-wrap {
+            position: relative;
+        }
+
+        .password-wrap input {
+            padding-right: 53px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #98a5bf;
+            cursor: pointer;
+        }
+
+        .toggle-password:hover {
+            color: white;
+            background: rgba(255,255,255,.07);
+        }
+
+        .toggle-password svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .field-error {
+            margin-top: 7px;
+            color: #ff999f;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .error-box {
+            margin-bottom: 20px;
+            padding: 13px 15px;
+            border: 1px solid rgba(255,105,120,.3);
+            border-radius: 12px;
+            background: rgba(255,105,120,.08);
+            color: #ffb0b5;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .error-box ul {
+            margin: 5px 0 0;
+            padding-left: 20px;
+        }
+
+        .password-hint {
+            margin-top: 8px;
+            color: #7f8ca7;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .submit-btn {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            min-height: 52px;
+            margin-top: 7px;
+            border: 0;
+            border-radius: 13px;
+            background: linear-gradient(105deg, #5578ff, #6557e9);
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 10px 28px rgba(86,104,255,.22);
+            transition: transform .2s, box-shadow .2s, filter .2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+            box-shadow: 0 14px 32px rgba(86,104,255,.34);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .form-bottom {
+            margin-top: 23px;
+            color: var(--muted);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .form-bottom a {
+            margin-left: 5px;
+            color: #9eafff;
+            font-weight: 700;
+        }
+
+        .form-bottom a:hover {
+            color: var(--cyan);
+        }
+
+        .security-note {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 7px;
+            margin-top: 22px;
+            color: #7885a0;
+            font-size: 11px;
+        }
+
+        .security-note svg {
+            width: 14px;
+            height: 14px;
+            color: #70d8bf;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-20px) translateX(12px); }
+        }
+
+        @media (min-width: 1450px) {
+            .page {
+                grid-template-columns: minmax(380px, .9fr) minmax(0, 1.1fr);
+            }
+
+            .form-wrapper {
+                max-width: 570px;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .page {
+                grid-template-columns: minmax(270px, .75fr) minmax(0, 1.25fr);
+            }
+
+            .brand-panel {
+                padding: 32px 26px;
+            }
+
+            .brand-content h1 {
+                font-size: 42px;
+            }
+
+            .form-panel {
+                padding: 30px 25px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .page {
+                display: block;
+            }
+
+            .brand-panel {
+                display: none;
+            }
+
+            .form-panel {
+                min-height: 100vh;
+                padding: 25px 17px 35px;
+            }
+
+            .form-wrapper {
+                max-width: 520px;
+                padding-top: 0;
+            }
+
+            .mobile-brand {
+                display: flex;
+                align-items: center;
+                gap: 11px;
+                margin-bottom: 34px;
+            }
+
+            .mobile-brand .brand-logo {
+                width: 41px;
+                height: 41px;
+            }
+
+            .form-heading {
+                margin-bottom: 22px;
+            }
+
+            .form-heading h2 {
+                font-size: 32px;
+            }
+
+            .form-card {
+                padding: 23px 19px;
+                border-radius: 18px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .form-panel {
+                padding: 20px 13px 28px;
+            }
+
+            .form-card {
+                padding: 20px 15px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .field {
+                margin-bottom: 17px;
+            }
+
+            .form-heading h2 {
+                font-size: 29px;
+            }
+
+            .mobile-brand {
+                margin-bottom: 28px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-light">
+<body>
+<div class="page">
 
-<div class="container py-5">
+    <!-- LEFT BRAND PANEL: hidden on smaller screens -->
+    <aside class="brand-panel">
+        <a href="/" class="brand" aria-label="College Help Desk home">
+            <span class="brand-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m3 9 9-5 9 5-9 5-9-5Z"/>
+                    <path d="M7 11.3V16c3.2 2.5 6.8 2.5 10 0v-4.7"/>
+                    <path d="M21 9v6"/>
+                </svg>
+            </span>
+            <span>
+                <span class="brand-name">College Help Desk</span>
+                <span class="brand-subtitle" style="display:block;">Your campus, connected.</span>
+            </span>
+        </a>
 
-    <div class="row justify-content-center">
+        <div class="brand-content">
+            <span class="eyebrow">
+                <span class="eyebrow-dot"></span>
+                Your campus support hub
+            </span>
 
-        <div class="col-md-7 col-lg-6">
+            <h1>
+                Your college life.<br>
+                <span class="gradient-text">A little simpler.</span>
+            </h1>
 
-            <div class="card shadow border-0">
+            <p class="brand-description">
+                One account brings your campus support together.
+                Raise requests, track updates, and stay connected with
+                the people who keep your college running.
+            </p>
 
-                <div class="card-body p-4">
-
-                    <div class="text-center mb-4">
-
-                        <h2 class="fw-bold">
-                            Student Registration
-                        </h2>
-
-                        <p class="text-muted mb-0">
-                            Create your College Help Desk account
-                        </p>
-
-                    </div>
-
-                    <form method="POST">
-
-                        {% csrf_token %}
-
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {{ form.non_field_errors }}
-                            </div>
-                        {% endif %}
-
-                        <div class="row">
-
-                            <div class="col-md-6 mb-3">
-
-                                <label class="form-label">
-                                    First Name
-                                </label>
-
-                                {{ form.first_name }}
-
-                                {% for error in form.first_name.errors %}
-                                    <div class="text-danger small">
-                                        {{ error }}
-                                    </div>
-                                {% endfor %}
-
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-
-                                <label class="form-label">
-                                    Last Name
-                                </label>
-
-                                {{ form.last_name }}
-
-                                {% for error in form.last_name.errors %}
-                                    <div class="text-danger small">
-                                        {{ error }}
-                                    </div>
-                                {% endfor %}
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Student ID / Enrollment Number
-                            </label>
-
-                            {{ form.username }}
-
-                            {% for error in form.username.errors %}
-                                <div class="text-danger small">
-                                    {{ error }}
-                                </div>
-                            {% endfor %}
-
-                        </div>
-
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                College Email
-                            </label>
-
-                            {{ form.email }}
-
-                            {% for error in form.email.errors %}
-                                <div class="text-danger small">
-                                    {{ error }}
-                                </div>
-                            {% endfor %}
-
-                        </div>
-
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Phone Number
-                            </label>
-
-                            {{ form.phone }}
-
-                            {% for error in form.phone.errors %}
-                                <div class="text-danger small">
-                                    {{ error }}
-                                </div>
-                            {% endfor %}
-
-                        </div>
-
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Password
-                            </label>
-
-                            {{ form.password1 }}
-
-                            {% for error in form.password1.errors %}
-                                <div class="text-danger small">
-                                    {{ error }}
-                                </div>
-                            {% endfor %}
-
-                        </div>
-
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Confirm Password
-                            </label>
-
-                            {{ form.password2 }}
-
-                            {% for error in form.password2.errors %}
-                                <div class="text-danger small">
-                                    {{ error }}
-                                </div>
-                            {% endfor %}
-
-                        </div>
-
-
-                        <button
-                            type="submit"
-                            class="btn btn-primary w-100"
-                        >
-                            Create Student Account
-                        </button>
-
-                    </form>
-
-
-                    <div class="text-center mt-4">
-
-                        <span class="text-muted">
-                            Already have an account?
-                        </span>
-
-                        <a href="{% url 'accounts:login' %}">
-                            Login
-                        </a>
-
-                    </div>
-
+            <div class="feature-list">
+                <div class="feature">
+                    <span class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 3 20 7v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4Z"/>
+                            <path d="m8.5 12 2.3 2.3 4.7-4.8"/>
+                        </svg>
+                    </span>
+                    Secure, personal student account
                 </div>
 
-            </div>
+                <div class="feature">
+                    <span class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 5h16v12H8l-4 3V5Z"/>
+                            <path d="M8 9h8M8 13h5"/>
+                        </svg>
+                    </span>
+                    Track campus requests in one place
+                </div>
 
+                <div class="feature">
+                    <span class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                            <path d="M10 21h4"/>
+                        </svg>
+                    </span>
+                    Stay informed about request updates
+                </div>
+            </div>
         </div>
 
-    </div>
+        <div class="brand-footer">
+            Built for a better campus experience.<br>
+            © {% now "Y" %} College Help Desk
+        </div>
+    </aside>
 
+
+    <!-- REGISTRATION FORM -->
+    <main class="form-panel">
+        <div class="form-wrapper">
+
+            <!-- Compact brand shown on mobile -->
+            <a href="/" class="mobile-brand" aria-label="College Help Desk home">
+                <span class="brand-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m3 9 9-5 9 5-9 5-9-5Z"/>
+                        <path d="M7 11.3V16c3.2 2.5 6.8 2.5 10 0v-4.7"/>
+                        <path d="M21 9v6"/>
+                    </svg>
+                </span>
+                <span>
+                    <span class="brand-name">College Help Desk</span>
+                    <span class="brand-subtitle" style="display:block;">Your campus, connected.</span>
+                </span>
+            </a>
+
+            <header class="form-heading">
+                <span class="small-label">Get started today</span>
+                <h2>Create your account<span class="gradient-text">.</span></h2>
+                <p>Join your campus support community. It only takes a minute.</p>
+            </header>
+
+            <div class="form-card">
+
+                <form method="POST" autocomplete="on">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="error-box" role="alert">
+                            <strong>Please check your details.</strong>
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="{{ form.first_name.id_for_label }}">First name</label>
+                            {{ form.first_name }}
+                            {% for error in form.first_name.errors %}
+                                <div class="field-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="field">
+                            <label for="{{ form.last_name.id_for_label }}">Last name</label>
+                            {{ form.last_name }}
+                            {% for error in form.last_name.errors %}
+                                <div class="field-error">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.username.id_for_label }}">Student ID / Enrollment number</label>
+                        {{ form.username }}
+                        {% for error in form.username.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.email.id_for_label }}">College email</label>
+                        {{ form.email }}
+                        {% for error in form.email.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.phone.id_for_label }}">Phone number</label>
+                        {{ form.phone }}
+                        {% for error in form.phone.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.password1.id_for_label }}">Password</label>
+                        <div class="password-wrap">
+                            {{ form.password1 }}
+                            <button class="toggle-password" type="button" data-target="{{ form.password1.id_for_label }}" aria-label="Show password" aria-pressed="false">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                        {% for error in form.password1.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                        <div class="password-hint">Use a strong password that you don't use on other websites.</div>
+                    </div>
+
+                    <div class="field">
+                        <label for="{{ form.password2.id_for_label }}">Confirm password</label>
+                        <div class="password-wrap">
+                            {{ form.password2 }}
+                            <button class="toggle-password" type="button" data-target="{{ form.password2.id_for_label }}" aria-label="Show password" aria-pressed="false">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                        {% for error in form.password2.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        Create student account
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6"/>
+                        </svg>
+                    </button>
+                </form>
+
+                <div class="form-bottom">
+                    Already have an account?
+                    <a href="{% url 'accounts:login' %}">Sign in →</a>
+                </div>
+            </div>
+
+            <div class="security-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="4" y="10" width="16" height="11" rx="2"/>
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+                </svg>
+                Your account details are handled securely.
+            </div>
+        </div>
+    </main>
 </div>
 
+<script>
+    // Apply consistent styling without changing Django form fields or names.
+    document.querySelectorAll(
+        '.field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"])'
+    ).forEach(function (input) {
+        input.classList.add('form-input');
+
+        if (input.type === 'password') {
+            input.autocomplete = input.id.includes('password2')
+                ? 'new-password'
+                : 'new-password';
+        }
+
+        if (input.id.includes('first_name')) {
+            input.placeholder = 'Your first name';
+            input.autocomplete = 'given-name';
+        } else if (input.id.includes('last_name')) {
+            input.placeholder = 'Your last name';
+            input.autocomplete = 'family-name';
+        } else if (input.id.includes('username')) {
+            input.placeholder = 'Enter your student ID';
+            input.autocomplete = 'username';
+        } else if (input.type === 'email' || input.id.includes('email')) {
+            input.placeholder = 'you@college.edu';
+            input.autocomplete = 'email';
+        } else if (input.id.includes('phone')) {
+            input.placeholder = 'Enter your phone number';
+            input.autocomplete = 'tel';
+            input.inputMode = 'tel';
+        }
+    });
+
+    // Show/hide password buttons.
+    document.querySelectorAll('.toggle-password').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const input = document.getElementById(button.dataset.target);
+            if (!input) return;
+
+            const shouldShow = input.type === 'password';
+            input.type = shouldShow ? 'text' : 'password';
+            button.setAttribute('aria-pressed', String(shouldShow));
+            button.setAttribute(
+                'aria-label',
+                shouldShow ? 'Hide password' : 'Show password'
+            );
+        });
+    });
+</script>
 </body>
 </html>
+```
