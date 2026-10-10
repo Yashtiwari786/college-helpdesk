@@ -3,10 +3,9 @@ from django.conf.urls.static import static
 from django.shortcuts import redirect
 from django.contrib import admin
 from django.urls import include, path
+from config.views import landing_page
 
 
-def home(request):
-    return redirect("dashboard:dashboard")
 
 
 urlpatterns = [
@@ -17,7 +16,7 @@ urlpatterns = [
     ),
     path(
         "",
-        lambda request: redirect("accounts:register"),
+        landing_page,
         name="home",
     ),
 
