@@ -1115,7 +1115,7 @@ def admin_staff_detail(request, staff_id):
         request,
         "admin_panel/staff_detail.html",
         {
-            "staff": staff,
+            "staff_member": staff,
             "profile": profile,
         },
     )
@@ -1194,6 +1194,7 @@ def admin_edit_staff(request, staff_id):
         "admin_panel/staff_edit.html",
         {
             "staff": staff,
+            "staff_member": staff,
             "profile": profile,
             "departments": departments,
         },
@@ -1258,5 +1259,7 @@ def admin_reset_staff_password(request, staff_id):
     return render(
         request,
         "admin_panel/staff_reset_password.html",
-        {"staff": staff},
+        {"staff": staff,
+        "staff_member": staff,
+        },
     )
