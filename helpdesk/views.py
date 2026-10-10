@@ -7,6 +7,13 @@ from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db import models
+
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.db.models import Q
+
+from django.urls import reverse
+from django.views.decorators.http import require_POST
 from .forms import (
     FeedbackForm,
     MessageForm,
@@ -39,8 +46,21 @@ from .models import (
     Request,
     Department,
     Category,
-    Announcement
+    Announcement, StaffProfile
 )
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def student_required(view_func):
@@ -738,16 +758,18 @@ def admin_students(request):
         }
     )
 
+
 @admin_required
 def admin_staff(request):
-
-    staff_members = User.objects.filter(
-        role=User.Roles.STAFF
-    ).order_by(
-        "-date_joined"
+    staff_members = (
+        User.objects
+        .filter(role=User.Roles.STAFF)
+        .select_related("staff_profile__department")
+        .order_by("-date_joined")
     )
 
     search = request.GET.get("search", "").strip()
+    department_id = request.GET.get("department", "").strip()
 
     if search:
         staff_members = staff_members.filter(
@@ -755,7 +777,17 @@ def admin_staff(request):
             | Q(first_name__icontains=search)
             | Q(last_name__icontains=search)
             | Q(email__icontains=search)
+            | Q(phone__icontains=search)
         )
+
+    if department_id.isdigit():
+        staff_members = staff_members.filter(
+            staff_profile__department_id=int(department_id)
+        )
+
+    departments = Department.objects.filter(
+        is_active=True
+    ).order_by("name")
 
     return render(
         request,
@@ -763,9 +795,10 @@ def admin_staff(request):
         {
             "staff_members": staff_members,
             "search": search,
-        }
+            "departments": departments,
+            "selected_department": department_id,
+        },
     )
-
 @admin_required
 def admin_requests(request):
 
@@ -892,73 +925,88 @@ def admin_departments(request):
         }
     )
 @login_required
+@admin_required
 def admin_add_staff(request):
-
-    user = request.user
-
-    if user.role != user.Roles.ADMIN:
-        return redirect("dashboard:dashboard")
+    departments = Department.objects.filter(is_active=True)
 
     if request.method == "POST":
-
         username = request.POST.get("username", "").strip()
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
-        email = request.POST.get("email", "").strip()
+        email = request.POST.get("email", "").strip().lower()
+        phone = request.POST.get("phone", "").strip()
         password = request.POST.get("password", "")
+        department_id = request.POST.get("department", "").strip()
+        designation = request.POST.get("designation", "").strip()
+
+        errors = []
 
         if not username or not email or not password:
-            messages.error(
-                request,
-                "Username, email and password are required."
-            )
+            errors.append("Username, email and password are required.")
+
+        if User.objects.filter(username__iexact=username).exists():
+            errors.append("Username already exists.")
+
+        if User.objects.filter(email__iexact=email).exists():
+            errors.append("Email already exists.")
+
+        department = None
+
+        if department_id:
+            if department_id.isdigit():
+                department = Department.objects.filter(
+                    pk=int(department_id),
+                    is_active=True,
+                ).first()
+
+            if department is None:
+                errors.append("Select a valid active department.")
+
+        if password:
+            try:
+                validate_password(password)
+            except ValidationError as exc:
+                errors.extend(exc.messages)
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+
             return render(
                 request,
-                "admin_panel/add_staff.html"
+                "admin_panel/add_staff.html",
+                {"departments": departments},
             )
 
-        if User.objects.filter(username=username).exists():
-            messages.error(
-                request,
-                "Username already exists."
-            )
-            return render(
-                request,
-                "admin_panel/add_staff.html"
-            )
-
-        if User.objects.filter(email=email).exists():
-            messages.error(
-                request,
-                "Email already exists."
-            )
-            return render(
-                request,
-                "admin_panel/add_staff.html"
-            )
-
-        staff = User.objects.create(
+        staff = User(
             username=username,
             first_name=first_name,
             last_name=last_name,
             email=email,
+            phone=phone,
             role=User.Roles.STAFF,
-            password=make_password(password),
+        )
+        staff.set_password(password)
+        staff.save()
+
+        StaffProfile.objects.create(
+            user=staff,
+            department=department,
+            designation=designation,
         )
 
         messages.success(
             request,
-            f"Staff account '{staff.username}' created successfully."
+            f"Staff account '{staff.username}' created successfully.",
         )
 
         return redirect("helpdesk:admin_staff")
 
     return render(
         request,
-        "admin_panel/add_staff.html"
+        "admin_panel/add_staff.html",
+        {"departments": departments},
     )
-
-
 
 # ==============================
 # ADMIN: DEPARTMENT MANAGEMENT
@@ -1051,3 +1099,164 @@ def admin_edit_category(request, category_id):
         "page_title": "Edit Category",
         "category": category,
     })
+
+
+@admin_required
+def admin_staff_detail(request, staff_id):
+    staff = get_object_or_404(
+        User.objects.select_related("staff_profile__department"),
+        pk=staff_id,
+        role=User.Roles.STAFF,
+    )
+
+    profile = getattr(staff, "staff_profile", None)
+
+    return render(
+        request,
+        "admin_panel/staff_detail.html",
+        {
+            "staff": staff,
+            "profile": profile,
+        },
+    )
+
+
+@admin_required
+def admin_edit_staff(request, staff_id):
+    staff = get_object_or_404(
+        User,
+        pk=staff_id,
+        role=User.Roles.STAFF,
+    )
+
+    profile, _ = StaffProfile.objects.get_or_create(user=staff)
+    departments = Department.objects.filter(is_active=True)
+
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+        email = request.POST.get("email", "").strip().lower()
+        phone = request.POST.get("phone", "").strip()
+        designation = request.POST.get("designation", "").strip()
+        department_id = request.POST.get("department", "").strip()
+
+        if not username or not email:
+            messages.error(request, "Username and email are required.")
+        elif User.objects.filter(
+            username__iexact=username
+        ).exclude(pk=staff.pk).exists():
+            messages.error(request, "That username is already in use.")
+        elif User.objects.filter(
+            email__iexact=email
+        ).exclude(pk=staff.pk).exists():
+            messages.error(request, "That email is already in use.")
+        else:
+            department = None
+
+            if department_id:
+                department = Department.objects.filter(
+                    pk=department_id,
+                    is_active=True,
+                ).first()
+
+                if department is None:
+                    messages.error(request, "Select a valid department.")
+                    return render(
+                        request,
+                        "admin_panel/staff_edit.html",
+                        {
+                            "staff": staff,
+                            "profile": profile,
+                            "departments": departments,
+                        },
+                    )
+
+            staff.username = username
+            staff.first_name = first_name
+            staff.last_name = last_name
+            staff.email = email
+            staff.phone = phone
+            staff.save()
+
+            profile.department = department
+            profile.designation = designation
+            profile.save()
+
+            messages.success(request, "Staff details updated successfully.")
+            return redirect(
+                "helpdesk:admin_staff_detail",
+                staff_id=staff.pk,
+            )
+
+    return render(
+        request,
+        "admin_panel/staff_edit.html",
+        {
+            "staff": staff,
+            "profile": profile,
+            "departments": departments,
+        },
+    )
+
+
+@require_POST
+@admin_required
+def admin_delete_staff(request, staff_id):
+    staff = get_object_or_404(
+        User,
+        pk=staff_id,
+        role=User.Roles.STAFF,
+    )
+
+    if staff.pk == request.user.pk:
+        messages.error(request, "You cannot delete your own account here.")
+        return redirect("helpdesk:admin_staff")
+
+    username = staff.username
+    staff.delete()
+
+    messages.success(request, f"Staff account '{username}' was deleted.")
+    return redirect("helpdesk:admin_staff")
+
+
+@admin_required
+def admin_reset_staff_password(request, staff_id):
+    staff = get_object_or_404(
+        User,
+        pk=staff_id,
+        role=User.Roles.STAFF,
+    )
+
+    if request.method == "POST":
+        password = request.POST.get("password", "")
+        confirmation = request.POST.get("confirm_password", "")
+
+        if not password:
+            messages.error(request, "Enter a new password.")
+        elif password != confirmation:
+            messages.error(request, "The passwords do not match.")
+        else:
+            try:
+                validate_password(password, user=staff)
+            except ValidationError as exc:
+                for error in exc.messages:
+                    messages.error(request, error)
+            else:
+                staff.set_password(password)
+                staff.save(update_fields=["password"])
+
+                messages.success(
+                    request,
+                    f"Password reset successfully for {staff.username}.",
+                )
+                return redirect(
+                    "helpdesk:admin_staff_detail",
+                    staff_id=staff.pk,
+                )
+
+    return render(
+        request,
+        "admin_panel/staff_reset_password.html",
+        {"staff": staff},
+    )

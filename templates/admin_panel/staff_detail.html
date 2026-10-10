@@ -1,0 +1,148 @@
+
+{% extends "base.html" %}
+
+{% block title %}Staff Details | College Help Desk{% endblock %}
+
+{% block content %}
+<style>
+    .detail-page { max-width:1000px; margin:auto; padding:30px 16px 50px; }
+    .detail-header { display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap; margin-bottom:25px; }
+    .detail-header h2 { font-weight:800; color:#172033; margin:0; }
+    .detail-header p { color:#718096; margin:8px 0 0; }
+    .detail-card { background:#fff; border:1px solid #e8edf5; border-radius:16px; overflow:hidden; box-shadow:0 8px 28px rgba(25,40,70,.05); margin-bottom:22px; }
+    .detail-card-header { padding:20px 24px; background:#f8faff; border-bottom:1px solid #e8edf5; font-weight:750; color:#202b45; }
+    .detail-card-body { padding:25px; }
+    .profile-top { display:flex; align-items:center; gap:18px; }
+    .profile-avatar { width:76px; height:76px; border-radius:50%; background:#eef2ff; color:#4f46e5; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; }
+    .profile-name { font-size:24px; font-weight:800; color:#172033; }
+    .profile-muted { color:#718096; }
+    .detail-label { font-size:12px; text-transform:uppercase; letter-spacing:.7px; font-weight:800; color:#718096; margin-bottom:6px; }
+    .detail-value { color:#202b45; font-weight:600; overflow-wrap:anywhere; }
+    .detail-item { padding:14px 0; border-bottom:1px solid #f0f2f6; }
+    .detail-item:last-child { border-bottom:0; }
+    @media(max-width:576px) { .detail-card-body { padding:18px; } }
+</style>
+
+<div class="detail-page">
+    <div class="detail-header">
+        <div>
+            <h2>Staff Details</h2>
+            <p>Review the staff account and assignment information.</p>
+        </div>
+        <a href="{% url 'helpdesk:admin_staff' %}" class="btn btn-outline-secondary">
+            ← Back to Staff
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="detail-card">
+        <div class="detail-card-body">
+            <div class="profile-top">
+                <div class="profile-avatar">
+                    {{ staff_member.first_name|default:staff_member.username|slice:":1"|upper }}
+                </div>
+                <div>
+                    <div class="profile-name">
+                        {{ staff_member.get_full_name|default:staff_member.username }}
+                    </div>
+                    <div class="profile-muted">@{{ staff_member.username }}</div>
+                    <span class="badge text-bg-success mt-2">Staff Account</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-card">
+        <div class="detail-card-header">Personal Information</div>
+        <div class="detail-card-body">
+            <div class="row">
+                <div class="col-md-6 detail-item">
+                    <div class="detail-label">First name</div>
+                    <div class="detail-value">{{ staff_member.first_name|default:"—" }}</div>
+                </div>
+                <div class="col-md-6 detail-item">
+                    <div class="detail-label">Last name</div>
+                    <div class="detail-value">{{ staff_member.last_name|default:"—" }}</div>
+                </div>
+                <div class="col-md-6 detail-item">
+                    <div class="detail-label">Username / Staff ID</div>
+                    <div class="detail-value">{{ staff_member.username }}</div>
+                </div>
+                <div class="col-md-6 detail-item">
+                    <div class="detail-label">Email address</div>
+                    <div class="detail-value">{{ staff_member.email|default:"—" }}</div>
+                </div>
+                <div class="col-md-6 detail-item">
+                    <div class="detail-label">Phone number</div>
+                    <div class="detail-value">{{ staff_member.phone|default:"—" }}</div>
+                </div>
+                <div class="col-md-6 detail-item">
+                    <div class="detail-label">Date joined</div>
+                    <div class="detail-value">{{ staff_member.date_joined|date:"d M Y, H:i" }}</div>
+                </div>
+                <div class="col-md-6 detail-item">
+                    <div class="detail-label">Last login</div>
+                    <div class="detail-value">
+                        {% if staff_member.last_login %}
+                            {{ staff_member.last_login|date:"d M Y, H:i" }}
+                        {% else %}
+                            Never logged in
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6 detail-item">
+                    <div class="detail-label">Account status</div>
+                    <div class="detail-value">
+                        {% if staff_member.is_active %}
+                            <span class="text-success">Active</span>
+                        {% else %}
+                            <span class="text-danger">Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-card">
+        <div class="detail-card-header">Department and Job Information</div>
+        <div class="detail-card-body">
+            <div class="row">
+                <div class="col-md-6 detail-item">
+                    <div class="detail-label">Department</div>
+                    <div class="detail-value">
+                        {% if staff_member.staff_profile.department %}
+                            {{ staff_member.staff_profile.department.name }}
+                        {% else %}
+                            Unassigned
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6 detail-item">
+                    <div class="detail-label">Designation</div>
+                    <div class="detail-value">
+                        {{ staff_member.staff_profile.designation|default:"—" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'helpdesk:admin_edit_staff' staff_member.id %}"
+           class="btn btn-primary">Edit Staff Details</a>
+        <a href="{% url 'helpdesk:admin_reset_staff_password' staff_member.id %}"
+           class="btn btn-outline-warning">Reset Password</a>
+        <a href="{% url 'helpdesk:admin_staff' %}"
+           class="btn btn-light border">Back to Staff List</a>
+    </div>
+</div>
+{% endblock %}

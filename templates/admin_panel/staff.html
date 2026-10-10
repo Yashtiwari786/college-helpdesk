@@ -1,117 +1,166 @@
+
 {% extends "base.html" %}
 
+{% block title %}Manage Staff | College Help Desk{% endblock %}
+
 {% block content %}
+<style>
+    .staff-page { max-width: 1400px; margin: auto; padding: 30px 16px 50px; }
+    .staff-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:25px; }
+    .staff-heading h2 { color:#172033; font-weight:800; margin:0; }
+    .staff-heading p { color:#718096; margin:8px 0 0; }
+    .staff-card { background:#fff; border:1px solid #e8edf5; border-radius:16px; box-shadow:0 8px 28px rgba(25,40,70,.05); overflow:hidden; }
+    .staff-card-header { padding:20px 24px; border-bottom:1px solid #edf0f5; display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap; }
+    .staff-card-header h5 { margin:0; font-weight:750; color:#202b45; }
+    .staff-table th { font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:#718096; white-space:nowrap; }
+    .staff-table td { vertical-align:middle; }
+    .staff-avatar { width:40px; height:40px; border-radius:50%; background:#eef2ff; color:#4f46e5; display:inline-flex; align-items:center; justify-content:center; font-weight:800; margin-right:10px; }
+    .staff-name { font-weight:700; color:#172033; }
+    .staff-muted { color:#718096; font-size:13px; }
+    .staff-badge { display:inline-block; padding:5px 10px; border-radius:20px; background:#e3f7ed; color:#18794e; font-size:12px; font-weight:700; }
+    .staff-actions { display:flex; flex-wrap:wrap; gap:6px; }
+    .empty-state { text-align:center; padding:45px 20px; color:#718096; }
+    .search-box { max-width:420px; width:100%; }
+    @media(max-width:576px) { .staff-page { padding:20px 10px; } .staff-card-header { padding:16px; } }
+</style>
 
-<div class="container-fluid py-4">
-
-    <h2 class="fw-bold mb-1">
-        Staff
-    </h2>
-
-    <p class="text-muted mb-4">
-        Manage help desk staff members
-    </p>
-
-    <a href="{% url 'helpdesk:admin_add_staff' %}"
-   class="btn btn-primary">
-    + Add Staff
-</a>
-
-
-    <div class="card border-0 shadow-sm mb-4">
-
-        <div class="card-body">
-
-            <form method="GET">
-
-                <div class="input-group">
-
-                    <input
-                        type="text"
-                        name="search"
-                        value="{{ search }}"
-                        class="form-control"
-                        placeholder="Search staff..."
-                    >
-
-                    <button class="btn btn-primary">
-                        Search
-                    </button>
-
-                </div>
-
-            </form>
-
+<div class="staff-page">
+    <div class="staff-heading">
+        <div>
+            <h2>Staff Management</h2>
+            <p>View staff accounts, update details, and manage access.</p>
         </div>
-
+        <a href="{% url 'helpdesk:admin_add_staff' %}" class="btn btn-primary">
+            + Add Staff Member
+        </a>
     </div>
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
 
-    <div class="card border-0 shadow-sm">
+    <div class="staff-card">
+        <div class="staff-card-header">
+            <div>
+                <h5>Staff Directory</h5>
+                <div class="staff-muted mt-1">
+                    {% if staff_members %}Staff accounts matching your search.{% else %}No staff accounts to display.{% endif %}
+                </div>
+            </div>
+
+            <form method="get" action="{% url 'helpdesk:admin_staff' %}" class="search-box">
+                <div class="input-group">
+                    <input
+                        type="search"
+                        name="search"
+                        class="form-control"
+                        placeholder="Search name, username or email..."
+                        value="{{ search|default:'' }}"
+                        aria-label="Search staff"
+                    >
+                    <button class="btn btn-outline-primary" type="submit">Search</button>
+                    {% if search %}
+                        <a href="{% url 'helpdesk:admin_staff' %}" class="btn btn-outline-secondary">Clear</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
 
         <div class="table-responsive">
-
-            <table class="table table-hover mb-0">
-
+            <table class="table table-hover staff-table mb-0">
                 <thead>
-
                     <tr>
-                        <th>Name</th>
+                        <th class="ps-4">Staff member</th>
                         <th>Email</th>
-                        <th>Phone</th>
-                        <th>Status</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>Date joined</th>
+                        <th class="text-end pe-4">Actions</th>
                     </tr>
-
                 </thead>
-
                 <tbody>
-
-                    {% for member in staff_members %}
-
+                    {% for staff in staff_members %}
                     <tr>
-
-                        <td>
-                            {{ member.get_full_name|default:member.username }}
-                        </td>
-
-                        <td>
-                            {{ member.email }}
-                        </td>
-
-                        <td>
-                            {{ member.phone|default:"-" }}
-                        </td>
-
-                        <td>
-
-                            {% if member.is_active %}
-
-                                <span class="badge bg-success">
-                                    Active
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <span class="staff-avatar">
+                                    {{ staff.first_name|default:staff.username|slice:":1"|upper }}
                                 </span>
-
+                                <div>
+                                    <div class="staff-name">
+                                        {{ staff.get_full_name|default:staff.username }}
+                                    </div>
+                                    <div class="staff-muted">@{{ staff.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ staff.email|default:"—" }}</td>
+                        <td>
+                            {% if staff.staff_profile.department %}
+                                {{ staff.staff_profile.department.name }}
                             {% else %}
-
-                                <span class="badge bg-danger">
-                                    Disabled
-                                </span>
-
+                                <span class="staff-muted">Unassigned</span>
                             {% endif %}
-
                         </td>
+                        <td>
+                            {% if staff.staff_profile.designation %}
+                                {{ staff.staff_profile.designation }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>{{ staff.date_joined|date:"d M Y" }}</td>
+                        <td class="text-end pe-4">
+                            <div class="staff-actions justify-content-end">
+                                <a href="{% url 'helpdesk:admin_staff_detail' staff.id %}"
+                                   class="btn btn-sm btn-outline-primary">View</a>
 
+                                <a href="{% url 'helpdesk:admin_edit_staff' staff.id %}"
+                                   class="btn btn-sm btn-outline-secondary">Edit</a>
+
+                                <a href="{% url 'helpdesk:admin_reset_staff_password' staff.id %}"
+                                   class="btn btn-sm btn-outline-warning">Reset Password</a>
+
+                                <form method="post"
+                                      action="{% url 'helpdesk:admin_delete_staff' staff.id %}"
+                                      onsubmit="return confirm('Delete this staff account? This action cannot be undone.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
-
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <h5>No staff members found</h5>
+                                <p class="mb-3">
+                                    {% if search %}Try another search term.{% else %}Add your first staff account to get started.{% endif %}
+                                </p>
+                                {% if search %}
+                                    <a href="{% url 'helpdesk:admin_staff' %}" class="btn btn-outline-secondary">
+                                        Clear search
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'helpdesk:admin_add_staff' %}" class="btn btn-primary">
+                                        Add Staff Member
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
-
                 </tbody>
-
             </table>
-
         </div>
-
     </div>
-
 </div>
-
 {% endblock %}

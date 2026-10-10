@@ -1,0 +1,129 @@
+
+{% extends "base.html" %}
+
+{% block title %}Edit Staff | College Help Desk{% endblock %}
+
+{% block content %}
+<style>
+    .edit-page { max-width:950px; margin:auto; padding:30px 16px 50px; }
+    .edit-heading { margin-bottom:25px; }
+    .edit-heading h2 { color:#172033; font-weight:800; margin:0; }
+    .edit-heading p { color:#718096; margin:8px 0 0; }
+    .edit-card { background:#fff; border:1px solid #e8edf5; border-radius:16px; box-shadow:0 8px 28px rgba(25,40,70,.05); overflow:hidden; }
+    .edit-card-header { padding:21px 25px; background:#f8faff; border-bottom:1px solid #e8edf5; }
+    .edit-card-header h5 { font-weight:750; margin:0 0 5px; color:#202b45; }
+    .edit-card-header p { color:#718096; margin:0; font-size:14px; }
+    .edit-card-body { padding:26px; }
+    .section-label { font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#4f46e5; font-weight:800; margin:8px 0 16px; }
+    .edit-page .form-label { color:#344054; font-weight:700; font-size:13px; }
+    .edit-page .form-control, .edit-page .form-select { min-height:45px; border-radius:10px; border-color:#dce3ee; }
+    .edit-actions { display:flex; gap:10px; flex-wrap:wrap; border-top:1px solid #edf0f5; margin-top:25px; padding-top:22px; }
+    @media(max-width:576px) { .edit-card-body { padding:18px; } .edit-actions .btn { width:100%; } }
+</style>
+
+<div class="edit-page">
+    <div class="edit-heading">
+        <h2>Edit Staff Member</h2>
+        <p>Update account details and staff assignment.</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="edit-card">
+        <div class="edit-card-header">
+            <h5>{{ staff_member.get_full_name|default:staff_member.username }}</h5>
+            <p>Username: {{ staff_member.username }}</p>
+        </div>
+
+        <div class="edit-card-body">
+            <form method="post" action="{% url 'helpdesk:admin_edit_staff' staff_member.id %}">
+                {% csrf_token %}
+
+                <div class="section-label">01 — Personal information</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="first_name" class="form-label">First name</label>
+                        <input type="text" id="first_name" name="first_name"
+                               class="form-control" value="{{ staff_member.first_name }}"
+                               autocomplete="given-name">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="last_name" class="form-label">Last name</label>
+                        <input type="text" id="last_name" name="last_name"
+                               class="form-control" value="{{ staff_member.last_name }}"
+                               autocomplete="family-name">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email address *</label>
+                        <input type="email" id="email" name="email"
+                               class="form-control" value="{{ staff_member.email }}"
+                               autocomplete="email" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="phone" class="form-label">Phone number</label>
+                        <input type="tel" id="phone" name="phone"
+                               class="form-control" value="{{ staff_member.phone }}"
+                               maxlength="20" autocomplete="tel">
+                    </div>
+                </div>
+
+                <div class="section-label mt-4">02 — Department and designation</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="department" class="form-label">Department</label>
+                        <select id="department" name="department" class="form-select">
+                            <option value="">Unassigned</option>
+                            {% for department in departments %}
+                                <option value="{{ department.id }}"
+                                    {% if staff_member.staff_profile.department_id == department.id %}selected{% endif %}>
+                                    {{ department.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="designation" class="form-label">Designation / Job title</label>
+                        <input type="text" id="designation" name="designation"
+                               class="form-control"
+                               value="{{ staff_member.staff_profile.designation }}"
+                               maxlength="100"
+                               placeholder="e.g. IT Support Officer">
+                    </div>
+                </div>
+
+                <div class="section-label mt-4">03 — Account status</div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox"
+                           id="is_active" name="is_active" value="1"
+                           {% if staff_member.is_active %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active">
+                        Account is active
+                    </label>
+                    <div class="form-text">
+                        Unchecking this disables the staff member's account.
+                    </div>
+                </div>
+
+                <div class="edit-actions">
+                    <button type="submit" class="btn btn-primary">
+                        Save Changes
+                    </button>
+                    <a href="{% url 'helpdesk:admin_staff_detail' staff_member.id %}"
+                       class="btn btn-light border">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

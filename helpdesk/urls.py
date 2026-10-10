@@ -141,4 +141,24 @@ path(
     views.admin_edit_category,
     name="admin_edit_category",
 ),
+path(
+    "admin-panel/staff/<int:staff_id>/",
+    views.admin_staff_detail,
+    name="admin_staff_detail",
+),
+path(
+    "admin-panel/staff/<int:staff_id>/edit/",
+    views.admin_edit_staff,
+    name="admin_edit_staff",
+),
+path(
+    "admin-panel/staff/<int:staff_id>/delete/",
+    views.admin_delete_staff,
+    name="admin_delete_staff",
+),
+path(
+    "admin-panel/staff/<int:staff_id>/reset-password/",
+    views.admin_reset_staff_password,
+    name="admin_reset_staff_password",
+),
 ]

@@ -1,109 +1,353 @@
+
 {% extends "base.html" %}
 
 {% block content %}
 
-<div class="container py-4">
+<style>
+    .staff-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 28px 16px 50px;
+    }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    .staff-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+    }
+
+    .staff-eyebrow {
+        color: #4f46e5;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .staff-title {
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin: 0;
+        color: #172033;
+    }
+
+    .staff-subtitle {
+        color: #718096;
+        margin: 8px 0 0;
+    }
+
+    .staff-card {
+        background: #fff;
+        border: 1px solid #e8edf5;
+        border-radius: 18px;
+        box-shadow: 0 12px 35px rgba(25, 40, 70, .07);
+        overflow: hidden;
+    }
+
+    .staff-card-header {
+        padding: 22px 26px;
+        background: linear-gradient(120deg, #f8faff, #eef2ff);
+        border-bottom: 1px solid #e8edf5;
+    }
+
+    .staff-card-header h5 {
+        margin: 0 0 6px;
+        font-weight: 750;
+        color: #202b45;
+    }
+
+    .staff-card-header p {
+        color: #718096;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .staff-card-body {
+        padding: 28px;
+    }
+
+    .section-label {
+        color: #4f46e5;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin: 8px 0 18px;
+    }
+
+    .staff-page .form-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #344054;
+        margin-bottom: 8px;
+    }
+
+    .staff-page .form-control,
+    .staff-page .form-select {
+        min-height: 46px;
+        border-radius: 10px;
+        border-color: #dce3ee;
+        padding: 10px 13px;
+    }
+
+    .staff-page .form-control:focus,
+    .staff-page .form-select:focus {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+    }
+
+    .field-help {
+        color: #8490a5;
+        font-size: 12px;
+        margin-top: 6px;
+    }
+
+    .staff-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        border-top: 1px solid #edf0f5;
+        margin-top: 24px;
+        padding-top: 24px;
+    }
+
+    .staff-actions .btn {
+        border-radius: 10px;
+        padding: 11px 18px;
+        font-weight: 700;
+    }
+
+    .btn-create {
+        color: white;
+        border: none;
+        background: linear-gradient(110deg, #4f46e5, #6366f1);
+    }
+
+    .btn-create:hover {
+        color: white;
+        background: #4338ca;
+    }
+
+    @media (max-width: 576px) {
+        .staff-card-body {
+            padding: 20px 16px;
+        }
+
+        .staff-card-header {
+            padding: 20px 16px;
+        }
+
+        .staff-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="staff-page">
+
+    <div class="staff-header">
         <div>
-            <h2 class="fw-bold">Add Staff</h2>
-            <p class="text-muted mb-0">
-                Create a new staff account
+            <div class="staff-eyebrow">Administration / Team</div>
+            <h2 class="staff-title">Add Staff Member</h2>
+            <p class="staff-subtitle">
+                Create a staff account and assign their department.
             </p>
         </div>
 
         <a href="{% url 'helpdesk:admin_staff' %}"
-           class="btn btn-outline-secondary">
+           class="btn btn-outline-secondary rounded-3">
             ← Back to Staff
         </a>
     </div>
 
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show"
+                 role="alert">
                 {{ message }}
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close"></button>
             </div>
         {% endfor %}
     {% endif %}
 
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
+    <div class="staff-card">
 
-            <form method="post">
+        <div class="staff-card-header">
+            <h5>Staff Account Information</h5>
+            <p>Enter the employee's details and support assignment.</p>
+        </div>
+
+        <div class="staff-card-body">
+
+            <form method="post"
+                  action="{% url 'helpdesk:admin_add_staff' %}">
 
                 {% csrf_token %}
 
-                <div class="row">
+                <div class="section-label">01 — Personal information</div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">
-                            Username
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="username" class="form-label">
+                            Username / Staff ID *
                         </label>
-
                         <input
                             type="text"
+                            id="username"
                             name="username"
                             class="form-control"
+                            placeholder="e.g. staff001"
+                            autocomplete="username"
+                            maxlength="150"
                             required
                         >
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">
-                            Email
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">
+                            Email address *
                         </label>
-
                         <input
                             type="email"
+                            id="email"
                             name="email"
                             class="form-control"
+                            placeholder="staff@college.edu"
+                            autocomplete="email"
                             required
                         >
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">
-                            First Name
+                    <div class="col-md-6">
+                        <label for="first_name" class="form-label">
+                            First name
                         </label>
-
                         <input
                             type="text"
+                            id="first_name"
                             name="first_name"
                             class="form-control"
+                            placeholder="Enter first name"
+                            autocomplete="given-name"
                         >
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">
-                            Last Name
+                    <div class="col-md-6">
+                        <label for="last_name" class="form-label">
+                            Last name
                         </label>
-
                         <input
                             type="text"
+                            id="last_name"
                             name="last_name"
                             class="form-control"
+                            placeholder="Enter last name"
+                            autocomplete="family-name"
                         >
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">
-                            Password
+                    <div class="col-md-6">
+                        <label for="phone" class="form-label">
+                            Phone number
                         </label>
-
                         <input
-                            type="password"
-                            name="password"
+                            type="tel"
+                            id="phone"
+                            name="phone"
                             class="form-control"
-                            required
+                            placeholder="Enter phone number"
+                            autocomplete="tel"
+                            maxlength="20"
                         >
                     </div>
 
                 </div>
 
-                <button type="submit"
-                        class="btn btn-primary">
-                    Create Staff Account
-                </button>
+                <div class="section-label mt-4">
+                    02 — Department and role
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="department" class="form-label">
+                            Assigned department
+                        </label>
+                        <select
+                            id="department"
+                            name="department"
+                            class="form-select"
+                        >
+                            <option value="">Unassigned</option>
+                            {% for department in departments %}
+                                <option value="{{ department.id }}">
+                                    {{ department.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="field-help">
+                            Select the department this staff member supports.
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="designation" class="form-label">
+                            Designation / Job title
+                        </label>
+                        <input
+                            type="text"
+                            id="designation"
+                            name="designation"
+                            class="form-control"
+                            placeholder="e.g. IT Support Officer"
+                            maxlength="100"
+                        >
+                    </div>
+
+                </div>
+
+                <div class="section-label mt-4">
+                    03 — Account security
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="password" class="form-label">
+                            Temporary password *
+                        </label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="form-control"
+                            placeholder="Create a temporary password"
+                            autocomplete="new-password"
+                            required
+                        >
+                        <div class="field-help">
+                            The password will be securely hashed before storage.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="staff-actions">
+                    <button type="submit" class="btn btn-create">
+                        + Create Staff Account
+                    </button>
+
+                    <a href="{% url 'helpdesk:admin_staff' %}"
+                       class="btn btn-light border">
+                        Cancel
+                    </a>
+                </div>
 
             </form>
 
