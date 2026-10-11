@@ -1279,14 +1279,12 @@ def admin_reset_staff_password(request, staff_id):
     )
 
 
+
 def department_directory(request):
     departments = Department.objects.filter(
         is_active=True
     ).order_by("name")
 
-    # Each department gets a visual card image.
-    # These are remote images; replace with local static files
-    # later if you prefer to host them yourself.
     department_images = [
         "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=900&q=80",
         "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=900&q=80",
@@ -1314,6 +1312,7 @@ def department_directory(request):
     )
 
 
+
 def department_detail(request, department_id):
     department = get_object_or_404(
         Department,
@@ -1338,7 +1337,24 @@ def department_detail(request, department_id):
     )
 
 
+
 def faculty_directory(request):
+    staff_profiles = (
+        StaffProfile.objects
+        .filter(
+            department__is_active=True,
+            user__role=User.Roles.STAFF,
+            user__is_active=True,
+        )
+        .select_related("user", "department")
+        .order_by(
+            "department__name",
+            "designation",
+            "user__first_name",
+            "user__last_name",
+        )
+    )
+
     departments = Department.objects.filter(
         is_active=True
     ).order_by("name")
@@ -1348,5 +1364,6 @@ def faculty_directory(request):
         "helpdesk/faculty_directory.html",
         {
             "departments": departments,
+            "staff_profiles": staff_profiles,
         },
     )
