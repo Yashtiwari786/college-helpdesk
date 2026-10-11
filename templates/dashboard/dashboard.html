@@ -201,24 +201,28 @@
         flex-shrink: 0;
     }
 
-    .hd-avatar {
-        width: 43px;
-        height: 43px;
-        display: grid;
-        place-items: center;
-        overflow: hidden;
-        border-radius: 13px;
-        color: #fff;
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        font-size: 18px;
-        font-weight: 800;
-    }
+    
+.hd-avatar {
+    width: 43px;
+    height: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    border-radius: 13px;
+    color: #fff;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    font-size: 18px;
+    font-weight: 800;
+}
 
-    .hd-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+.hd-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
     .hd-user-name {
         display: block;
@@ -866,21 +870,27 @@
                 class="hd-user-menu"
                 aria-label="Open profile"
             >
-                <div class="my-profile-avatar">
-                            {% if profile_user.profile_photo %}
-                                <img
-                                    src="{{ profile_user.profile_photo.url }}"
-                                    alt="Profile photo"
-                                >
-                            {% else %}
-                                {{ profile_user.username|first|upper }}
-                            {% endif %}
-                        </div>
+               
+<div class="hd-avatar">
+    {% if user.profile_photo %}
+        <img
+            src="{{ user.profile_photo.url }}"
+            alt="Profile photo"
+        >
+    {% else %}
+        {{ user.username|first|upper }}
+    {% endif %}
+</div>
 
-                <div class="hd-user-details">
-                    <span class="hd-user-name">{{ profile_user.username }}</span>
-                    <span class="hd-user-role">{{ profile_user.get_role_display }}</span>
-                </div>
+<div class="hd-user-details">
+    <span class="hd-user-name">
+        {{ user.username }}
+    </span>
+    <span class="hd-user-role">
+        {{ user.get_role_display }}
+    </span>
+</div>
+
             </a>
         </header>
 
