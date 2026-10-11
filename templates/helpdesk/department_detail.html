@@ -1,0 +1,205 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ department.name }} | College Help Desk{% endblock %}
+
+{% block content %}
+<style>
+.faculty-page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 30px 22px 65px;
+    color: #172033;
+}
+.faculty-back {
+    display: inline-flex;
+    margin-bottom: 25px;
+    color: #2563eb;
+    font-weight: 800;
+    text-decoration: none;
+}
+.faculty-hero {
+    padding: 35px;
+    margin-bottom: 30px;
+    border-radius: 22px;
+    background: linear-gradient(120deg,#172554,#2563eb,#7c3aed);
+    color: white;
+}
+.faculty-hero small {
+    letter-spacing: 2px;
+    font-weight: 800;
+}
+.faculty-hero h1 {
+    margin: 12px 0;
+    font-size: clamp(28px,4vw,40px);
+    overflow-wrap: anywhere;
+}
+.faculty-hero p {
+    margin: 0;
+    max-width: 680px;
+    color: #e0e7ff;
+    line-height: 1.8;
+}
+.faculty-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 18px;
+}
+.faculty-card {
+    display: flex;
+    gap: 18px;
+    padding: 23px;
+    min-width: 0;
+    background: white;
+    border: 1px solid #e3eaf4;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(15,23,42,.05);
+}
+.faculty-photo,.faculty-fallback {
+    width: 82px;
+    height: 82px;
+    flex: 0 0 82px;
+    border-radius: 20px;
+    object-fit: cover;
+    background: #e8efff;
+}
+.faculty-fallback {
+    display: grid;
+    place-items: center;
+    color: #3730a3;
+    font-size: 28px;
+    font-weight: 800;
+}
+.faculty-info { min-width: 0; }
+.faculty-info h2 {
+    margin: 0 0 7px;
+    font-size: 18px;
+    overflow-wrap: anywhere;
+}
+.faculty-designation {
+    margin: 0 0 12px;
+    color: #4f46e5;
+    font-size: 13px;
+    font-weight: 700;
+}
+.faculty-contact {
+    display: block;
+    margin-top: 8px;
+    color: #475569;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+}
+.faculty-contact:hover { color: #2563eb; }
+.faculty-empty {
+    padding: 35px;
+    border-radius: 16px;
+    background: #f8fafc;
+    color: #64748b;
+    line-height: 1.8;
+}
+@media(max-width:680px) {
+    .faculty-page { padding: 22px 14px 45px; }
+    .faculty-hero { padding: 25px 20px; }
+    .faculty-grid { grid-template-columns: 1fr; }
+    .faculty-card { padding: 17px; gap: 13px; }
+    .faculty-photo,.faculty-fallback {
+        width: 64px;
+        height: 64px;
+        flex-basis: 64px;
+        border-radius: 15px;
+    }
+}
+</style>
+
+<main class="faculty-page">
+    <a class="faculty-back"
+       href="{% url 'helpdesk:department_directory' %}">
+        ← Back to Departments
+    </a>
+
+    <section class="faculty-hero">
+        <small>FACULTY DIRECTORY</small>
+        <h1>{{ department.name }}</h1>
+        <p>
+            {% if department.description %}
+                {{ department.description }}
+            {% else %}
+                Find faculty and staff associated with this department
+                and use their available contact details to get in touch.
+            {% endif %}
+        </p>
+    </section>
+
+    <h2>Faculty &amp; Staff</h2>
+    <p>Contact details are shown when they are available in the directory.</p>
+
+    <div class="faculty-grid">
+        {% for profile in staff_profiles %}
+            <article class="faculty-card">
+                {% if profile.user.profile_photo %}
+                    <img
+                        class="faculty-photo"
+                        src="{{ profile.user.profile_photo.url }}"
+                        alt="{{ profile.user.get_full_name|default:profile.user.username }}"
+                        loading="lazy"
+                    >
+                {% else %}
+                    <div class="faculty-fallback">
+                        {{ profile.user.first_name|first|default:profile.user.username|first|upper }}
+                    </div>
+                {% endif %}
+
+                <div class="faculty-info">
+                    <h2>
+                        {{ profile.user.get_full_name|default:profile.user.username }}
+                    </h2>
+
+                    <p class="faculty-designation">
+                        {{ profile.designation|default:"College Staff" }}
+                    </p>
+
+                    {% if profile.user.email %}
+                        <a class="faculty-contact"
+                           href="mailto:{{ profile.user.email }}">
+                            ✉ {{ profile.user.email }}
+                        </a>
+                    {% endif %}
+
+                    {% if profile.user.phone %}
+                        <a class="faculty-contact"
+                           href="tel:{{ profile.user.phone }}">
+                            ☎ {{ profile.user.phone }}
+                        </a>
+                    {% endif %}
+
+                    {% if not profile.user.email and not profile.user.phone %}
+                        <span class="faculty-contact">
+                            Contact details not available.
+                        </span>
+                    {% endif %}
+                </div>
+            </article>
+        {% empty %}
+            <div class="faculty-empty">
+                <h3>No faculty listed yet</h3>
+                <p>
+                    There are currently no staff profiles assigned to
+                    {{ department.name }}.
+                </p>
+                <p>
+                    Please check back later or contact the college
+                    administration for assistance.
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <p style="margin-top:28px">
+        <a class="faculty-back"
+           href="{% url 'helpdesk:department_directory' %}">
+            ← View All Departments
+        </a>
+    </p>
+</main>
+{% endblock %}

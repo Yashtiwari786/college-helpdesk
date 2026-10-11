@@ -1277,3 +1277,63 @@ def admin_reset_staff_password(request, staff_id):
             "staff_member": staff,
         },
     )
+
+
+def department_directory(request):
+    departments = Department.objects.filter(
+        is_active=True
+    ).order_by("name")
+
+    # Each department gets a visual card image.
+    # These are remote images; replace with local static files
+    # later if you prefer to host them yourself.
+    department_images = [
+        "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
+        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=80",
+    ]
+
+    department_cards = [
+        {
+            "department": department,
+            "image": department_images[index % len(department_images)],
+        }
+        for index, department in enumerate(departments)
+    ]
+
+    return render(
+        request,
+        "helpdesk/department_directory.html",
+        {
+            "departments": departments,
+            "department_cards": department_cards,
+        },
+    )
+
+
+def department_detail(request, department_id):
+    department = get_object_or_404(
+        Department,
+        pk=department_id,
+        is_active=True,
+    )
+
+    staff_profiles = (
+        StaffProfile.objects
+        .filter(department=department)
+        .select_related("user", "department")
+        .order_by("designation", "user__first_name", "user__last_name")
+    )
+
+    return render(
+        request,
+        "helpdesk/department_detail.html",
+        {
+            "department": department,
+            "staff_profiles": staff_profiles,
+        },
+    )
+

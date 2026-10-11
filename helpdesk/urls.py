@@ -161,4 +161,16 @@ path(
     views.admin_reset_staff_password,
     name="admin_reset_staff_password",
 ),
+
+path(
+    "departments/",
+    views.department_directory,
+    name="department_directory",
+),
+path(
+    "departments/<int:department_id>/",
+    views.department_detail,
+    name="department_detail",
+),
+
 ]
