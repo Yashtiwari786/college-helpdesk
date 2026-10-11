@@ -1135,7 +1135,7 @@
             <a href="{% url 'home' %}">Home</a>
             <a href="#about">About Us</a>
             <a href="#services">Services</a>
-            <a href="/faculty/">Faculty &amp; Staff</a>
+            <a href="{% url 'department_directory' %}">Faculty &amp; Staff</a>
             <a href="#news">Campus Updates</a>
             <a href="#contact">Contact</a>
             <a href="/accounts/login/" class="nav-login">Login</a>
@@ -1383,7 +1383,7 @@
                         and find available college contact information.
                     </p>
 
-                  <a href="/faculty/" class="card-link">Find Faculty →</a>
+                 <a href="{% url 'department_directory' %}" class="card-link">Find Faculty →</a>
                 </article>
 
                 <article class="service-card">
@@ -1543,7 +1543,7 @@
                             and find available staff contact information.
                         </p>
 
-                     <a href="/faculty/" class="card-link">Explore Departments →</a>
+                     <a href="{% url 'department_directory' %}" class="card-link">Explore Departments →</a>
                     </div>
                 </article>
 
@@ -1577,7 +1577,7 @@
                     Sign In
                 </a>
 
-               <a href="/faculty/" class="card-link">Find Faculty →</a>
+               <a href="{% url 'department_directory' %}" class="card-link">Find Faculty →</a>
             </div>
 
         </div>

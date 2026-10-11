@@ -25,8 +25,14 @@ urlpatterns = [
 
     # Faculty directory
     path(
+        "departments/",
+        helpdesk_views.department_directory,
+        name="department_directory",
+    ),
+
+    path(
         "faculty/",
-        helpdesk_views.faculty_directory,
+        helpdesk_views.department_directory,
         name="faculty_directory",
     ),
 ]

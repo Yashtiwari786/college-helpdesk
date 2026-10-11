@@ -1337,7 +1337,6 @@ def department_detail(request, department_id):
     )
 
 
-
 def faculty_directory(request):
     staff_profiles = (
         StaffProfile.objects
