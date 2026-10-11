@@ -1337,3 +1337,16 @@ def department_detail(request, department_id):
         },
     )
 
+
+def faculty_directory(request):
+    departments = Department.objects.filter(
+        is_active=True
+    ).order_by("name")
+
+    return render(
+        request,
+        "helpdesk/faculty_directory.html",
+        {
+            "departments": departments,
+        },
+    )

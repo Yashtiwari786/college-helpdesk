@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from django.contrib import admin
 from django.urls import include, path
 from config.views import landing_page
-
+from helpdesk import views as helpdesk_views
 
 
 
@@ -33,6 +33,11 @@ urlpatterns = [
     path(
         "helpdesk/",
         include("helpdesk.urls"),
+    ),
+    path(
+        "faculty/",
+        helpdesk_views.faculty_directory,
+        name="faculty_directory",
     ),
 ]
 
