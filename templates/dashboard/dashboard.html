@@ -1,784 +1,1465 @@
+```html
 {% extends "base.html" %}
 
 {% block title %}
-{{ title }} | College Students Help Desk
+    {{ title|default:"Dashboard" }} | College Students Help Desk
 {% endblock %}
 
 {% block content %}
 
-<div class="dashboard-wrapper">
+<style>
+    :root {
+        --hd-primary: #4f46e5;
+        --hd-primary-dark: #3730a3;
+        --hd-bg: #f5f7fb;
+        --hd-card: #ffffff;
+        --hd-text: #172033;
+        --hd-muted: #718096;
+        --hd-border: #e7eaf2;
+        --hd-sidebar: #111827;
+        --hd-sidebar-muted: #9ca3af;
+        --hd-radius: 18px;
+        --hd-shadow: 0 8px 30px rgba(23, 32, 51, 0.055);
+    }
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
+    .helpdesk-dashboard,
+    .helpdesk-dashboard * {
+        box-sizing: border-box;
+    }
 
-        <div class="brand">
-            <div class="brand-logo">
-                🎓
-            </div>
+    .helpdesk-dashboard {
+        display: flex;
+        min-height: 100vh;
+        margin: -1rem;
+        background: var(--hd-bg);
+        color: var(--hd-text);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
 
+    /* SIDEBAR */
+
+    .hd-sidebar {
+        width: 255px;
+        flex: 0 0 255px;
+        display: flex;
+        flex-direction: column;
+        background: var(--hd-sidebar);
+        color: #fff;
+        padding: 26px 16px;
+    }
+
+    .hd-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 10px 28px;
+        border-bottom: 1px solid rgba(255,255,255,.09);
+    }
+
+    .hd-brand-icon {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        font-size: 23px;
+    }
+
+    .hd-brand strong {
+        display: block;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .hd-brand small {
+        display: block;
+        color: var(--hd-sidebar-muted);
+        font-size: 12px;
+    }
+
+    .hd-nav-label {
+        padding: 25px 12px 10px;
+        color: #6b7280;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+
+    .hd-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .hd-nav a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 13px;
+        color: var(--hd-sidebar-muted);
+        text-decoration: none;
+        border-radius: 11px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background .2s ease, color .2s ease;
+    }
+
+    .hd-nav a:hover,
+    .hd-nav a.active {
+        color: #fff;
+        background: rgba(99, 102, 241, .2);
+    }
+
+    .hd-nav a.active {
+        box-shadow: inset 3px 0 #818cf8;
+    }
+
+    .hd-nav-icon {
+        width: 23px;
+        text-align: center;
+        font-size: 17px;
+    }
+
+    .hd-sidebar-bottom {
+        margin-top: auto;
+        padding-top: 25px;
+    }
+
+    .hd-logout {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px;
+        color: #fca5a5;
+        background: rgba(239, 68, 68, .09);
+        border: 1px solid rgba(239, 68, 68, .18);
+        border-radius: 11px;
+        font-weight: 700;
+        font-size: 13px;
+        transition: background .2s ease;
+    }
+
+    .hd-logout:hover {
+        background: rgba(239, 68, 68, .18);
+    }
+
+    /* MAIN LAYOUT */
+
+    .hd-main {
+        min-width: 0;
+        flex: 1;
+        padding: 30px;
+    }
+
+    .hd-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+
+    .hd-eyebrow {
+        color: var(--hd-primary);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .hd-page-title {
+        margin: 0;
+        color: var(--hd-text);
+        font-size: clamp(23px, 3vw, 30px);
+        font-weight: 800;
+        letter-spacing: -.8px;
+    }
+
+    .hd-subtitle {
+        margin: 8px 0 0;
+        color: var(--hd-muted);
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .hd-user-menu {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 9px 13px;
+        background: #fff;
+        border: 1px solid var(--hd-border);
+        border-radius: 15px;
+        box-shadow: var(--hd-shadow);
+        text-decoration: none;
+        color: var(--hd-text);
+        flex-shrink: 0;
+    }
+
+    .hd-avatar {
+        width: 43px;
+        height: 43px;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        border-radius: 13px;
+        color: #fff;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .hd-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .hd-user-name {
+        display: block;
+        max-width: 170px;
+        overflow-wrap: anywhere;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .hd-user-role {
+        display: block;
+        margin-top: 4px;
+        color: var(--hd-muted);
+        font-size: 11px;
+    }
+
+    /* FLASH MESSAGES */
+
+    .hd-messages {
+        margin-bottom: 20px;
+    }
+
+    .hd-messages .alert {
+        border-radius: 12px;
+        font-size: 13px;
+    }
+
+    /* WELCOME PANEL */
+
+    .hd-welcome {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 27px 29px;
+        margin-bottom: 23px;
+        color: #fff;
+        background: linear-gradient(120deg, #4338ca, #6366f1 65%, #8b5cf6);
+        border-radius: var(--hd-radius);
+        box-shadow: 0 12px 30px rgba(79, 70, 229, .16);
+    }
+
+    .hd-welcome::after {
+        content: "";
+        position: absolute;
+        width: 210px;
+        height: 210px;
+        right: -65px;
+        top: -105px;
+        border: 35px solid rgba(255,255,255,.08);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .hd-welcome-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hd-welcome h3 {
+        margin: 0 0 9px;
+        font-size: clamp(20px, 3vw, 25px);
+        font-weight: 800;
+    }
+
+    .hd-welcome p {
+        margin: 0;
+        color: rgba(255,255,255,.83);
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .hd-welcome .hd-department {
+        margin-top: 12px;
+        color: #fff;
+        font-size: 12px;
+    }
+
+    .hd-welcome-actions {
+        position: relative;
+        z-index: 1;
+        flex-shrink: 0;
+    }
+
+    .hd-welcome .btn {
+        padding: 11px 17px;
+        color: var(--hd-primary-dark);
+        background: #fff;
+        border: 0;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .hd-welcome .btn:hover {
+        background: #eef2ff;
+    }
+
+    /* STATISTICS */
+
+    .hd-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 17px;
+        margin-bottom: 24px;
+    }
+
+    .hd-stat-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+        padding: 21px 18px;
+        background: var(--hd-card);
+        border: 1px solid var(--hd-border);
+        border-radius: 16px;
+        box-shadow: var(--hd-shadow);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .hd-stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(23,32,51,.09);
+    }
+
+    .hd-stat-icon {
+        width: 45px;
+        height: 45px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        border-radius: 13px;
+        font-size: 20px;
+    }
+
+    .hd-icon-purple { background: #ede9fe; }
+    .hd-icon-orange { background: #ffedd5; }
+    .hd-icon-blue { background: #dbeafe; }
+    .hd-icon-green { background: #dcfce7; }
+
+    .hd-stat-label {
+        display: block;
+        color: var(--hd-muted);
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    .hd-stat-value {
+        margin: 5px 0 0;
+        color: var(--hd-text);
+        font-size: 27px;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    /* CARDS */
+
+    .hd-card {
+        min-width: 0;
+        margin-bottom: 23px;
+        padding: 24px;
+        background: var(--hd-card);
+        border: 1px solid var(--hd-border);
+        border-radius: var(--hd-radius);
+        box-shadow: var(--hd-shadow);
+    }
+
+    .hd-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 18px;
+    }
+
+    .hd-card-title {
+        margin: 0;
+        color: var(--hd-text);
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .hd-card-description {
+        margin: 7px 0 0;
+        color: var(--hd-muted);
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .hd-quick-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 13px;
+    }
+
+    .hd-action-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        padding: 16px;
+        color: var(--hd-text);
+        background: #fff;
+        border: 1px solid var(--hd-border);
+        border-radius: 13px;
+        text-decoration: none;
+        transition: border-color .2s ease, background .2s ease;
+    }
+
+    .hd-action-link:hover {
+        color: var(--hd-primary);
+        background: #f8f8ff;
+        border-color: #c7d2fe;
+    }
+
+    .hd-action-icon {
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        border-radius: 11px;
+        background: #eef2ff;
+        font-size: 19px;
+    }
+
+    .hd-action-link strong {
+        display: block;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .hd-action-link small {
+        display: block;
+        margin-top: 4px;
+        color: var(--hd-muted);
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    /* TABLE */
+
+    .hd-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .hd-table {
+        width: 100%;
+        min-width: 620px;
+        margin: 0;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+    .hd-table thead th {
+        padding: 13px 14px;
+        color: var(--hd-muted);
+        background: #f8f9fc;
+        border-bottom: 1px solid var(--hd-border);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .5px;
+        text-align: left;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .hd-table tbody td {
+        padding: 16px 14px;
+        color: #475569;
+        border-bottom: 1px solid #eef0f5;
+        vertical-align: middle;
+    }
+
+    .hd-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .hd-table tbody tr:hover {
+        background: #fafbff;
+    }
+
+    .hd-ticket {
+        color: var(--hd-primary);
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .hd-subject {
+        max-width: 240px;
+        color: var(--hd-text);
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .hd-status {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 30px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .hd-view-btn {
+        display: inline-block;
+        padding: 8px 12px;
+        color: #fff;
+        background: var(--hd-primary);
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .hd-view-btn:hover {
+        color: #fff;
+        background: var(--hd-primary-dark);
+    }
+
+    .hd-empty {
+        padding: 38px 15px !important;
+        text-align: center;
+    }
+
+    .hd-empty-icon {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 31px;
+    }
+
+    .hd-empty strong {
+        display: block;
+        color: var(--hd-text);
+        font-size: 14px;
+    }
+
+    .hd-empty p {
+        margin: 7px 0 15px;
+        color: var(--hd-muted);
+    }
+
+    .hd-primary-btn {
+        display: inline-block;
+        padding: 11px 16px;
+        color: #fff;
+        background: var(--hd-primary);
+        border: 0;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .hd-primary-btn:hover {
+        color: #fff;
+        background: var(--hd-primary-dark);
+    }
+
+    .hd-outline-btn {
+        display: inline-block;
+        padding: 9px 12px;
+        color: var(--hd-primary);
+        background: #fff;
+        border: 1px solid #c7d2fe;
+        border-radius: 9px;
+        font-size: 11px;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .hd-outline-btn:hover {
+        background: #eef2ff;
+    }
+
+    .hd-footer {
+        padding: 8px 0 2px;
+        color: var(--hd-muted);
+        font-size: 11px;
+        text-align: center;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 1150px) {
+        .hd-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .hd-quick-actions {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 850px) {
+        .helpdesk-dashboard {
+            margin: -1rem;
+        }
+
+        .hd-sidebar {
+            width: 205px;
+            flex-basis: 205px;
+            padding: 20px 11px;
+        }
+
+        .hd-main {
+            padding: 22px 17px;
+        }
+
+        .hd-quick-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .helpdesk-dashboard {
+            display: block;
+            min-height: 100vh;
+        }
+
+        .hd-sidebar {
+            width: 100%;
+            padding: 15px;
+        }
+
+        .hd-brand {
+            padding: 0 4px 15px;
+        }
+
+        .hd-nav-label {
+            padding: 17px 5px 8px;
+        }
+
+        .hd-nav {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 5px;
+        }
+
+        .hd-nav a {
+            padding: 10px 8px;
+            font-size: 11px;
+        }
+
+        .hd-nav-icon {
+            width: 19px;
+            font-size: 15px;
+        }
+
+        .hd-sidebar-bottom {
+            padding-top: 13px;
+        }
+
+        .hd-main {
+            padding: 20px 13px;
+        }
+
+        .hd-topbar {
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .hd-user-menu {
+            padding: 7px;
+        }
+
+        .hd-user-details {
+            display: none;
+        }
+
+        .hd-avatar {
+            width: 39px;
+            height: 39px;
+        }
+
+        .hd-welcome {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 22px;
+        }
+
+        .hd-stats {
+            gap: 10px;
+        }
+
+        .hd-stat-card {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px 12px;
+        }
+
+        .hd-stat-value {
+            font-size: 23px;
+        }
+
+        .hd-stat-icon {
+            width: 38px;
+            height: 38px;
+            font-size: 17px;
+        }
+
+        .hd-card {
+            padding: 17px 13px;
+        }
+
+        .hd-card-header {
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="helpdesk-dashboard">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="hd-sidebar">
+
+        <div class="hd-brand">
+            <div class="hd-brand-icon">🎓</div>
             <div>
                 <strong>College Students</strong>
-                <small>Help Desk</small>
+                <small>Help Desk Portal</small>
             </div>
         </div>
 
-        <nav class="sidebar-nav">
+        <div class="hd-nav-label">Workspace</div>
 
-            <!-- COMMON DASHBOARD -->
-            <a
-                href="{% url 'dashboard:dashboard' %}"
-                class="nav-item active"
-            >
-                🏠
+        <nav class="hd-nav">
+
+            <a href="{% url 'dashboard:dashboard' %}" class="active">
+                <span class="hd-nav-icon">🏠</span>
                 <span>Dashboard</span>
             </a>
 
-
-            <!-- ================= STUDENT ================= -->
-
             {% if dashboard_type == "student" %}
 
-                <a
-                    href="{% url 'helpdesk:create_request' %}"
-                    class="nav-item"
-                >
-                    ➕
+                <a href="{% url 'helpdesk:create_request' %}">
+                    <span class="hd-nav-icon">➕</span>
                     <span>New Request</span>
                 </a>
 
-                <a
-                    href="{% url 'helpdesk:requests' %}"
-                    class="nav-item"
-                >
-                    📋
+                <a href="{% url 'helpdesk:requests' %}">
+                    <span class="hd-nav-icon">📋</span>
                     <span>My Requests</span>
                 </a>
 
-                <a href="#" class="nav-item">
-                    🔔
-                    <span>Notifications</span>
+                <a href="{% url 'accounts:profile' %}">
+                    <span class="hd-nav-icon">👤</span>
+                    <span>My Profile</span>
                 </a>
 
-                <a href="#" class="nav-item">
-                    👤
-                    <span>Profile</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    ⭐
-                    <span>Feedback</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    ❓
-                    <span>FAQs</span>
+                <a href="{% url 'accounts:edit_profile' %}">
+                    <span class="hd-nav-icon">✏️</span>
+                    <span>Edit Profile</span>
                 </a>
 
             {% endif %}
-
-
-            <!-- ================= STAFF ================= -->
 
             {% if dashboard_type == "staff" %}
 
-                <a
-                    href="{% url 'helpdesk:staff_requests' %}"
-                    class="nav-item"
-                >
-                    📋
+                <a href="{% url 'helpdesk:staff_requests' %}">
+                    <span class="hd-nav-icon">📋</span>
                     <span>Assigned Requests</span>
-                </a>
-
-                <a
-                    href="{% url 'helpdesk:staff_requests' %}"
-                    class="nav-item"
-                >
-                    📂
-                    <span>All Requests</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    💬
-                    <span>Messages</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    👤
-                    <span>Profile</span>
                 </a>
 
             {% endif %}
 
-
-            <!-- ================= ADMIN ================= -->
-
             {% if dashboard_type == "admin" %}
 
-                <a
-                    href="{% url 'dashboard:admin_dashboard' %}"
-                    class="nav-item"
-                >
-                    🏠
+                <a href="{% url 'dashboard:admin_dashboard' %}">
+                    <span class="hd-nav-icon">📊</span>
                     <span>Admin Dashboard</span>
                 </a>
 
-                <a
-                    href="{% url 'helpdesk:admin_students' %}"
-                    class="nav-item"
-                >
-                    👨‍🎓
+                <a href="{% url 'helpdesk:admin_students' %}">
+                    <span class="hd-nav-icon">🎓</span>
                     <span>Students</span>
                 </a>
 
-                <a
-                    href="{% url 'helpdesk:admin_staff' %}"
-                    class="nav-item"
-                >
-                    👨‍💼
+                <a href="{% url 'helpdesk:admin_staff' %}">
+                    <span class="hd-nav-icon">👨‍💼</span>
                     <span>Staff</span>
                 </a>
 
-                <a
-                    href="{% url 'helpdesk:admin_departments' %}"
-                    class="nav-item"
-                >
-                    🏢
+                <a href="{% url 'helpdesk:admin_departments' %}">
+                    <span class="hd-nav-icon">🏢</span>
                     <span>Departments</span>
                 </a>
 
-                <a
-                    href="{% url 'helpdesk:admin_requests' %}"
-                    class="nav-item"
-                >
-                    📋
+                <a href="{% url 'helpdesk:admin_requests' %}">
+                    <span class="hd-nav-icon">📑</span>
                     <span>All Requests</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    📊
-                    <span>Reports</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    ❓
-                    <span>FAQs</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    📢
-                    <span>Announcements</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    ⚙️
-                    <span>Settings</span>
                 </a>
 
             {% endif %}
 
         </nav>
 
+        <div class="hd-sidebar-bottom">
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="hd-logout">
+                    <span>↪</span>
+                    <span>Sign Out</span>
+                </button>
+            </form>
+        </div>
 
-        <!-- LOGOUT -->
-
-       
-<form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-outline-danger">
-        Logout
-    </button>
-</form>
     </aside>
 
 
     <!-- ================= MAIN CONTENT ================= -->
 
-    <main class="main-content">
+    <main class="hd-main">
 
         <!-- TOP BAR -->
 
-        <header class="topbar">
-
+        <header class="hd-topbar">
             <div>
+                <div class="hd-eyebrow">College Help Desk</div>
 
-                <h2>
-                    {{ title }}
-                </h2>
+                <h1 class="hd-page-title">
+                    {{ title|default:"Dashboard" }}
+                </h1>
 
-                <p>
+                <p class="hd-subtitle">
                     Welcome back,
-                    <strong>
-                        {{ user.first_name|default:user.username }}
-                    </strong>
-                    👋
+                    <strong>{{ user.first_name|default:user.username }}</strong>.
+                    Here's your workspace overview.
                 </p>
-
             </div>
 
-
-            <div class="user-info">
-
-                <div class="avatar">
-                    {{ user.username|first|upper }}
+            <a
+                href="{% url 'accounts:profile' %}"
+                class="hd-user-menu"
+                aria-label="Open profile"
+            >
+                <div class="hd-avatar">
+                    {% if user.profile_photo %}
+                        <img
+                            src="{{ user.profile_photo }}"
+                            alt="Profile photo"
+                        >
+                    {% else %}
+                        {{ user.username|first|upper }}
+                    {% endif %}
                 </div>
 
-                <div>
-
-                    <strong>
-                        {{ user.username }}
-                    </strong>
-
-                    <small>
-                        {{ user.get_role_display }}
-                    </small>
-
+                <div class="hd-user-details">
+                    <span class="hd-user-name">{{ user.username }}</span>
+                    <span class="hd-user-role">{{ user.get_role_display }}</span>
                 </div>
-
-            </div>
-
+            </a>
         </header>
 
 
-        <!-- ================================================= -->
-        <!-- STUDENT DASHBOARD -->
-        <!-- ================================================= -->
+        <!-- DJANGO FLASH MESSAGES -->
+
+        {% if messages %}
+            <div class="hd-messages">
+                {% for message in messages %}
+                    <div
+                        class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show"
+                        role="alert"
+                    >
+                        {{ message }}
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+
+        <!-- ================= STUDENT DASHBOARD ================= -->
 
         {% if dashboard_type == "student" %}
 
-        <section class="stats-grid">
+            <section class="hd-welcome">
+                <div class="hd-welcome-content">
+                    <h3>
+                        Hello, {{ user.first_name|default:user.username }}! 👋
+                    </h3>
 
-            <div class="stat-card">
-                <span>📄</span>
+                    <p>
+                        Need assistance? Submit a request and follow its progress
+                        right here.
+                    </p>
 
-                <div>
-                    <small>Total Requests</small>
-                    <h3>{{ total_requests }}</h3>
+                    <p class="hd-department">
+                        🏢 Department:
+                        <strong>{{ user.department.name|default:"Not assigned" }}</strong>
+                    </p>
                 </div>
-            </div>
 
-
-            <div class="stat-card">
-                <span>🕐</span>
-
-                <div>
-                    <small>In Progress</small>
-                    <h3>{{ in_progress_requests }}</h3>
+                <div class="hd-welcome-actions">
+                    <a href="{% url 'helpdesk:create_request' %}" class="btn">
+                        + Create Request
+                    </a>
                 </div>
-            </div>
+            </section>
 
 
-            <div class="stat-card">
-                <span>✅</span>
+            <!-- STUDENT STATISTICS -->
 
-                <div>
-                    <small>Resolved</small>
-                    <h3>{{ resolved_requests }}</h3>
+            <section class="hd-stats">
+
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-purple">📄</div>
+                    <div>
+                        <span class="hd-stat-label">Total Requests</span>
+                        <h2 class="hd-stat-value">{{ total_requests|default:0 }}</h2>
+                    </div>
                 </div>
-            </div>
 
-
-            <div class="stat-card">
-                <span>⏳</span>
-
-                <div>
-                    <small>Pending</small>
-                    <h3>{{ pending_requests }}</h3>
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-orange">⏳</div>
+                    <div>
+                        <span class="hd-stat-label">Pending</span>
+                        <h2 class="hd-stat-value">{{ pending_requests|default:0 }}</h2>
+                    </div>
                 </div>
-            </div>
 
-        </section>
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-blue">🔄</div>
+                    <div>
+                        <span class="hd-stat-label">In Progress</span>
+                        <h2 class="hd-stat-value">{{ in_progress_requests|default:0 }}</h2>
+                    </div>
+                </div>
 
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-green">✅</div>
+                    <div>
+                        <span class="hd-stat-label">Resolved</span>
+                        <h2 class="hd-stat-value">{{ resolved_requests|default:0 }}</h2>
+                    </div>
+                </div>
 
-        <!-- CREATE REQUEST -->
-
-        <section class="dashboard-card">
-
-            <h4>
-                Submit a New Request
-            </h4>
-
-            <p class="text-muted">
-                Get help from the appropriate college department.
-            </p>
-
-            <a
-                href="{% url 'helpdesk:create_request' %}"
-                class="btn btn-primary"
-            >
-                + Create Request
-            </a>
-
-        </section>
+            </section>
 
 
-        <!-- RECENT REQUESTS -->
+            <!-- STUDENT QUICK ACTIONS -->
 
-        <section class="dashboard-card">
+            <section class="hd-card">
+                <div class="hd-card-header">
+                    <div>
+                        <h3 class="hd-card-title">Quick Actions</h3>
+                        <p class="hd-card-description">
+                            Common tasks available in your student account.
+                        </p>
+                    </div>
+                </div>
 
-            <div class="d-flex justify-content-between align-items-center">
+                <div class="hd-quick-actions">
 
-                <h4>
-                    Recent Requests
-                </h4>
+                    <a
+                        href="{% url 'helpdesk:create_request' %}"
+                        class="hd-action-link"
+                    >
+                        <span class="hd-action-icon">➕</span>
+                        <span>
+                            <strong>Create Request</strong>
+                            <small>Report an issue</small>
+                        </span>
+                    </a>
 
-                <a
-                    href="{% url 'helpdesk:requests' %}"
-                    class="btn btn-sm btn-outline-primary"
-                >
-                    View All
-                </a>
+                    <a
+                        href="{% url 'helpdesk:requests' %}"
+                        class="hd-action-link"
+                    >
+                        <span class="hd-action-icon">📋</span>
+                        <span>
+                            <strong>My Requests</strong>
+                            <small>Track your tickets</small>
+                        </span>
+                    </a>
 
-            </div>
+                    <a
+                        href="{% url 'accounts:edit_profile' %}"
+                        class="hd-action-link"
+                    >
+                        <span class="hd-action-icon">👤</span>
+                        <span>
+                            <strong>Edit Profile</strong>
+                            <small>Update your details</small>
+                        </span>
+                    </a>
+
+                </div>
+            </section>
 
 
-            <div class="table-responsive">
+            <!-- STUDENT RECENT REQUESTS -->
 
-                <table class="table">
+            <section class="hd-card">
+                <div class="hd-card-header">
+                    <div>
+                        <h3 class="hd-card-title">My Recent Requests</h3>
+                        <p class="hd-card-description">
+                            A quick look at the latest tickets you submitted.
+                        </p>
+                    </div>
 
-                    <thead>
+                    <a
+                        href="{% url 'helpdesk:requests' %}"
+                        class="hd-outline-btn"
+                    >
+                        View All
+                    </a>
+                </div>
 
-                        <tr>
-                            <th>Ticket</th>
-                            <th>Subject</th>
-                            <th>Department</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
+                <div class="hd-table-wrap">
+                    <table class="hd-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket</th>
+                                <th>Subject</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
 
-                    </thead>
+                        <tbody>
+                            {% for item in recent_requests %}
+                                <tr>
+                                    <td>
+                                        <span class="hd-ticket">
+                                            {{ item.ticket_number }}
+                                        </span>
+                                    </td>
 
+                                    <td>
+                                        <div class="hd-subject">{{ item.subject }}</div>
+                                    </td>
 
-                    <tbody>
+                                    <td>
+                                        {{ item.department.name|default:"Not assigned" }}
+                                    </td>
 
-                        {% for item in recent_requests %}
+                                    <td>
+                                        <span class="hd-status">
+                                            {{ item.get_status_display }}
+                                        </span>
+                                    </td>
 
-                        <tr>
-
-                            <td>
-                                <strong>
-                                    {{ item.ticket_number }}
-                                </strong>
-                            </td>
-
-                            <td>
-                                {{ item.subject }}
-                            </td>
-
-                            <td>
-                                {{ item.department.name }}
-                            </td>
-
-                            <td>
-                                <span class="badge bg-secondary">
-                                    {{ item.get_status_display }}
-                                </span>
-                            </td>
-
-                            <td>
-
-                                <a
-                                    href="{% url 'helpdesk:request_detail' item.ticket_number %}"
-                                    class="btn btn-sm btn-primary"
-                                >
-                                    View
-                                </a>
-
-                            </td>
-
-                        </tr>
-
-                        {% empty %}
-
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">
-                                No requests yet.
-                            </td>
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </section>
+                                    <td>
+                                        <a
+                                            href="{% url 'helpdesk:request_detail' item.ticket_number %}"
+                                            class="hd-view-btn"
+                                        >
+                                            View →
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="hd-empty">
+                                        <span class="hd-empty-icon">📭</span>
+                                        <strong>No requests yet</strong>
+                                        <p>
+                                            Submit your first help-desk request
+                                            to get started.
+                                        </p>
+                                        <a
+                                            href="{% url 'helpdesk:create_request' %}"
+                                            class="hd-primary-btn"
+                                        >
+                                            + Create Your First Request
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
         {% endif %}
 
 
-        <!-- ================================================= -->
-        <!-- STAFF DASHBOARD -->
-        <!-- ================================================= -->
+        <!-- ================= STAFF DASHBOARD ================= -->
 
         {% if dashboard_type == "staff" %}
 
-        <section class="stats-grid">
-
-            <div class="stat-card">
-
-                <span>📄</span>
-
-                <div>
-                    <small>Total Assigned</small>
-                    <h3>{{ assigned_requests }}</h3>
+            <section class="hd-welcome">
+                <div class="hd-welcome-content">
+                    <h3>Welcome, {{ user.first_name|default:user.username }}! 👋</h3>
+                    <p>
+                        Review assigned tickets, update their progress,
+                        and help students resolve their issues.
+                    </p>
                 </div>
 
-            </div>
+                <div class="hd-welcome-actions">
+                    <a
+                        href="{% url 'helpdesk:staff_requests' %}"
+                        class="btn"
+                    >
+                        View Assigned Requests
+                    </a>
+                </div>
+            </section>
 
 
-            <div class="stat-card">
+            <section class="hd-stats">
 
-                <span>⏳</span>
-
-                <div>
-                    <small>Pending</small>
-                    <h3>{{ pending_requests }}</h3>
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-purple">📋</div>
+                    <div>
+                        <span class="hd-stat-label">Total Assigned</span>
+                        <h2 class="hd-stat-value">{{ assigned_requests|default:0 }}</h2>
+                    </div>
                 </div>
 
-            </div>
-
-
-            <div class="stat-card">
-
-                <span>🕐</span>
-
-                <div>
-                    <small>In Progress</small>
-                    <h3>{{ in_progress_requests }}</h3>
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-orange">⏳</div>
+                    <div>
+                        <span class="hd-stat-label">Pending</span>
+                        <h2 class="hd-stat-value">{{ pending_requests|default:0 }}</h2>
+                    </div>
                 </div>
 
-            </div>
-
-
-            <div class="stat-card">
-
-                <span>✅</span>
-
-                <div>
-                    <small>Resolved</small>
-                    <h3>{{ resolved_requests }}</h3>
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-blue">🔄</div>
+                    <div>
+                        <span class="hd-stat-label">In Progress</span>
+                        <h2 class="hd-stat-value">{{ in_progress_requests|default:0 }}</h2>
+                    </div>
                 </div>
 
-            </div>
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-green">✅</div>
+                    <div>
+                        <span class="hd-stat-label">Resolved</span>
+                        <h2 class="hd-stat-value">{{ resolved_requests|default:0 }}</h2>
+                    </div>
+                </div>
 
-        </section>
-
-
-        <!-- STAFF REQUESTS -->
-
-        <section class="dashboard-card">
-
-            <div class="d-flex justify-content-between align-items-center">
-
-                <h4>
-                    Assigned Requests
-                </h4>
-
-                <a
-                    href="{% url 'helpdesk:staff_requests' %}"
-                    class="btn btn-sm btn-outline-primary"
-                >
-                    View All
-                </a>
-
-            </div>
+            </section>
 
 
-            <div class="table-responsive">
+            <section class="hd-card">
+                <div class="hd-card-header">
+                    <div>
+                        <h3 class="hd-card-title">Assigned Requests</h3>
+                        <p class="hd-card-description">
+                            Tickets currently available in your work queue.
+                        </p>
+                    </div>
 
-                <table class="table">
+                    <a
+                        href="{% url 'helpdesk:staff_requests' %}"
+                        class="hd-outline-btn"
+                    >
+                        View All
+                    </a>
+                </div>
 
-                    <thead>
+                <div class="hd-table-wrap">
+                    <table class="hd-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket</th>
+                                <th>Student</th>
+                                <th>Subject</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
 
-                        <tr>
-                            <th>Ticket</th>
-                            <th>Student</th>
-                            <th>Subject</th>
-                            <th>Priority</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
+                        <tbody>
+                            {% for item in recent_requests %}
+                                <tr>
+                                    <td>
+                                        <span class="hd-ticket">
+                                            {{ item.ticket_number }}
+                                        </span>
+                                    </td>
 
-                    </thead>
+                                    <td>{{ item.student.username }}</td>
 
+                                    <td>
+                                        <div class="hd-subject">{{ item.subject }}</div>
+                                    </td>
 
-                    <tbody>
+                                    <td>{{ item.get_priority_display }}</td>
 
-                        {% for item in recent_requests %}
+                                    <td>
+                                        <span class="hd-status">
+                                            {{ item.get_status_display }}
+                                        </span>
+                                    </td>
 
-                        <tr>
-
-                            <td>
-                                <strong>
-                                    {{ item.ticket_number }}
-                                </strong>
-                            </td>
-
-                            <td>
-                                {{ item.student.username }}
-                            </td>
-
-                            <td>
-                                {{ item.subject }}
-                            </td>
-
-                            <td>
-                                {{ item.get_priority_display }}
-                            </td>
-
-                            <td>
-                                <span class="badge bg-secondary">
-                                    {{ item.get_status_display }}
-                                </span>
-                            </td>
-
-                            <td>
-
-                                <a
-                                    href="{% url 'helpdesk:staff_request_detail' item.ticket_number %}"
-                                    class="btn btn-sm btn-primary"
-                                >
-                                    View
-                                </a>
-
-                            </td>
-
-                        </tr>
-
-                        {% empty %}
-
-                        <tr>
-
-                            <td
-                                colspan="6"
-                                class="text-center text-muted"
-                            >
-                                No requests are currently assigned to you.
-                            </td>
-
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </section>
+                                    <td>
+                                        <a
+                                            href="{% url 'helpdesk:staff_request_detail' item.ticket_number %}"
+                                            class="hd-view-btn"
+                                        >
+                                            View →
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="hd-empty">
+                                        <span class="hd-empty-icon">📭</span>
+                                        <strong>No assigned requests</strong>
+                                        <p>
+                                            There are currently no requests
+                                            to display.
+                                        </p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
         {% endif %}
 
 
-        <!-- ================================================= -->
-        <!-- ADMIN DASHBOARD -->
-        <!-- ================================================= -->
+        <!-- ================= ADMIN DASHBOARD ================= -->
 
         {% if dashboard_type == "admin" %}
 
-        <section class="stats-grid">
-
-            <div class="stat-card">
-
-                <span>👨‍🎓</span>
-
-                <div>
-                    <small>Total Students</small>
-                    <h3>{{ total_students }}</h3>
+            <section class="hd-welcome">
+                <div class="hd-welcome-content">
+                    <h3>Administration Overview ⚙️</h3>
+                    <p>
+                        Manage students, staff, departments, and college
+                        help-desk requests from one place.
+                    </p>
                 </div>
 
-            </div>
+                <div class="hd-welcome-actions">
+                    <a
+                        href="{% url 'helpdesk:admin_requests' %}"
+                        class="btn"
+                    >
+                        Manage Requests
+                    </a>
+                </div>
+            </section>
 
 
-            <div class="stat-card">
+            <section class="hd-stats">
 
-                <span>👨‍💼</span>
-
-                <div>
-                    <small>Total Staff</small>
-                    <h3>{{ total_staff }}</h3>
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-purple">🎓</div>
+                    <div>
+                        <span class="hd-stat-label">Total Students</span>
+                        <h2 class="hd-stat-value">{{ total_students|default:0 }}</h2>
+                    </div>
                 </div>
 
-            </div>
-
-
-            <div class="stat-card">
-
-                <span>📄</span>
-
-                <div>
-                    <small>Total Requests</small>
-                    <h3>{{ total_requests }}</h3>
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-orange">👨‍💼</div>
+                    <div>
+                        <span class="hd-stat-label">Total Staff</span>
+                        <h2 class="hd-stat-value">{{ total_staff|default:0 }}</h2>
+                    </div>
                 </div>
 
-            </div>
-
-
-            <div class="stat-card">
-
-                <span>✅</span>
-
-                <div>
-                    <small>Resolved</small>
-                    <h3>{{ resolved_requests }}</h3>
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-blue">📄</div>
+                    <div>
+                        <span class="hd-stat-label">Total Requests</span>
+                        <h2 class="hd-stat-value">{{ total_requests|default:0 }}</h2>
+                    </div>
                 </div>
 
-            </div>
+                <div class="hd-stat-card">
+                    <div class="hd-stat-icon hd-icon-green">✅</div>
+                    <div>
+                        <span class="hd-stat-label">Resolved</span>
+                        <h2 class="hd-stat-value">{{ resolved_requests|default:0 }}</h2>
+                    </div>
+                </div>
 
-        </section>
-
-
-        <!-- ADMIN QUICK ACTIONS -->
-
-        <section class="dashboard-card">
-
-            <h4>
-                System Overview
-            </h4>
-
-            <p class="text-muted">
-                Manage students, staff, departments and help-desk
-                requests from the administration panel.
-            </p>
+            </section>
 
 
-            <div class="quick-actions">
+            <section class="hd-card">
+                <div class="hd-card-header">
+                    <div>
+                        <h3 class="hd-card-title">Administration Tools</h3>
+                        <p class="hd-card-description">
+                            Choose an area to manage.
+                        </p>
+                    </div>
+                </div>
 
-                <a
-                    href="{% url 'helpdesk:admin_students' %}"
-                    class="btn btn-primary"
-                >
-                    Manage Students
-                </a>
+                <div class="hd-quick-actions">
 
+                    <a
+                        href="{% url 'helpdesk:admin_students' %}"
+                        class="hd-action-link"
+                    >
+                        <span class="hd-action-icon">🎓</span>
+                        <span>
+                            <strong>Manage Students</strong>
+                            <small>Student accounts</small>
+                        </span>
+                    </a>
 
-                <a
-                    href="{% url 'helpdesk:admin_staff' %}"
-                    class="btn btn-outline-primary"
-                >
-                    Manage Staff
-                </a>
+                    <a
+                        href="{% url 'helpdesk:admin_staff' %}"
+                        class="hd-action-link"
+                    >
+                        <span class="hd-action-icon">👨‍💼</span>
+                        <span>
+                            <strong>Manage Staff</strong>
+                            <small>Staff accounts</small>
+                        </span>
+                    </a>
 
+                    <a
+                        href="{% url 'helpdesk:admin_departments' %}"
+                        class="hd-action-link"
+                    >
+                        <span class="hd-action-icon">🏢</span>
+                        <span>
+                            <strong>Departments</strong>
+                            <small>Department management</small>
+                        </span>
+                    </a>
 
-                <a
-                    href="{% url 'helpdesk:admin_requests' %}"
-                    class="btn btn-outline-primary"
-                >
-                    View Requests
-                </a>
+                    <a
+                        href="{% url 'helpdesk:admin_requests' %}"
+                        class="hd-action-link"
+                    >
+                        <span class="hd-action-icon">📑</span>
+                        <span>
+                            <strong>All Requests</strong>
+                            <small>Review tickets</small>
+                        </span>
+                    </a>
 
-
-                <a
-                    href="{% url 'helpdesk:admin_departments' %}"
-                    class="btn btn-outline-primary"
-                >
-                    Departments
-                </a>
-
-            </div>
-
-        </section>
-
-
-        <!-- ADMIN RECENT REQUESTS -->
-
-        <section class="dashboard-card">
-
-            <div class="d-flex justify-content-between align-items-center">
-
-                <h4>
-                    Recent Requests
-                </h4>
-
-                <a
-                    href="{% url 'helpdesk:admin_requests' %}"
-                    class="btn btn-sm btn-outline-primary"
-                >
-                    View All
-                </a>
-
-            </div>
-
-
-            <div class="table-responsive">
-
-                <table class="table">
-
-                    <thead>
-
-                        <tr>
-                            <th>Ticket</th>
-                            <th>Student</th>
-                            <th>Subject</th>
-                            <th>Department</th>
-                            <th>Status</th>
-                        </tr>
-
-                    </thead>
+                </div>
+            </section>
 
 
-                    <tbody>
+            <section class="hd-card">
+                <div class="hd-card-header">
+                    <div>
+                        <h3 class="hd-card-title">Recent Help Desk Requests</h3>
+                        <p class="hd-card-description">
+                            Latest tickets submitted to the system.
+                        </p>
+                    </div>
 
-                        {% for item in recent_requests %}
+                    <a
+                        href="{% url 'helpdesk:admin_requests' %}"
+                        class="hd-outline-btn"
+                    >
+                        View All
+                    </a>
+                </div>
 
-                        <tr>
+                <div class="hd-table-wrap">
+                    <table class="hd-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket</th>
+                                <th>Student</th>
+                                <th>Subject</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
 
-                            <td>
-                                <strong>
-                                    {{ item.ticket_number }}
-                                </strong>
-                            </td>
+                        <tbody>
+                            {% for item in recent_requests %}
+                                <tr>
+                                    <td>
+                                        <span class="hd-ticket">
+                                            {{ item.ticket_number }}
+                                        </span>
+                                    </td>
 
-                            <td>
-                                {{ item.student.username }}
-                            </td>
+                                    <td>{{ item.student.username }}</td>
 
-                            <td>
-                                {{ item.subject }}
-                            </td>
+                                    <td>
+                                        <div class="hd-subject">{{ item.subject }}</div>
+                                    </td>
 
-                            <td>
-                                {{ item.department.name }}
-                            </td>
+                                    <td>
+                                        {{ item.department.name|default:"Not assigned" }}
+                                    </td>
 
-                            <td>
-                                <span class="badge bg-secondary">
-                                    {{ item.get_status_display }}
-                                </span>
-                            </td>
-
-                        </tr>
-
-                        {% empty %}
-
-                        <tr>
-
-                            <td
-                                colspan="5"
-                                class="text-center text-muted"
-                            >
-                                No requests found.
-                            </td>
-
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </section>
+                                    <td>
+                                        <span class="hd-status">
+                                            {{ item.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="hd-empty">
+                                        <span class="hd-empty-icon">📭</span>
+                                        <strong>No requests found</strong>
+                                        <p>
+                                            Requests will appear here when
+                                            students submit them.
+                                        </p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
         {% endif %}
+
+
+        <footer class="hd-footer">
+            College Students Help Desk · Your college support portal
+        </footer>
 
     </main>
 
 </div>
 
 {% endblock %}
+```
