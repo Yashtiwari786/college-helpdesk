@@ -322,21 +322,29 @@ def profile(request):
     )
 
 
+
 @login_required
 def edit_profile(request):
     if request.user.role != User.Roles.STUDENT:
-        messages.error(request, "This page is for student accounts only.")
+        messages.error(
+            request,
+            "This page is for student accounts only.",
+        )
         return redirect("dashboard:dashboard")
 
     if request.method == "POST":
         form = StudentProfileForm(
             request.POST,
+            request.FILES,
             instance=request.user,
         )
 
         if form.is_valid():
             form.save()
-            messages.success(request, "Your profile was updated successfully.")
+            messages.success(
+                request,
+                "Your profile was updated successfully.",
+            )
             return redirect("accounts:profile")
     else:
         form = StudentProfileForm(instance=request.user)

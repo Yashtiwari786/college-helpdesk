@@ -35,7 +35,8 @@ class User(AbstractUser):
         blank=True,
     )
 
-    profile_photo = models.URLField(
+    profile_photo = models.ImageField(
+        upload_to="profile_photos/",
         blank=True,
         null=True,
     )

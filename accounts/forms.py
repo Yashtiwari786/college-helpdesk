@@ -118,6 +118,7 @@ class StudentRegistrationForm(UserCreationForm):
         return user
 
 
+
 class StudentProfileForm(forms.ModelForm):
     class Meta:
         model = User
@@ -129,29 +130,30 @@ class StudentProfileForm(forms.ModelForm):
             "department",
             "profile_photo",
         ]
+
         widgets = {
             "first_name": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "First Name",
+                "class": "profile-input",
+                "placeholder": "Enter first name",
             }),
             "last_name": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Last Name",
+                "class": "profile-input",
+                "placeholder": "Enter last name",
             }),
             "email": forms.EmailInput(attrs={
-                "class": "form-control",
-                "placeholder": "Email Address",
+                "class": "profile-input",
+                "placeholder": "Enter email address",
             }),
             "phone": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Phone Number",
+                "class": "profile-input",
+                "placeholder": "Enter phone number",
             }),
             "department": forms.Select(attrs={
-                "class": "form-control",
+                "class": "profile-input",
             }),
-            "profile_photo": forms.URLInput(attrs={
-                "class": "form-control",
-                "placeholder": "Profile photo URL (optional)",
+            "profile_photo": forms.ClearableFileInput(attrs={
+                "class": "profile-file-input",
+                "accept": "image/*",
             }),
         }
 
@@ -175,3 +177,23 @@ class StudentProfileForm(forms.ModelForm):
             )
 
         return email
+
+    def clean_profile_photo(self):
+        photo = self.cleaned_data.get("profile_photo")
+
+        if photo and hasattr(photo, "content_type"):
+            if photo.content_type not in (
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+            ):
+                raise forms.ValidationError(
+                    "Choose a JPG, PNG, or WebP image."
+                )
+
+            if photo.size > 5 * 1024 * 1024:
+                raise forms.ValidationError(
+                    "The image must be 5 MB or smaller."
+                )
+
+        return photo

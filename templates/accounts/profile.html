@@ -1,30 +1,399 @@
 
 {% extends "base.html" %}
 
+{% block title %}My Profile | College Help Desk{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1>My Profile</h1>
+<style>
+    .my-profile-page {
+        min-height: 75vh;
+        padding: 35px 15px;
+        background: #f5f7fb;
+        color: #172033;
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
 
-    {% if profile_user.profile_photo %}
-        <img
-            src="{{ profile_user.profile_photo }}"
-            alt="Profile photo"
-            width="120"
-            height="120"
-            style="object-fit: cover; border-radius: 50%;"
-        >
-    {% endif %}
+    .my-profile-shell {
+        max-width: 900px;
+        margin: 0 auto;
+    }
 
-    <p><strong>Student ID:</strong> {{ profile_user.username }}</p>
-    <p><strong>First name:</strong> {{ profile_user.first_name }}</p>
-    <p><strong>Last name:</strong> {{ profile_user.last_name }}</p>
-    <p><strong>Email:</strong> {{ profile_user.email }}</p>
-    <p><strong>Phone:</strong> {{ profile_user.phone|default:"Not provided" }}</p>
-    <p>
-        <strong>Department:</strong>
-        {{ profile_user.department|default:"Not assigned" }}
-    </p>
+    .my-profile-heading {
+        margin-bottom: 25px;
+    }
 
-    <a href="{% url 'accounts:edit_profile' %}">Edit Profile</a>
+    .my-profile-heading .eyebrow {
+        color: #4f46e5;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+
+    .my-profile-heading h1 {
+        margin: 8px 0;
+        font-size: clamp(25px, 4vw, 34px);
+        font-weight: 800;
+        letter-spacing: -1px;
+    }
+
+    .my-profile-heading p {
+        color: #718096;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .my-profile-card {
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #e7eaf2;
+        border-radius: 20px;
+        box-shadow: 0 12px 35px rgba(23, 32, 51, .06);
+    }
+
+    .my-profile-banner {
+        height: 145px;
+        background: linear-gradient(120deg, #4338ca, #6366f1, #a78bfa);
+    }
+
+    .my-profile-body {
+        padding: 0 30px 30px;
+    }
+
+    .my-profile-identity {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-top: -55px;
+        margin-bottom: 25px;
+    }
+
+    .my-profile-identity-left {
+        display: flex;
+        align-items: flex-end;
+        gap: 18px;
+        min-width: 0;
+    }
+
+    .my-profile-avatar {
+        width: 115px;
+        height: 115px;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        flex-shrink: 0;
+        color: #fff;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border: 5px solid #fff;
+        border-radius: 27px;
+        box-shadow: 0 6px 20px rgba(23,32,51,.12);
+        font-size: 38px;
+        font-weight: 800;
+    }
+
+    .my-profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .my-profile-name {
+        min-width: 0;
+        padding-bottom: 8px;
+    }
+
+    .my-profile-name h2 {
+        margin: 0 0 7px;
+        overflow-wrap: anywhere;
+        color: #172033;
+        font-size: 21px;
+        font-weight: 800;
+    }
+
+    .my-profile-name p {
+        margin: 0;
+        color: #718096;
+        font-size: 12px;
+        overflow-wrap: anywhere;
+    }
+
+    .my-profile-role {
+        display: inline-block;
+        padding: 6px 11px;
+        margin-top: 9px;
+        color: #4338ca;
+        background: #eef2ff;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .my-profile-edit-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-shrink: 0;
+        padding: 12px 16px;
+        color: #fff;
+        background: #4f46e5;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .my-profile-edit-btn:hover {
+        color: #fff;
+        background: #3730a3;
+    }
+
+    .my-profile-section-title {
+        margin: 27px 0 16px;
+        color: #172033;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .my-profile-details {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .my-profile-detail {
+        min-width: 0;
+        padding: 18px;
+        background: #f8f9fc;
+        border: 1px solid #edf0f5;
+        border-radius: 13px;
+    }
+
+    .my-profile-detail-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #718096;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .7px;
+        text-transform: uppercase;
+    }
+
+    .my-profile-detail-value {
+        display: block;
+        color: #263247;
+        font-size: 13px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+        line-height: 1.6;
+    }
+
+    .my-profile-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding-top: 22px;
+        margin-top: 25px;
+        border-top: 1px solid #edf0f5;
+    }
+
+    .my-profile-footer p {
+        margin: 0;
+        color: #718096;
+        font-size: 11px;
+    }
+
+    .my-profile-back {
+        color: #4f46e5;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .my-profile-back:hover {
+        color: #3730a3;
+    }
+
+    @media (max-width: 650px) {
+        .my-profile-page {
+            padding: 22px 10px;
+        }
+
+        .my-profile-body {
+            padding: 0 16px 20px;
+        }
+
+        .my-profile-identity {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .my-profile-identity-left {
+            align-items: flex-end;
+            gap: 12px;
+        }
+
+        .my-profile-avatar {
+            width: 83px;
+            height: 83px;
+            border-radius: 20px;
+            font-size: 29px;
+        }
+
+        .my-profile-name h2 {
+            font-size: 17px;
+        }
+
+        .my-profile-edit-btn {
+            width: 100%;
+        }
+
+        .my-profile-details {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .my-profile-banner {
+            height: 110px;
+        }
+    }
+</style>
+
+<div class="my-profile-page">
+    <div class="my-profile-shell">
+
+        <header class="my-profile-heading">
+            <div class="eyebrow">Student account</div>
+            <h1>My Profile</h1>
+            <p>View your personal details and college department information.</p>
+        </header>
+
+        <section class="my-profile-card">
+
+            <div class="my-profile-banner"></div>
+
+            <div class="my-profile-body">
+
+                <div class="my-profile-identity">
+
+                    <div class="my-profile-identity-left">
+
+                        <div class="my-profile-avatar">
+                            {% if profile_user.profile_photo %}
+                                <img
+                                    src="{{ profile_user.profile_photo.url }}"
+                                    alt="Profile photo"
+                                >
+                            {% else %}
+                                {{ profile_user.username|first|upper }}
+                            {% endif %}
+                        </div>
+
+                        <div class="my-profile-name">
+                            <h2>
+                                {{ profile_user.get_full_name|default:profile_user.username }}
+                            </h2>
+
+                            <p>{{ profile_user.email }}</p>
+
+                            <span class="my-profile-role">
+                                {{ profile_user.get_role_display }}
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <a
+                        href="{% url 'accounts:edit_profile' %}"
+                        class="my-profile-edit-btn"
+                    >
+                        ✏️ Edit Profile
+                    </a>
+
+                </div>
+
+
+                <h3 class="my-profile-section-title">
+                    Personal Information
+                </h3>
+
+                <div class="my-profile-details">
+
+                    <div class="my-profile-detail">
+                        <span class="my-profile-detail-label">First Name</span>
+                        <span class="my-profile-detail-value">
+                            {{ profile_user.first_name|default:"Not provided" }}
+                        </span>
+                    </div>
+
+                    <div class="my-profile-detail">
+                        <span class="my-profile-detail-label">Last Name</span>
+                        <span class="my-profile-detail-value">
+                            {{ profile_user.last_name|default:"Not provided" }}
+                        </span>
+                    </div>
+
+                    <div class="my-profile-detail">
+                        <span class="my-profile-detail-label">Student ID</span>
+                        <span class="my-profile-detail-value">
+                            {{ profile_user.username }}
+                        </span>
+                    </div>
+
+                    <div class="my-profile-detail">
+                        <span class="my-profile-detail-label">Email Address</span>
+                        <span class="my-profile-detail-value">
+                            {{ profile_user.email }}
+                        </span>
+                    </div>
+
+                    <div class="my-profile-detail">
+                        <span class="my-profile-detail-label">Phone Number</span>
+                        <span class="my-profile-detail-value">
+                            {{ profile_user.phone|default:"Not provided" }}
+                        </span>
+                    </div>
+
+                    <div class="my-profile-detail">
+                        <span class="my-profile-detail-label">Department</span>
+                        <span class="my-profile-detail-value">
+                            {{ profile_user.department.name|default:"Not assigned" }}
+                        </span>
+                    </div>
+
+                    <div class="my-profile-detail">
+                        <span class="my-profile-detail-label">Account Role</span>
+                        <span class="my-profile-detail-value">
+                            {{ profile_user.get_role_display }}
+                        </span>
+                    </div>
+
+                    <div class="my-profile-detail">
+                        <span class="my-profile-detail-label">Member Since</span>
+                        <span class="my-profile-detail-value">
+                            {{ profile_user.date_joined|date:"d M Y" }}
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="my-profile-footer">
+                    <p>Your account information is private to your signed-in account.</p>
+
+                    <a
+                        href="{% url 'dashboard:dashboard' %}"
+                        class="my-profile-back"
+                    >
+                        ← Back to Dashboard
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
 </div>
 {% endblock %}
