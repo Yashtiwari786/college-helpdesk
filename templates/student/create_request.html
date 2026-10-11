@@ -1,222 +1,319 @@
+
 {% extends "base.html" %}
 
-{% block title %}
-New Request | College Students Help Desk
-{% endblock %}
-
+{% block title %}Create Request | College Help Desk{% endblock %}
 
 {% block content %}
+<style>
+.request-page {
+    --ink: #17233f;
+    --muted: #71809b;
+    --line: #e4eaf4;
+    --primary: #4f5fe8;
+    max-width: 1440px;
+    margin: auto;
+    padding: 30px 22px 55px;
+    color: var(--ink);
+}
+.request-layout {
+    display: grid;
+    grid-template-columns: 245px minmax(0, 1fr);
+    gap: 25px;
+}
+.request-sidebar, .request-panel, .request-info {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    box-shadow: 0 12px 35px rgba(35, 52, 94, .055);
+}
+.request-sidebar {
+    padding: 22px 15px;
+    align-self: start;
+}
+.request-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 8px 25px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 20px;
+}
+.request-brand-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 15px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg,#3549ca,#8253f2);
+    color: white;
+    font-size: 23px;
+}
+.request-brand strong { display: block; font-size: 14px; }
+.request-brand small { color: var(--muted); }
+.request-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+.request-nav a {
+    text-decoration: none;
+    padding: 12px 13px;
+    border-radius: 12px;
+    color: #687792;
+    font-size: 14px;
+    font-weight: 600;
+    transition: .2s;
+}
+.request-nav a:hover, .request-nav a.active {
+    background: #eef0ff;
+    color: #4655d8;
+}
+.request-logout { margin-top: 25px; }
+.request-main { min-width: 0; }
+.request-hero {
+    padding: 30px;
+    border-radius: 23px;
+    background: linear-gradient(115deg,#202f71,#4356dd 60%,#8150e9);
+    color: white;
+    margin-bottom: 23px;
+    position: relative;
+    overflow: hidden;
+}
+.request-hero:after {
+    content: "✦";
+    position: absolute;
+    right: 35px;
+    top: -37px;
+    font-size: 150px;
+    opacity: .12;
+}
+.request-eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 800;
+    opacity: .8;
+}
+.request-hero h1 { font-size: clamp(25px,3vw,35px); font-weight: 800; margin: 9px 0; }
+.request-hero p { margin: 0; opacity: .85; }
+.request-panel { padding: clamp(18px,3vw,32px); }
+.request-panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+.request-panel-head h2 { font-size: 20px; font-weight: 800; margin: 0; }
+.request-panel-head p { font-size: 13px; color: var(--muted); margin: 5px 0 0; }
+.request-section-label {
+    color: #5261d9;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin: 25px 0 15px;
+}
+.request-page .form-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #35435f;
+    margin-bottom: 8px;
+}
+.request-page input:not([type="file"]):not([type="checkbox"]),
+.request-page select, .request-page textarea {
+    width: 100%;
+    border: 1px solid #dce3ef;
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: #fbfcff;
+    color: var(--ink);
+    font-size: 14px;
+    transition: .2s;
+}
+.request-page textarea { min-height: 155px; resize: vertical; }
+.request-page input:focus, .request-page select:focus,
+.request-page textarea:focus {
+    outline: none;
+    border-color: #737cf0;
+    box-shadow: 0 0 0 4px rgba(89,101,231,.11);
+    background: #fff;
+}
+.request-upload {
+    padding: 22px;
+    border: 1.5px dashed #b9c5e0;
+    border-radius: 15px;
+    background: #f8f9ff;
+}
+.request-upload .form-control { margin-top: 12px; }
+.request-muted { font-size: 12px; color: var(--muted); }
+.request-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
+.request-btn {
+    border: 0;
+    border-radius: 12px;
+    padding: 12px 19px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    transition: .2s;
+}
+.request-btn-primary {
+    background: linear-gradient(110deg,#4859dc,#7650e8);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(83,85,220,.22);
+}
+.request-btn-primary:hover { color: #fff; transform: translateY(-1px); }
+.request-btn-light { background: #f1f3f9; color: #4e5d77; }
+.request-btn-light:hover { background: #e5e9f4; color: #253451; }
+.request-info { padding: 23px; margin-top: 18px; }
+.request-info h3 { font-size: 15px; font-weight: 800; }
+.request-info p { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+.request-tip { display: flex; gap: 12px; margin-top: 18px; }
+.request-tip-icon {
+    flex-shrink: 0;
+    width: 35px;
+    height: 35px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    background: #eef0ff;
+}
+@media(max-width:900px) {
+    .request-layout { grid-template-columns: 1fr; }
+    .request-sidebar { padding: 15px; }
+    .request-brand { padding-bottom: 14px; margin-bottom: 12px; }
+    .request-nav { flex-direction: row; flex-wrap: wrap; }
+    .request-nav a { flex: 1 1 auto; text-align: center; }
+    .request-logout { margin-top: 14px; }
+}
+@media(max-width:575px) {
+    .request-page { padding: 15px 10px 30px; }
+    .request-hero { padding: 23px 20px; }
+    .request-panel { padding: 18px 14px; }
+    .request-panel-head { align-items: flex-start; }
+    .request-actions > * { width: 100%; }
+}
+</style>
 
-<div class="dashboard-wrapper">
+<div class="request-page">
+    <div class="request-layout">
 
-    <aside class="sidebar">
-
-        <div class="brand">
-
-            <div class="brand-logo">
-                🎓
+        <aside class="request-sidebar">
+            <div class="request-brand">
+                <div class="request-brand-icon">🎓</div>
+                <div>
+                    <strong>College Students</strong>
+                    <small>Help Desk Portal</small>
+                </div>
             </div>
 
-            <div>
-                <strong>College Students</strong>
-                <small>Help Desk</small>
+            <nav class="request-nav">
+                <a href="{% url 'dashboard:dashboard' %}">⌂ &nbsp; Dashboard</a>
+                <a href="{% url 'helpdesk:create_request' %}" class="active">＋ &nbsp; New Request</a>
+                <a href="{% url 'helpdesk:requests' %}">▤ &nbsp; My Requests</a>
+            </nav>
+
+            <div class="request-logout">
+                <form method="post" action="{% url 'accounts:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="request-btn request-btn-light w-100">↪ &nbsp; Logout</button>
+                </form>
             </div>
 
-        </div>
-
-
-        <nav class="sidebar-nav">
-
-            <a
-                href="{% url 'dashboard:dashboard' %}"
-                class="nav-item"
-            >
-                🏠 Dashboard
-            </a>
-
-            <a
-                href="{% url 'helpdesk:create_request' %}"
-                class="nav-item active"
-            >
-                ➕ New Request
-            </a>
-
-            <a
-                href="{% url 'helpdesk:requests' %}"
-                class="nav-item"
-            >
-                📋 My Requests
-            </a>
-
-        </nav>
-
-
-       <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-outline-danger">
-        Logout
-    </button>
-</form>
-    </aside>
-
-
-    <main class="main-content">
-
-        <div class="topbar">
-
-            <div>
-
-                <h2>
-                    Create New Request
-                </h2>
-
-                <p>
-                    Tell us what you need help with.
-                </p>
-
+            <div class="request-info">
+                <h3>💡 Before submitting</h3>
+                <p>Choose the right department and describe your issue clearly so the team can help you faster.</p>
             </div>
+        </aside>
 
-        </div>
+        <main class="request-main">
+            <header class="request-hero">
+                <div class="request-eyebrow">Student support · Workspace</div>
+                <h1>Create a new request</h1>
+                <p>Tell us what's happening. We'll help you find a solution.</p>
+            </header>
 
-
-        <div class="dashboard-card">
-
-            <form
-                method="post"
-                enctype="multipart/form-data"
-            >
-
-                {% csrf_token %}
-
-
-                {% if form.non_field_errors %}
-
-                    <div class="alert alert-danger">
-
-                        {{ form.non_field_errors }}
-
+            <section class="request-panel">
+                <div class="request-panel-head">
+                    <div>
+                        <h2>Request details</h2>
+                        <p>Fields marked by your form validation are required.</p>
                     </div>
+                    <span aria-hidden="true">✍️</span>
+                </div>
 
-                {% endif %}
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
 
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                    {% endif %}
 
-                <div class="row g-4">
-
-
-                    <div class="col-md-6">
-
-                        <label class="form-label">
-                            Department
-                        </label>
-
-                        {{ form.department }}
-
-                        {% for error in form.department.errors %}
-                            <div class="text-danger small">
-                                {{ error }}
-                            </div>
-                        {% endfor %}
-
-                    </div>
-
-
-                    <div class="col-md-6">
-
-                        <label class="form-label">
-                            Category
-                        </label>
-
-                        {{ form.category }}
-
-                        {% for error in form.category.errors %}
-                            <div class="text-danger small">
-                                {{ error }}
-                            </div>
-                        {% endfor %}
-
-                    </div>
-
-
-                    <div class="col-md-8">
-
-                        <label class="form-label">
-                            Subject
-                        </label>
-
-                        {{ form.subject }}
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <label class="form-label">
-                            Priority
-                        </label>
-
-                        {{ form.priority }}
-
-                    </div>
-
-
-                    <div class="col-12">
-
-                        <label class="form-label">
-                            Description
-                        </label>
-
-                        {{ form.description }}
-
-                    </div>
-
-
-                    <div class="col-12">
-
-                        <label class="form-label">
-                            Attachments
-                        </label>
-
-                        <input
-                            type="file"
-                            name="attachments"
-                            class="form-control"
-                            multiple
-                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.mp4,.mov"
-                        >
-
-                        <div class="form-text">
-                            You can upload screenshots, documents or videos.
+                    <div class="request-section-label">01 / Classification</div>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ form.department.id_for_label }}">Department</label>
+                            {{ form.department }}
+                            {% for error in form.department.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
                         </div>
 
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ form.category.id_for_label }}">Category</label>
+                            {{ form.category }}
+                            {% for error in form.category.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label" for="{{ form.subject.id_for_label }}">Subject</label>
+                            {{ form.subject }}
+                            {% for error in form.subject.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.priority.id_for_label }}">Priority</label>
+                            {{ form.priority }}
+                            {% for error in form.priority.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
                     </div>
 
-                </div>
+                    <div class="request-section-label">02 / Tell us more</div>
+                    <div>
+                        <label class="form-label" for="{{ form.description.id_for_label }}">Problem description</label>
+                        {{ form.description }}
+                        {% for error in form.description.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                        <div class="request-muted mt-2">Include relevant details, what you tried, and any error messages.</div>
+                    </div>
 
+                    <div class="request-section-label">03 / Supporting files</div>
+                    <div class="request-upload">
+                        <strong>📎 Attach screenshots or documents</strong>
+                        <div class="request-muted mt-1">Add files that help explain your issue.</div>
+                        <input type="file" name="attachments" class="form-control"
+                               multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.mp4,.mov">
+                        <div class="request-muted mt-2">Accepted formats: JPG, PNG, PDF, DOC, DOCX, MP4, MOV.</div>
+                    </div>
 
-                <div class="mt-4 d-flex gap-2">
-
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
-                    >
-                        Submit Request
-                    </button>
-
-                    <a
-                        href="{% url 'helpdesk:requests' %}"
-                        class="btn btn-outline-secondary"
-                    >
-                        Cancel
-                    </a>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </main>
-
+                    <div class="request-actions">
+                        <button type="submit" class="request-btn request-btn-primary">Submit request &nbsp; →</button>
+                        <a href="{% url 'helpdesk:requests' %}" class="request-btn request-btn-light">Cancel</a>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
 </div>
-
 {% endblock %}

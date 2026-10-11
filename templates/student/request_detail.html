@@ -1,383 +1,454 @@
+
 {% extends "base.html" %}
 
-{% block title %}
-{{ help_request.ticket_number }} | Help Desk
-{% endblock %}
-
+{% block title %}{{ help_request.ticket_number }} | College Help Desk{% endblock %}
 
 {% block content %}
+<style>
+.detail-page {
+    --ink: #182541;
+    --muted: #77849c;
+    --line: #e5eaf3;
+    max-width: 1440px;
+    padding: 28px 22px 55px;
+    margin: auto;
+    color: var(--ink);
+}
+.detail-layout {
+    display: grid;
+    grid-template-columns: 235px minmax(0,1fr);
+    gap: 24px;
+}
+.detail-sidebar, .detail-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(31,47,87,.045);
+}
+.detail-sidebar { padding: 21px 14px; align-self: start; }
+.detail-brand {
+    display: flex;
+    gap: 11px;
+    align-items: center;
+    padding: 4px 7px 22px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 17px;
+}
+.detail-brand-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(135deg,#3549ca,#8052ed);
+    color: white;
+    font-size: 22px;
+}
+.detail-brand strong { display: block; font-size: 13px; }
+.detail-brand small { color: var(--muted); }
+.detail-nav { display: flex; flex-direction: column; gap: 7px; }
+.detail-nav a {
+    padding: 12px;
+    border-radius: 11px;
+    color: #687792;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+.detail-nav a:hover, .detail-nav a.active { background: #eef0ff; color: #4b56d5; }
+.detail-logout { margin-top: 24px; }
+.detail-main { min-width: 0; }
+.detail-hero {
+    padding: 27px 29px;
+    border-radius: 22px;
+    color: white;
+    background: linear-gradient(115deg,#202e6e,#4557dd 65%,#8150e9);
+    margin-bottom: 20px;
+}
+.detail-hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+.detail-eyebrow {
+    font-size: 11px;
+    letter-spacing: 1.7px;
+    font-weight: 800;
+    text-transform: uppercase;
+    opacity: .78;
+}
+.detail-hero h1 { font-size: clamp(23px,3vw,32px); font-weight: 800; margin: 8px 0; overflow-wrap: anywhere; }
+.detail-hero p { margin: 0; opacity: .86; }
+.detail-ticket-tag {
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.22);
+    padding: 9px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.detail-back {
+    display: inline-block;
+    margin-top: 19px;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+}
+.detail-card { padding: clamp(18px,3vw,27px); margin-bottom: 19px; }
+.detail-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.detail-card h2 { font-size: 19px; font-weight: 800; margin: 0; }
+.detail-subtitle { color: var(--muted); font-size: 13px; margin-top: 6px; }
+.detail-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 11px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    background: #edf0ff;
+    color: #4b57d6;
+}
+.detail-metrics {
+    display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr));
+    gap: 12px;
+    margin: 23px 0;
+}
+.detail-metric {
+    padding: 15px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: #fafbfe;
+    min-width: 0;
+}
+.detail-metric-label {
+    color: var(--muted);
+    font-size: 11px;
+    margin-bottom: 8px;
+}
+.detail-metric-value {
+    font-size: 13px;
+    font-weight: 750;
+    overflow-wrap: anywhere;
+}
+.detail-divider { border: 0; border-top: 1px solid var(--line); margin: 23px 0; }
+.detail-description {
+    line-height: 1.8;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+.detail-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #6876d9;
+    margin-bottom: 12px;
+}
+.detail-files { display: flex; flex-wrap: wrap; gap: 9px; }
+.detail-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 13px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: #fafbff;
+    color: #4e5bd0;
+    font-size: 12px;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+.detail-file:hover { background: #eef0ff; color: #3947c3; }
+.detail-conversation { display: flex; flex-direction: column; gap: 16px; }
+.detail-message {
+    max-width: 88%;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 5px 17px 17px 17px;
+    background: #f8f9fd;
+    overflow-wrap: anywhere;
+}
+.detail-message.message-own {
+    align-self: flex-end;
+    background: #eef0ff;
+    border-color: #dfe2ff;
+    border-radius: 17px 5px 17px 17px;
+}
+.detail-message-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+}
+.detail-message-head small { color: var(--muted); }
+.detail-message-body { margin: 12px 0 0; font-size: 14px; line-height: 1.7; }
+.detail-compose {
+    margin-top: 23px;
+    padding-top: 21px;
+    border-top: 1px solid var(--line);
+}
+.detail-compose textarea, .detail-compose input[type="file"],
+.detail-feedback textarea, .detail-feedback select {
+    width: 100%;
+    padding: 12px 13px;
+    border: 1px solid #dce3ef;
+    border-radius: 12px;
+    background: #fbfcff;
+    font-size: 14px;
+}
+.detail-compose textarea:focus, .detail-feedback textarea:focus,
+.detail-feedback select:focus {
+    outline: none;
+    border-color: #737cf0;
+    box-shadow: 0 0 0 4px rgba(89,101,231,.1);
+}
+.detail-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 17px;
+    border: 0;
+    border-radius: 11px;
+    background: linear-gradient(110deg,#4859dc,#7650e8);
+    color: white;
+    font-size: 13px;
+    font-weight: 750;
+    text-decoration: none;
+}
+.detail-btn:hover { color: white; opacity: .92; }
+.detail-btn-light { background: #f0f2f8; color: #4c5b77; }
+.detail-btn-light:hover { background: #e5e9f4; color: #263653; }
+.detail-empty {
+    padding: 25px 15px;
+    border-radius: 14px;
+    text-align: center;
+    background: #f8f9fd;
+    color: var(--muted);
+    font-size: 13px;
+}
+.detail-feedback textarea { min-height: 100px; margin-top: 13px; }
+.detail-rating { font-size: 26px; font-weight: 800; color: #edaa34; }
+@media(max-width:1000px) {
+    .detail-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:850px) {
+    .detail-layout { grid-template-columns: 1fr; }
+    .detail-sidebar { padding: 15px; }
+    .detail-brand { padding-bottom: 13px; margin-bottom: 12px; }
+    .detail-nav { flex-direction: row; flex-wrap: wrap; }
+    .detail-nav a { flex: 1 1 auto; text-align: center; }
+    .detail-logout { margin-top: 14px; }
+}
+@media(max-width:575px) {
+    .detail-page { padding: 14px 9px 30px; }
+    .detail-hero { padding: 22px 18px; }
+    .detail-hero-top { flex-direction: column; }
+    .detail-card { padding: 17px 14px; }
+    .detail-metrics { gap: 8px; }
+    .detail-metric { padding: 11px; }
+    .detail-message { max-width: 100%; }
+}
+</style>
 
-<div class="dashboard-wrapper">
+<div class="detail-page">
+    <div class="detail-layout">
 
-    <aside class="sidebar">
-
-        <div class="brand">
-
-            <div class="brand-logo">
-                🎓
-            </div>
-
-            <div>
-                <strong>College Students</strong>
-                <small>Help Desk</small>
-            </div>
-
-        </div>
-
-
-        <nav class="sidebar-nav">
-
-            <a
-                href="{% url 'dashboard:dashboard' %}"
-                class="nav-item"
-            >
-                🏠 Dashboard
-            </a>
-
-            <a
-                href="{% url 'helpdesk:create_request' %}"
-                class="nav-item"
-            >
-                ➕ New Request
-            </a>
-
-            <a
-                href="{% url 'helpdesk:requests' %}"
-                class="nav-item active"
-            >
-                📋 My Requests
-            </a>
-
-        </nav>
-
-
-      <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-outline-danger">
-        Logout
-    </button>
-</form>
-    </aside>
-
-
-    <main class="main-content">
-
-
-        <div class="topbar">
-
-            <div>
-
-                <h2>
-                    {{ help_request.ticket_number }}
-                </h2>
-
-                <p>
-                    {{ help_request.subject }}
-                </p>
-
-            </div>
-
-
-            <a
-                href="{% url 'helpdesk:requests' %}"
-                class="btn btn-outline-primary"
-            >
-                ← Back
-            </a>
-
-        </div>
-
-
-        <!-- REQUEST INFO -->
-
-        <div class="dashboard-card">
-
-            <div class="d-flex justify-content-between">
-
+        <aside class="detail-sidebar">
+            <div class="detail-brand">
+                <div class="detail-brand-icon">🎓</div>
                 <div>
-
-                    <h4>
-                        {{ help_request.subject }}
-                    </h4>
-
-                    <p class="text-muted">
-                        Created
-                        {{ help_request.created_at|date:"d M Y, h:i A" }}
-                    </p>
-
+                    <strong>College Students</strong>
+                    <small>Help Desk Portal</small>
                 </div>
-
-
-                <span class="badge bg-primary align-self-start">
-
-                    {{ help_request.get_status_display }}
-
-                </span>
-
             </div>
 
+            <nav class="detail-nav">
+                <a href="{% url 'dashboard:dashboard' %}">⌂ &nbsp; Dashboard</a>
+                <a href="{% url 'helpdesk:create_request' %}">＋ &nbsp; New Request</a>
+                <a href="{% url 'helpdesk:requests' %}" class="active">▤ &nbsp; My Requests</a>
+            </nav>
 
-            <hr>
-
-
-            <div class="row g-3">
-
-                <div class="col-md-3">
-
-                    <small class="text-muted">
-                        Department
-                    </small>
-
-                    <div>
-                        {{ help_request.department.name }}
-                    </div>
-
-                </div>
-
-
-                <div class="col-md-3">
-
-                    <small class="text-muted">
-                        Category
-                    </small>
-
-                    <div>
-                        {{ help_request.category.name }}
-                    </div>
-
-                </div>
-
-
-                <div class="col-md-3">
-
-                    <small class="text-muted">
-                        Priority
-                    </small>
-
-                    <div>
-                        {{ help_request.get_priority_display }}
-                    </div>
-
-                </div>
-
-
-                <div class="col-md-3">
-
-                    <small class="text-muted">
-                        Assigned Staff
-                    </small>
-
-                    <div>
-                        {% if help_request.assigned_staff %}
-                            {{ help_request.assigned_staff.get_full_name|default:help_request.assigned_staff.username }}
-                        {% else %}
-                            Not assigned yet
-                        {% endif %}
-                    </div>
-
-                </div>
-
+            <div class="detail-logout">
+                <form method="post" action="{% url 'accounts:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="detail-btn detail-btn-light w-100">↪ &nbsp; Logout</button>
+                </form>
             </div>
+        </aside>
 
+        <main class="detail-main">
+            <header class="detail-hero">
+                <div class="detail-hero-top">
+                    <div>
+                        <div class="detail-eyebrow">Request workspace</div>
+                        <h1>{{ help_request.subject }}</h1>
+                        <p>Created {{ help_request.created_at|date:"d M Y, h:i A" }}</p>
+                    </div>
+                    <div class="detail-ticket-tag"># {{ help_request.ticket_number }}</div>
+                </div>
+                <a class="detail-back" href="{% url 'helpdesk:requests' %}">← Back to all requests</a>
+            </header>
 
-            <hr>
-
-
-            <h5>
-                Problem Description
-            </h5>
-
-            <p>
-                {{ help_request.description|linebreaksbr }}
-            </p>
-
-
-            {% if help_request.attachments.all %}
-
-                <h5 class="mt-4">
-                    Attachments
-                </h5>
-
-                <div class="d-flex flex-wrap gap-2">
-
-                    {% for attachment in help_request.attachments.all %}
-
-                        <a
-                            href="{{ attachment.file.url }}"
-                            target="_blank"
-                            class="btn btn-outline-secondary btn-sm"
-                        >
-                            📎 {{ attachment.original_name }}
-                        </a>
-
-                    {% endfor %}
-
+            <section class="detail-card">
+                <div class="detail-card-head">
+                    <div>
+                        <h2>Request overview</h2>
+                        <div class="detail-subtitle">Review your issue and current progress.</div>
+                    </div>
+                    <span class="detail-status">{{ help_request.get_status_display }}</span>
                 </div>
 
-            {% endif %}
-
-        </div>
-
-
-        <!-- CONVERSATION -->
-
-        <div class="dashboard-card">
-
-            <h4>
-                Conversation
-            </h4>
-
-            <hr>
-
-
-            {% for message in help_request.messages.all %}
-
-                <div class="message-box
-                    {% if message.sender == user %}
-                        message-own
-                    {% else %}
-                        message-other
-                    {% endif %}
-                ">
-
-                    <div class="d-flex justify-content-between">
-
-                        <strong>
-                            {% if message.sender == user %}
-                                You
+                <div class="detail-metrics">
+                    <div class="detail-metric">
+                        <div class="detail-metric-label">DEPARTMENT</div>
+                        <div class="detail-metric-value">{{ help_request.department.name }}</div>
+                    </div>
+                    <div class="detail-metric">
+                        <div class="detail-metric-label">CATEGORY</div>
+                        <div class="detail-metric-value">{{ help_request.category.name }}</div>
+                    </div>
+                    <div class="detail-metric">
+                        <div class="detail-metric-label">PRIORITY</div>
+                        <div class="detail-metric-value">{{ help_request.get_priority_display }}</div>
+                    </div>
+                    <div class="detail-metric">
+                        <div class="detail-metric-label">ASSIGNED STAFF</div>
+                        <div class="detail-metric-value">
+                            {% if help_request.assigned_staff %}
+                                {{ help_request.assigned_staff.get_full_name|default:help_request.assigned_staff.username }}
                             {% else %}
-                                {{ message.sender.get_full_name|default:message.sender.username }}
+                                Not assigned yet
                             {% endif %}
-                        </strong>
-
-                        <small class="text-muted">
-                            {{ message.created_at|date:"d M Y, h:i A" }}
-                        </small>
-
+                        </div>
                     </div>
+                </div>
 
+                <hr class="detail-divider">
 
-                    <p class="mb-0 mt-2">
-                        {{ message.message|linebreaksbr }}
-                    </p>
+                <div class="detail-label">Problem description</div>
+                <div class="detail-description">{{ help_request.description|linebreaksbr }}</div>
 
+                {% if help_request.attachments.all %}
+                <hr class="detail-divider">
+                <div class="detail-label">Supporting attachments</div>
+                <div class="detail-files">
+                    {% for attachment in help_request.attachments.all %}
+                    <a href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer" class="detail-file">
+                        📎 {{ attachment.original_name|default:attachment.file.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </section>
 
-                    {% if message.attachment %}
+            <section class="detail-card">
+                <div class="detail-card-head">
+                    <div>
+                        <h2>Conversation</h2>
+                        <div class="detail-subtitle">Messages related to this request.</div>
+                    </div>
+                    <span aria-hidden="true">💬</span>
+                </div>
 
-                        <a
-                            href="{{ message.attachment.url }}"
-                            target="_blank"
-                            class="btn btn-sm btn-outline-primary mt-2"
-                        >
-                            📎 View Attachment
+                <div class="detail-conversation">
+                    {% for message in help_request.messages.all %}
+                    <article class="detail-message {% if message.sender_id == user.id %}message-own{% endif %}">
+                        <div class="detail-message-head">
+                            <strong>
+                                {% if message.sender_id == user.id %}
+                                    You
+                                {% else %}
+                                    {{ message.sender.get_full_name|default:message.sender.username }}
+                                {% endif %}
+                            </strong>
+                            <small>{{ message.created_at|date:"d M Y, h:i A" }}</small>
+                        </div>
+                        <p class="detail-message-body">{{ message.message|linebreaksbr }}</p>
+
+                        {% if message.attachment %}
+                        <a href="{{ message.attachment.url }}" target="_blank" rel="noopener noreferrer" class="detail-file mt-3">
+                            📎 View attachment
                         </a>
-
-                    {% endif %}
-
+                        {% endif %}
+                    </article>
+                    {% empty %}
+                    <div class="detail-empty">
+                        <div style="font-size:28px;margin-bottom:8px">💬</div>
+                        No messages yet. Send a message below if you have more information to share.
+                    </div>
+                    {% endfor %}
                 </div>
 
-            {% empty %}
-
-                <p class="text-muted">
-                    No messages yet.
-                </p>
-
-            {% endfor %}
-
-
-            <hr>
-
-
-            <form
-                method="post"
-                action="{% url 'helpdesk:send_message' help_request.ticket_number %}"
-                enctype="multipart/form-data"
-            >
-
-                {% csrf_token %}
-
-                {{ message_form.message }}
-
-                <div class="mt-2">
-
-                    {{ message_form.attachment }}
-
-                </div>
-
-
-                <button
-                    type="submit"
-                    class="btn btn-primary mt-3"
-                >
-                    Send Message
-                </button>
-
-            </form>
-
-        </div>
-
-
-        <!-- FEEDBACK -->
-
-        {% if help_request.status == "RESOLVED" or help_request.status == "CLOSED" %}
-
-            <div class="dashboard-card">
-
-                <h4>
-                    Feedback
-                </h4>
-
-
-                {% if existing_feedback %}
-
-                    <p>
-                        Your rating:
-                        <strong>
-                            {{ existing_feedback.rating }}/5
-                        </strong>
-                    </p>
-
-                    <p>
-                        {{ existing_feedback.comment }}
-                    </p>
-
-                {% else %}
-
-                    <p class="text-muted">
-                        How was your experience?
-                    </p>
-
-
-                    <form
-                        method="post"
-                        action="{% url 'helpdesk:submit_feedback' help_request.ticket_number %}"
-                    >
-
+                <div class="detail-compose">
+                    <form method="post"
+                          action="{% url 'helpdesk:send_message' help_request.ticket_number %}"
+                          enctype="multipart/form-data">
                         {% csrf_token %}
+                        <label class="form-label fw-bold" for="{{ message_form.message.id_for_label }}">Write a message</label>
+                        {{ message_form.message }}
 
-                        {{ feedback_form.rating }}
+                        {% for error in message_form.message.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
 
                         <div class="mt-3">
-                            {{ feedback_form.comment }}
+                            <label class="form-label fw-bold" for="{{ message_form.attachment.id_for_label }}">Attach a file (optional)</label>
+                            {{ message_form.attachment }}
                         </div>
 
-                        <button
-                            class="btn btn-primary mt-3"
-                        >
-                            Submit Feedback
-                        </button>
-
+                        <button type="submit" class="detail-btn mt-3">Send message &nbsp; →</button>
                     </form>
+                </div>
+            </section>
 
+            {% if help_request.status == "RESOLVED" or help_request.status == "CLOSED" %}
+            <section class="detail-card detail-feedback">
+                <div class="detail-card-head">
+                    <div>
+                        <h2>Share your feedback</h2>
+                        <div class="detail-subtitle">Help us improve the support experience.</div>
+                    </div>
+                    <span aria-hidden="true">⭐</span>
+                </div>
+
+                {% if existing_feedback %}
+                    <div class="detail-rating">{{ existing_feedback.rating }}/5 ★</div>
+                    <p class="mt-2 mb-1">{{ existing_feedback.comment|default:"Thank you for your feedback." }}</p>
+                    <div class="detail-subtitle">Your feedback has been submitted.</div>
+                {% else %}
+                    <p class="detail-subtitle mb-3">Your request is resolved or closed. Let us know how we did.</p>
+                    <form method="post" action="{% url 'helpdesk:submit_feedback' help_request.ticket_number %}">
+                        {% csrf_token %}
+                        <label class="form-label fw-bold" for="{{ feedback_form.rating.id_for_label }}">Your rating</label>
+                        {{ feedback_form.rating }}
+                        {% for error in feedback_form.rating.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+
+                        <label class="form-label fw-bold mt-3" for="{{ feedback_form.comment.id_for_label }}">Comments (optional)</label>
+                        {{ feedback_form.comment }}
+                        {% for error in feedback_form.comment.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+
+                        <button type="submit" class="detail-btn mt-3">Submit feedback &nbsp; →</button>
+                    </form>
                 {% endif %}
-
-            </div>
-
-        {% endif %}
-
-
-    </main>
-
+            </section>
+            {% endif %}
+        </main>
+    </div>
 </div>
-
 {% endblock %}

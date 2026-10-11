@@ -1,250 +1,458 @@
+
 {% extends "base.html" %}
 
-{% block title %}
-My Requests | College Students Help Desk
-{% endblock %}
-
+{% block title %}My Requests | College Help Desk{% endblock %}
 
 {% block content %}
+<style>
+.requests-page {
+    --ink: #182541;
+    --muted: #77849c;
+    --line: #e5eaf3;
+    max-width: 1440px;
+    margin: auto;
+    padding: 28px 22px 55px;
+    color: var(--ink);
+}
+.requests-layout {
+    display: grid;
+    grid-template-columns: 235px minmax(0,1fr);
+    gap: 24px;
+}
+.requests-sidebar, .requests-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(31,47,87,.045);
+}
+.requests-sidebar { padding: 21px 14px; align-self: start; }
+.requests-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 4px 7px 22px;
+    margin-bottom: 17px;
+    border-bottom: 1px solid var(--line);
+}
+.requests-brand-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg,#3549ca,#8052ed);
+    font-size: 22px;
+    color: white;
+}
+.requests-brand strong { display: block; font-size: 13px; }
+.requests-brand small { color: var(--muted); }
+.requests-nav { display: flex; flex-direction: column; gap: 7px; }
+.requests-nav a {
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 11px;
+    color: #687792;
+    font-size: 14px;
+    font-weight: 600;
+}
+.requests-nav a:hover, .requests-nav a.active {
+    background: #eef0ff;
+    color: #4b56d5;
+}
+.requests-logout { margin-top: 24px; }
+.requests-main { min-width: 0; }
+.requests-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 29px;
+    border-radius: 22px;
+    color: white;
+    background: linear-gradient(115deg,#202e6e,#4557dd 62%,#8150e9);
+    margin-bottom: 20px;
+}
+.requests-eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.7px;
+    text-transform: uppercase;
+    opacity: .8;
+}
+.requests-hero h1 {
+    font-size: clamp(25px,3vw,34px);
+    font-weight: 800;
+    margin: 8px 0;
+}
+.requests-hero p { margin: 0; opacity: .86; }
+.requests-new-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 17px;
+    border-radius: 12px;
+    background: white;
+    color: #414fc7;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 800;
+    white-space: nowrap;
+    transition: .2s;
+}
+.requests-new-btn:hover { color: #303cae; transform: translateY(-1px); }
+.requests-stats {
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.requests-stat {
+    padding: 19px;
+    border: 1px solid var(--line);
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(31,47,87,.035);
+}
+.requests-stat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.requests-stat-label { color: var(--muted); font-size: 12px; font-weight: 650; }
+.requests-stat-icon {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: #eef0ff;
+    color: #515ddd;
+}
+.requests-stat-number { font-size: 27px; font-weight: 850; margin-top: 12px; }
+.requests-stat-caption { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.requests-card { padding: clamp(17px,3vw,26px); }
+.requests-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 21px;
+}
+.requests-card-head h2 { font-size: 19px; font-weight: 800; margin: 0; }
+.requests-card-head p { color: var(--muted); font-size: 13px; margin: 5px 0 0; }
+.requests-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 21px;
+}
+.requests-search input {
+    min-width: 0;
+    flex: 1;
+    padding: 12px 14px;
+    border: 1px solid #dce3ef;
+    border-radius: 12px;
+    background: #fbfcff;
+    font-size: 13px;
+}
+.requests-search input:focus {
+    outline: none;
+    border-color: #737cf0;
+    box-shadow: 0 0 0 4px rgba(89,101,231,.1);
+}
+.requests-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 0;
+    border-radius: 11px;
+    padding: 11px 15px;
+    background: linear-gradient(110deg,#4859dc,#7650e8);
+    color: white;
+    font-size: 13px;
+    font-weight: 750;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.requests-btn:hover { color: white; opacity: .92; }
+.requests-btn-light { background: #f0f2f8; color: #4c5b77; }
+.requests-btn-light:hover { color: #263653; background: #e5e9f4; }
+.requests-table-wrap { overflow-x: auto; }
+.requests-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 720px;
+}
+.requests-table thead th {
+    padding: 13px 12px;
+    background: #f7f8fc;
+    color: #77849c;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    font-weight: 800;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+}
+.requests-table thead th:first-child { border-radius: 10px 0 0 10px; }
+.requests-table thead th:last-child { border-radius: 0 10px 10px 0; }
+.requests-table tbody td {
+    padding: 17px 12px;
+    border-bottom: 1px solid #edf0f6;
+    font-size: 12px;
+    vertical-align: middle;
+}
+.requests-table tbody tr:last-child td { border-bottom: 0; }
+.requests-table tbody tr:hover { background: #fbfbff; }
+.requests-ticket {
+    display: block;
+    color: #4e5bd0;
+    font-weight: 800;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+.requests-ticket:hover { color: #303cae; text-decoration: underline; }
+.requests-subject { color: #293752; font-weight: 700; }
+.requests-department { color: #71809a; }
+.requests-date { color: #71809a; white-space: nowrap; }
+.requests-status {
+    display: inline-flex;
+    padding: 6px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.requests-status-pending { background: #fff2d7; color: #98620a; }
+.requests-status-progress { background: #e8efff; color: #355bc2; }
+.requests-status-resolved { background: #dcf8e9; color: #167847; }
+.requests-status-closed { background: #edf0f5; color: #647084; }
+.requests-status-other { background: #e8f7fb; color: #18778c; }
+.requests-view {
+    display: inline-flex;
+    padding: 8px 11px;
+    border: 1px solid #dfe3ff;
+    border-radius: 9px;
+    background: #f2f3ff;
+    color: #4c58ce;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 800;
+}
+.requests-view:hover { background: #e5e8ff; color: #303cae; }
+.requests-empty {
+    text-align: center;
+    padding: 45px 15px;
+}
+.requests-empty-icon {
+    width: 65px;
+    height: 65px;
+    display: grid;
+    place-items: center;
+    border-radius: 20px;
+    margin: 0 auto 16px;
+    background: #eef0ff;
+    font-size: 28px;
+}
+.requests-empty h3 { font-size: 18px; font-weight: 800; }
+.requests-empty p { color: var(--muted); font-size: 13px; }
+.requests-footnote { color: var(--muted); font-size: 11px; margin-top: 17px; }
+@media(max-width:1050px) {
+    .requests-stats { gap: 10px; }
+    .requests-stat { padding: 15px; }
+}
+@media(max-width:850px) {
+    .requests-layout { grid-template-columns: 1fr; }
+    .requests-sidebar { padding: 15px; }
+    .requests-brand { padding-bottom: 13px; margin-bottom: 12px; }
+    .requests-nav { flex-direction: row; flex-wrap: wrap; }
+    .requests-nav a { flex: 1 1 auto; text-align: center; }
+    .requests-logout { margin-top: 14px; }
+}
+@media(max-width:575px) {
+    .requests-page { padding: 14px 9px 30px; }
+    .requests-hero { align-items: flex-start; flex-direction: column; padding: 23px 19px; }
+    .requests-stats { grid-template-columns: 1fr; }
+    .requests-stat { padding: 14px 16px; }
+    .requests-stat-number { font-size: 23px; }
+    .requests-card { padding: 16px 12px; }
+    .requests-card-head { align-items: flex-start; }
+    .requests-search { flex-wrap: wrap; }
+    .requests-search input { flex-basis: 100%; }
+    .requests-search button { flex: 1; }
+}
+</style>
 
-<div class="dashboard-wrapper">
+<div class="requests-page">
+    <div class="requests-layout">
 
-    <aside class="sidebar">
-
-        <div class="brand">
-
-            <div class="brand-logo">
-                🎓
+        <aside class="requests-sidebar">
+            <div class="requests-brand">
+                <div class="requests-brand-icon">🎓</div>
+                <div>
+                    <strong>College Students</strong>
+                    <small>Help Desk Portal</small>
+                </div>
             </div>
 
-            <div>
-                <strong>College Students</strong>
-                <small>Help Desk</small>
+            <nav class="requests-nav">
+                <a href="{% url 'dashboard:dashboard' %}">⌂ &nbsp; Dashboard</a>
+                <a href="{% url 'helpdesk:create_request' %}">＋ &nbsp; New Request</a>
+                <a href="{% url 'helpdesk:requests' %}" class="active">▤ &nbsp; My Requests</a>
+            </nav>
+
+            <div class="requests-logout">
+                <form method="post" action="{% url 'accounts:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="requests-btn requests-btn-light w-100">↪ &nbsp; Logout</button>
+                </form>
             </div>
-
-        </div>
-
-
-        <nav class="sidebar-nav">
-
-            <a
-                href="{% url 'dashboard:dashboard' %}"
-                class="nav-item"
-            >
-                🏠
-                Dashboard
-            </a>
-
-            <a
-                href="{% url 'helpdesk:create_request' %}"
-                class="nav-item"
-            >
-                ➕
-                New Request
-            </a>
-
-            <a
-                href="{% url 'helpdesk:requests' %}"
-                class="nav-item active"
-            >
-                📋
-                My Requests
-            </a>
-
-        </nav>
-
-
-      <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-outline-danger">
-        Logout
-    </button>
-</form>
-
-    </aside>
-
-
-    <main class="main-content">
-
-        <div class="topbar">
-
-            <div>
-
-                <h2>
-                    My Requests
-                </h2>
-
-                <p>
-                    Track your help-desk requests.
-                </p>
-
-            </div>
-
-            <a
-                href="{% url 'helpdesk:create_request' %}"
-                class="btn btn-primary"
-            >
-                + New Request
-            </a>
-
-        </div>
-
-
-        <div class="dashboard-card">
-
-            <form
-                method="get"
-                class="d-flex gap-2 mb-4"
-            >
-
-                <input
-                    type="text"
-                    name="q"
-                    value="{{ query }}"
-                    class="form-control"
-                    placeholder="Search ticket or subject..."
-                >
-
-                <button
-                    class="btn btn-outline-primary"
-                    type="submit"
-                >
-                    Search
-                </button>
-
-            </form>
-
-
-            <div class="table-responsive">
-
-                <table class="table align-middle">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>Ticket</th>
-
-                            <th>Subject</th>
-
-                            <th>Department</th>
-
-                            <th>Priority</th>
-
-                            <th>Status</th>
-
-                            <th>Date</th>
-
-                            <th></th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                    {% for item in requests %}
-
-                        <tr>
-
-                            <td>
-                                <strong>
-                                    {{ item.ticket_number }}
-                                </strong>
-                            </td>
-
-                            <td>
-                                {{ item.subject }}
-                            </td>
-
-                            <td>
-                                {{ item.department.name }}
-                            </td>
-
-                            <td>
-                                {{ item.get_priority_display }}
-                            </td>
-
-                            <td>
-
-                                <span class="badge
-                                    {% if item.status == 'PENDING' %}
-                                        bg-warning text-dark
-                                    {% elif item.status == 'IN_PROGRESS' %}
-                                        bg-primary
-                                    {% elif item.status == 'RESOLVED' %}
-                                        bg-success
-                                    {% elif item.status == 'CLOSED' %}
-                                        bg-secondary
-                                    {% else %}
-                                        bg-info
-                                    {% endif %}
-                                ">
-
-                                    {{ item.get_status_display }}
-
-                                </span>
-
-                            </td>
-
-                            <td>
-                                {{ item.created_at|date:"d M Y" }}
-                            </td>
-
-                            <td>
-
-                                <a
-                                    href="{% url 'helpdesk:request_detail' item.ticket_number %}"
-                                    class="btn btn-sm btn-outline-primary"
-                                >
-                                    View
-                                </a>
-
-                            </td>
-
-                        </tr>
-
-                    {% empty %}
-
-                        <tr>
-
-                            <td
-                                colspan="7"
-                                class="text-center py-5"
-                            >
-
-                                <h5>
-                                    No requests found
-                                </h5>
-
-                                <p class="text-muted">
-                                    Create your first help-desk request.
-                                </p>
-
-                                <a
-                                    href="{% url 'helpdesk:create_request' %}"
-                                    class="btn btn-primary"
-                                >
-                                    Create Request
-                                </a>
-
-                            </td>
-
-                        </tr>
-
-                    {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </main>
-
+        </aside>
+
+        <main class="requests-main">
+            <header class="requests-hero">
+                <div>
+                    <div class="requests-eyebrow">Your support center</div>
+                    <h1>My Requests</h1>
+                    <p>Every issue, every update, all in one place.</p>
+                </div>
+                <a href="{% url 'helpdesk:create_request' %}" class="requests-new-btn">＋ Create request</a>
+            </header>
+
+            <section class="requests-stats">
+                <div class="requests-stat">
+                    <div class="requests-stat-top">
+                        <span class="requests-stat-label">Requests displayed</span>
+                        <span class="requests-stat-icon">▤</span>
+                    </div>
+                    <div class="requests-stat-number">{{ requests|length }}</div>
+                    <div class="requests-stat-caption">Matching your current search</div>
+                </div>
+
+                <div class="requests-stat">
+                    <div class="requests-stat-top">
+                        <span class="requests-stat-label">Need attention</span>
+                        <span class="requests-stat-icon">◷</span>
+                    </div>
+                    <div class="requests-stat-number">
+                        {% for item in requests %}
+                            {% if item.status == "PENDING" or item.status == "IN_PROGRESS" %}{{ forloop.counter0|add:0 }}{% endif %}
+                        {% empty %}0{% endfor %}
+                    </div>
+                    <div class="requests-stat-caption">See individual ticket statuses below</div>
+                </div>
+
+                <div class="requests-stat">
+                    <div class="requests-stat-top">
+                        <span class="requests-stat-label">Support access</span>
+                        <span class="requests-stat-icon">✦</span>
+                    </div>
+                    <div class="requests-stat-number" style="font-size:22px">Available</div>
+                    <div class="requests-stat-caption">Create a request whenever you need help</div>
+                </div>
+            </section>
+
+            <section class="requests-card">
+                <div class="requests-card-head">
+                    <div>
+                        <h2>Request history</h2>
+                        <p>Search and open a ticket to view its conversation.</p>
+                    </div>
+                </div>
+
+                <form method="get" class="requests-search">
+                    <input type="text" name="q" value="{{ query|default:'' }}"
+                           placeholder="⌕  Search ticket number or subject..."
+                           aria-label="Search requests">
+                    <button class="requests-btn" type="submit">Search</button>
+                    {% if query %}
+                    <a href="{% url 'helpdesk:requests' %}" class="requests-btn requests-btn-light">Clear</a>
+                    {% endif %}
+                </form>
+
+                <div class="requests-table-wrap">
+                    <table class="requests-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket</th>
+                                <th>Subject</th>
+                                <th>Department</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Date created</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for item in requests %}
+                            <tr>
+                                <td>
+                                    <a class="requests-ticket"
+                                       href="{% url 'helpdesk:request_detail' item.ticket_number %}">
+                                        #{{ item.ticket_number }}
+                                    </a>
+                                </td>
+                                <td><span class="requests-subject">{{ item.subject }}</span></td>
+                                <td><span class="requests-department">{{ item.department.name }}</span></td>
+                                <td>{{ item.get_priority_display }}</td>
+                                <td>
+                                    <span class="requests-status
+                                        {% if item.status == 'PENDING' %}
+                                            requests-status-pending
+                                        {% elif item.status == 'IN_PROGRESS' %}
+                                            requests-status-progress
+                                        {% elif item.status == 'RESOLVED' %}
+                                            requests-status-resolved
+                                        {% elif item.status == 'CLOSED' %}
+                                            requests-status-closed
+                                        {% else %}
+                                            requests-status-other
+                                        {% endif %}">
+                                        {{ item.get_status_display }}
+                                    </span>
+                                </td>
+                                <td><span class="requests-date">{{ item.created_at|date:"d M Y" }}</span></td>
+                                <td>
+                                    <a href="{% url 'helpdesk:request_detail' item.ticket_number %}" class="requests-view">View →</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7">
+                                    <div class="requests-empty">
+                                        <div class="requests-empty-icon">📭</div>
+                                        <h3>{% if query %}No matching requests{% else %}Your story starts here{% endif %}</h3>
+                                        <p>
+                                            {% if query %}
+                                                Try a different ticket number or search term.
+                                            {% else %}
+                                                You haven't submitted a help-desk request yet.
+                                            {% endif %}
+                                        </p>
+                                        {% if query %}
+                                        <a href="{% url 'helpdesk:requests' %}" class="requests-btn requests-btn-light">Clear search</a>
+                                        {% else %}
+                                        <a href="{% url 'helpdesk:create_request' %}" class="requests-btn">Create your first request →</a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="requests-footnote">
+                    For full details, updates, and replies, select the ticket number or click View.
+                </div>
+            </section>
+        </main>
+    </div>
 </div>
-
 {% endblock %}
