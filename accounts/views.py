@@ -39,11 +39,15 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.mail import EmailMultiAlternatives
-from django.shortcuts import render, redirect
+
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import logout
+from helpdesk.models import Department
+from .forms import StudentRegistrationForm, StudentProfileForm
 
-from .forms import StudentRegistrationForm
 
 User = get_user_model()
 
@@ -107,6 +111,7 @@ def register(request):
                 "email": user.email,
                 "phone": user.phone,
                 "password": user.password,
+                "department": user.department_id,
                 "role": User.Roles.STUDENT,
             }
 
@@ -138,6 +143,7 @@ def register(request):
     )
 
 
+
 def verify_email(request):
     pending = request.session.get(PENDING_USER_KEY)
     otp_data = request.session.get(OTP_SESSION_KEY)
@@ -150,6 +156,8 @@ def verify_email(request):
         return redirect("accounts:register")
 
     if request.method == "POST":
+
+        # Resend OTP
         if request.POST.get("action") == "resend":
             try:
                 _send_registration_otp(
@@ -163,16 +171,22 @@ def verify_email(request):
                     "We couldn't send a new code. Please try again.",
                 )
             else:
-                messages.success(request, "A new verification code was sent.")
+                messages.success(
+                    request,
+                    "A new verification code was sent.",
+                )
+
             return redirect("accounts:verify_email")
 
+        # Validate OTP
         otp = request.POST.get("otp", "").strip()
         otp_data = request.session.get(OTP_SESSION_KEY, {})
+
         expiry = (
-    datetime.fromisoformat(otp_data["expires_at"])
-    if otp_data.get("expires_at")
-    else None
-)
+            datetime.fromisoformat(otp_data["expires_at"])
+            if otp_data.get("expires_at")
+            else None
+        )
 
         if expiry is None or timezone.now() >= expiry:
             request.session.pop(OTP_SESSION_KEY, None)
@@ -186,7 +200,9 @@ def verify_email(request):
                 {"email": pending["email"]},
             )
 
+        # Limit incorrect attempts
         attempts = otp_data.get("attempts", 0)
+
         if attempts >= MAX_OTP_ATTEMPTS:
             request.session.pop(OTP_SESSION_KEY, None)
             messages.error(
@@ -199,22 +215,30 @@ def verify_email(request):
                 {"email": pending["email"]},
             )
 
-        if len(otp) != 6 or not otp.isdigit() or not check_password(
-            otp, otp_data["hash"]
+        # Check OTP
+        if (
+            len(otp) != 6
+            or not otp.isdigit()
+            or not check_password(otp, otp_data["hash"])
         ):
             otp_data["attempts"] = attempts + 1
             request.session[OTP_SESSION_KEY] = otp_data
             request.session.modified = True
-            messages.error(request, "That code is incorrect. Please try again.")
+
+            messages.error(
+                request,
+                "That code is incorrect. Please try again.",
+            )
             return render(
                 request,
                 "accounts/verify_email.html",
                 {"email": pending["email"]},
             )
 
-        # Re-check uniqueness in case the email or username was registered
-        # in another session while this verification was pending.
-        if User.objects.filter(username=pending["username"]).exists():
+        # Check username uniqueness
+        if User.objects.filter(
+            username=pending["username"]
+        ).exists():
             messages.error(
                 request,
                 "That student ID is already registered. Please log in.",
@@ -223,7 +247,10 @@ def verify_email(request):
             request.session.pop(OTP_SESSION_KEY, None)
             return redirect("accounts:login")
 
-        if User.objects.filter(email__iexact=pending["email"]).exists():
+        # Check email uniqueness
+        if User.objects.filter(
+            email__iexact=pending["email"]
+        ).exists():
             messages.error(
                 request,
                 "That email is already registered. Please log in.",
@@ -232,26 +259,90 @@ def verify_email(request):
             request.session.pop(OTP_SESSION_KEY, None)
             return redirect("accounts:login")
 
+        # Get the selected active department
+        department = Department.objects.filter(
+            pk=pending.get("department"),
+            is_active=True,
+        ).first()
+
+        if department is None:
+            request.session.pop(PENDING_USER_KEY, None)
+            request.session.pop(OTP_SESSION_KEY, None)
+
+            messages.error(
+                request,
+                "The selected department is unavailable. Please register again.",
+            )
+            return redirect("accounts:register")
+
+        # Create the student account
         user = User(
             first_name=pending["first_name"],
             last_name=pending["last_name"],
             username=pending["username"],
             email=pending["email"],
-            phone=pending["phone"],
+            phone=pending.get("phone", ""),
+            department=department,
             role=User.Roles.STUDENT,
             password=pending["password"],
         )
         user.save()
 
+        # Clear verification session
         request.session.pop(PENDING_USER_KEY, None)
         request.session.pop(OTP_SESSION_KEY, None)
 
+        # Log in the verified student
         login(request, user)
-        messages.success(request, "Email verified! Your account is ready.")
+
+        messages.success(
+            request,
+            "Email verified! Your account is ready.",
+        )
+
         return redirect("dashboard:dashboard")
 
     return render(
         request,
         "accounts/verify_email.html",
         {"email": pending["email"]},
+    )
+
+
+@login_required
+def profile(request):
+    if request.user.role != User.Roles.STUDENT:
+        messages.error(request, "This page is for student accounts only.")
+        return redirect("dashboard:dashboard")
+
+    return render(
+        request,
+        "accounts/profile.html",
+        {"profile_user": request.user},
+    )
+
+
+@login_required
+def edit_profile(request):
+    if request.user.role != User.Roles.STUDENT:
+        messages.error(request, "This page is for student accounts only.")
+        return redirect("dashboard:dashboard")
+
+    if request.method == "POST":
+        form = StudentProfileForm(
+            request.POST,
+            instance=request.user,
+        )
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your profile was updated successfully.")
+            return redirect("accounts:profile")
+    else:
+        form = StudentProfileForm(instance=request.user)
+
+    return render(
+        request,
+        "accounts/edit_profile.html",
+        {"form": form},
     )

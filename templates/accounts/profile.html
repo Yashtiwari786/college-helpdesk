@@ -1,0 +1,30 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>My Profile</h1>
+
+    {% if profile_user.profile_photo %}
+        <img
+            src="{{ profile_user.profile_photo }}"
+            alt="Profile photo"
+            width="120"
+            height="120"
+            style="object-fit: cover; border-radius: 50%;"
+        >
+    {% endif %}
+
+    <p><strong>Student ID:</strong> {{ profile_user.username }}</p>
+    <p><strong>First name:</strong> {{ profile_user.first_name }}</p>
+    <p><strong>Last name:</strong> {{ profile_user.last_name }}</p>
+    <p><strong>Email:</strong> {{ profile_user.email }}</p>
+    <p><strong>Phone:</strong> {{ profile_user.phone|default:"Not provided" }}</p>
+    <p>
+        <strong>Department:</strong>
+        {{ profile_user.department|default:"Not assigned" }}
+    </p>
+
+    <a href="{% url 'accounts:edit_profile' %}">Edit Profile</a>
+</div>
+{% endblock %}

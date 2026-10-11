@@ -20,6 +20,16 @@ class User(AbstractUser):
         db_index=True,
     )
 
+    
+    department = models.ForeignKey(
+        "helpdesk.Department",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="students",
+    )
+
+
     phone = models.CharField(
         max_length=20,
         blank=True,

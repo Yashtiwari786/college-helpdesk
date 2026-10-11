@@ -402,7 +402,16 @@
             font-size: 11px;
             line-height: 1.6;
         }
-
+        .field select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    background: #1e1e2f;
+    color: #fff;
+    font: inherit;
+    box-sizing: border-box;
+}
         .submit-btn {
             position: relative;
             display: flex;
@@ -752,6 +761,18 @@
                             <div class="field-error">{{ error }}</div>
                         {% endfor %}
                     </div>
+
+                    <div class="field">
+    <label for="{{ form.department.id_for_label }}">
+        Department
+    </label>
+
+    {{ form.department }}
+
+    {% for error in form.department.errors %}
+        <p class="error">{{ error }}</p>
+    {% endfor %}
+</div>
 
                     <div class="field">
                         <label for="{{ form.password1.id_for_label }}">Password</label>
