@@ -798,6 +798,17 @@
         <span class="hd-nav-icon">👨‍🏫</span>
         <span>My Department Staff</span>
     </a>
+    
+<a href="{% url 'helpdesk:announcement_list' %}">
+    <span class="hd-nav-icon">📣</span>
+    <span>Announcements</span>
+</a>
+
+<a href="{% url 'helpdesk:faq_list' %}">
+    <span class="hd-nav-icon">❓</span>
+    <span>FAQs</span>
+</a>
+
 {% elif dashboard_type == "staff" %}
     <a href="{% url 'dashboard:department_students' %}">
         <span class="hd-nav-icon">🎓</span>
@@ -806,7 +817,10 @@
     <a href="{% url 'helpdesk:announcement_list' %}" class="btn btn-outline-primary">
     📣 Announcements
 </a>
-
+<a href="{% url 'helpdesk:announcement_create' %}">
+    <span class="hd-nav-icon">➕</span>
+    <span>Publish Announcement</span>
+</a>
 <a href="{% url 'helpdesk:faq_list' %}" class="btn btn-outline-primary">
     ❓ FAQs
 </a>

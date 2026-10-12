@@ -1136,8 +1136,10 @@
             <a href="#about">About Us</a>
             <a href="#services">Services</a>
             <a href="{% url 'department_directory' %}">Faculty &amp; Staff</a>
-            <a href="#news">Campus Updates</a>
-            <a href="#contact">Contact</a>
+            <a href="{% url 'helpdesk:announcement_list' %}">Announcements</a>
+<a href="{% url 'helpdesk:faq_list' %}">FAQs</a>
+
+
             <a href="/accounts/login/" class="nav-login">Login</a>
             <a href="/accounts/register/" class="nav-register">Get Started →</a>
         </nav>
@@ -1171,6 +1173,11 @@
                 <a href="/accounts/login/" class="btn btn-outline">
                     Sign In
                 </a>
+                
+<a href="{% url 'helpdesk:announcement_list' %}" class="btn btn-outline">
+    📣 Campus Updates
+</a>
+
             </div>
 
             <div class="hero-note">
@@ -1402,6 +1409,28 @@
                     </a>
                 </article>
 
+                
+<article class="service-card">
+    <div class="service-icon icon-orange">📣</div>
+    <span class="card-number">04</span>
+
+    <h3>Announcements &amp; FAQs</h3>
+
+    <p>
+        Read college notices, department announcements,
+        and answers to common student questions.
+    </p>
+
+    <a href="{% url 'helpdesk:announcement_list' %}" class="card-link">
+        View Announcements →
+    </a>
+
+    <a href="{% url 'helpdesk:faq_list' %}" class="card-link">
+        Browse FAQs →
+    </a>
+</article>
+
+
             </div>
         </div>
     </section>
@@ -1472,33 +1501,34 @@
                     </p>
                 </div>
 
-                <a href="/accounts/login/" class="text-link">
-                    Open Your Dashboard →
-                </a>
+               
+
+
             </div>
 
             <div class="news-grid">
 
                 <article class="news-card">
                     <img
-                        src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=900&q=85"
+                        src="https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&w=900&q=85"
                         alt="Students at a university campus"
                         loading="lazy"
                     >
 
                     <div class="news-body">
-                        <span class="news-tag">STUDENT SUPPORT</span>
+                        <span class="news-tag">Events & Announcements</span>
 
                         <h3>Your Campus Support Starts Here</h3>
 
                         <p>
-                            Use the help desk to organize concerns and
-                            follow up on submitted requests.
+                            Read the latest college announcements and
+                            department notices to stay informed about
+                            campus updates.
                         </p>
 
-                        <a href="/accounts/register/" class="card-link">
-                            Get Started →
-                        </a>
+                       <a href="{% url 'helpdesk:announcement_list' %}" class="text-link">
+    Read Announcements →
+</a>
                     </div>
                 </article>
 
