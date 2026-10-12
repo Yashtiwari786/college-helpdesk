@@ -1,139 +1,280 @@
+
 {% extends "base.html" %}
 
 {% block content %}
 
-<div class="container-fluid py-4">
+<style>
+    .students-page {
+        animation: pageEnter .45s ease both;
+    }
 
-    <div class="d-flex justify-content-between mb-4">
+    @keyframes pageEnter {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-        <div>
-            <h2 class="fw-bold">
-                Students
-            </h2>
+    .students-hero {
+        padding: 26px;
+        color: white;
+        border-radius: 18px;
+        background: linear-gradient(120deg, #253575, #6254e8, #9065ed);
+        box-shadow: 0 12px 28px rgba(72, 65, 180, .15);
+    }
 
-            <p class="text-muted">
-                Manage registered students
+    .students-hero p {
+        margin-bottom: 0;
+        color: #ecebff;
+    }
+
+    .student-table-card {
+        overflow: hidden;
+        border: 1px solid #e8eaf3;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 8px 25px rgba(25, 35, 70, .05);
+    }
+
+    .student-table-card tbody tr {
+        transition: background .2s;
+    }
+
+    .student-table-card tbody tr:hover {
+        background: #f7f7ff;
+    }
+
+    .student-avatar {
+        display: inline-flex;
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 12px;
+        color: #5145d8;
+        background: #eeecff;
+        font-weight: 800;
+    }
+
+    .student-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .student-name {
+        color: #202a49;
+        font-weight: 750;
+    }
+
+    .student-username {
+        color: #7c849b;
+        font-size: 12px;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 11px;
+        margin: 2px;
+        border: 1px solid transparent;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 12px rgba(30, 40, 80, .1);
+    }
+
+    .view-btn {
+        color: #5145d8;
+        border-color: #dcd8ff;
+        background: #f1efff;
+    }
+
+    .edit-btn {
+        color: #087a58;
+        border-color: #ccefe0;
+        background: #eafaf3;
+    }
+
+    .student-search {
+        border-radius: 10px 0 0 10px !important;
+        min-height: 44px;
+    }
+
+    .search-btn {
+        border-radius: 0 10px 10px 0 !important;
+    }
+
+    @media (max-width: 768px) {
+        .students-hero { padding: 21px; }
+        .action-btn { padding: 8px; }
+    }
+</style>
+
+<div class="container-fluid py-4 students-page">
+
+    <!-- PAGE HEADER -->
+    <div class="students-hero mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <div class="small fw-bold mb-2">ADMINISTRATION / STUDENTS</div>
+                <h2 class="fw-bold mb-2">Student Management</h2>
+                <p>View student profiles, manage account details, and update records.</p>
+            </div>
+
+            <div class="text-white">
+                <span class="badge rounded-pill text-bg-light px-3 py-2">
+                    {{ students|length }} student{{ students|length|pluralize }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius:16px;">
+        <div class="card-body p-3 p-md-4">
+            <form method="GET">
+                <label for="student-search" class="form-label fw-semibold">
+                    Search students
+                </label>
+
+                <div class="input-group">
+                    <input
+                        id="student-search"
+                        type="text"
+                        name="search"
+                        value="{{ search|default:'' }}"
+                        class="form-control student-search"
+                        placeholder="Search name, username or email..."
+                    >
+
+                    <button type="submit" class="btn btn-primary search-btn px-4">
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- STUDENT TABLE -->
+    <div class="student-table-card">
+        <div class="p-3 p-md-4 border-bottom">
+            <h5 class="fw-bold mb-1">Student Directory</h5>
+            <p class="text-muted small mb-0">
+                Select View Profile to see an individual student's details.
             </p>
         </div>
 
-    </div>
-
-
-    <div class="card border-0 shadow-sm mb-4">
-
-        <div class="card-body">
-
-            <form method="GET">
-
-                <div class="input-group">
-
-                    <input
-                        type="text"
-                        name="search"
-                        value="{{ search }}"
-                        class="form-control"
-                        placeholder="Search students..."
-                    >
-
-                    <button class="btn btn-primary">
-                        Search
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    <div class="card border-0 shadow-sm">
-
         <div class="table-responsive">
-
-            <table class="table table-hover mb-0">
-
-                <thead>
-
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
                     <tr>
-                        <th>Name</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Status</th>
+                        <th class="px-3 py-3">Student</th>
+                        <th class="py-3">Email</th>
+                        <th class="py-3">Phone</th>
+                        <th class="py-3">Department</th>
+                        <th class="py-3">Status</th>
+                        <th class="py-3 text-nowrap">Actions</th>
                     </tr>
-
                 </thead>
 
                 <tbody>
-
                     {% for student in students %}
-
                     <tr>
+                        <td class="px-3 py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="student-avatar">
+                                    {% if student.profile_photo %}
+                                        <img
+                                            src="{{ student.profile_photo.url }}"
+                                            alt="{{ student.username }} profile photo"
+                                        >
+                                    {% else %}
+                                        {{ student.first_name|first|default:student.username|first|upper }}
+                                    {% endif %}
+                                </div>
 
-                        <td>
-                            {{ student.get_full_name|default:"-" }}
+                                <div>
+                                    <div class="student-name">
+                                        {{ student.get_full_name|default:student.username }}
+                                    </div>
+                                    <div class="student-username">
+                                        @{{ student.username }}
+                                    </div>
+                                </div>
+                            </div>
                         </td>
 
-                        <td>
-                            {{ student.username }}
-                        </td>
+                        <td>{{ student.email|default:"-" }}</td>
+                        <td>{{ student.phone|default:"-" }}</td>
 
                         <td>
-                            {{ student.email }}
-                        </td>
-
-                        <td>
-                            {{ student.phone|default:"-" }}
-                        </td>
-
-                        <td>
-
-                            {% if student.is_active %}
-
-                                <span class="badge bg-success">
-                                    Active
+                            {% if student.department %}
+                                <span class="badge rounded-pill text-bg-light border">
+                                    {{ student.department.name }}
                                 </span>
-
                             {% else %}
-
-                                <span class="badge bg-danger">
-                                    Disabled
-                                </span>
-
+                                <span class="text-muted">Not assigned</span>
                             {% endif %}
-
                         </td>
 
+                        <td>
+                            {% if student.is_active %}
+                                <span class="badge rounded-pill text-bg-success">Active</span>
+                            {% else %}
+                                <span class="badge rounded-pill text-bg-danger">Disabled</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-wrap align-items-center">
+                                <a
+                                    class="action-btn view-btn"
+                                    href="{% url 'dashboard:student_detail' student.id %}"
+                                >
+                                    View Profile
+                                </a>
+
+                                <a
+                                    class="action-btn edit-btn"
+                                    href="{% url 'dashboard:student_edit' student.id %}"
+                                >
+                                    Edit
+                                </a>
+                            </div>
+                        </td>
                     </tr>
 
                     {% empty %}
-
                     <tr>
-
-                        <td colspan="5"
-                            class="text-center py-4">
-
-                            No students found.
-
+                        <td colspan="6" class="text-center py-5">
+                            <div class="fs-2 mb-2">🎓</div>
+                            <h6 class="fw-bold">No students found</h6>
+                            <p class="text-muted small mb-0">
+                                Try a different search term.
+                            </p>
                         </td>
-
                     </tr>
-
                     {% endfor %}
-
                 </tbody>
-
             </table>
-
         </div>
-
     </div>
+
+    <!-- BACK BUTTON -->
     <div class="mt-4">
         <a href="{% url 'helpdesk:admin_dashboard' %}"
-           class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Admin Dashboard
+           class="btn btn-outline-secondary rounded-3 px-3 py-2">
+            <i class="bi bi-arrow-left"></i>
+            Back to Admin Dashboard
         </a>
     </div>
 

@@ -1,0 +1,103 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card border-0 shadow-sm mx-auto" style="max-width: 850px; border-radius: 20px;">
+        <div class="card-body p-4 p-md-5">
+            <a href="{% url 'dashboard:student_list' %}"
+               class="btn btn-outline-secondary mb-4">
+                ← Back to Students
+            </a>
+
+            <h2 class="fw-bold mb-2">
+                {% if student %}Edit Student Profile{% else %}Create Student{% endif %}
+            </h2>
+            <p class="text-muted mb-4">
+                Manage the student's account and department information.
+            </p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Username *</label>
+                        <input class="form-control" name="username"
+                               value="{{ student.username|default:'' }}" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Email *</label>
+                        <input type="email" class="form-control" name="email"
+                               value="{{ student.email|default:'' }}" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">First Name</label>
+                        <input class="form-control" name="first_name"
+                               value="{{ student.first_name|default:'' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Last Name</label>
+                        <input class="form-control" name="last_name"
+                               value="{{ student.last_name|default:'' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Phone</label>
+                        <input class="form-control" name="phone"
+                               value="{{ student.phone|default:'' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Department</label>
+                        <select class="form-select" name="department">
+                            <option value="">No department</option>
+                            {% for department in departments %}
+                                <option value="{{ department.pk }}"
+                                    {% if student.department_id == department.pk %}selected{% endif %}>
+                                    {{ department.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Profile Photo</label>
+                        <input type="file" class="form-control"
+                               name="profile_photo" accept="image/*">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            {% if student %}New Password (optional){% else %}Password *{% endif %}
+                        </label>
+                        <input type="password" class="form-control" name="password"
+                               {% if not student %}required{% endif %}>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary px-4">
+                        {% if student %}Save Changes{% else %}Create Student{% endif %}
+                    </button>
+                    <a href="{% url 'dashboard:student_list' %}"
+                       class="btn btn-light border">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

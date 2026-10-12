@@ -10,7 +10,7 @@ from django.contrib import messages
 
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, query
 
 
 
@@ -303,11 +303,16 @@ def student_list(request):
             | Q(email__icontains=query)
         )
 
+    
     return render(
-        request,
-        "admin_panel/students/list.html",
-        {"students": students, "query": query},
-    )
+    request,
+    "admin_panel/students.html",
+    {
+        "students": students,
+        "search": query,
+        "query": query,
+    },
+)
 
 
 @login_required
@@ -369,6 +374,29 @@ def student_create(request):
         "admin_panel/students/form.html",
         {"departments": departments, "student": None, "page_title": "Create Student"},
     )
+
+
+@login_required
+def student_detail(request, student_id):
+    if request.user.role != User.Roles.ADMIN:
+        return redirect("dashboard:dashboard")
+
+    student = get_object_or_404(
+        User.objects.select_related("department"),
+        pk=student_id,
+        role=User.Roles.STUDENT,
+    )
+
+    return render(
+        request,
+        "admin_panel/students/detail.html",
+        {
+            "student": student,
+            "title": "Student Profile",
+        },
+    )
+
+
 
 
 @login_required
@@ -451,3 +479,6 @@ def student_delete(request, student_id):
     student.delete()
     messages.success(request, "Student account deleted successfully.")
     return redirect("dashboard:student_list")
+
+
+
