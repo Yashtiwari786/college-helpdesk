@@ -1,0 +1,230 @@
+
+{% extends "base.html" %}
+
+{% block title %}Department Students | College Help Desk{% endblock %}
+
+{% block content %}
+<style>
+.directory-page {
+    max-width: 1250px;
+    margin: auto;
+    padding: 28px 20px 50px;
+    color: #202b48;
+}
+.directory-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    margin-bottom: 22px;
+    border: 1px solid #e0e5f1;
+    border-radius: 12px;
+    background: white;
+    color: #4655bd;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 5px 18px #202b4808;
+}
+.directory-back:hover { background: #eef0ff; color: #303cae; }
+.directory-hero {
+    padding: 30px;
+    border-radius: 23px;
+    color: white;
+    background: linear-gradient(115deg,#1d2d69,#4e59d9 65%,#8150e9);
+    margin-bottom: 22px;
+}
+.directory-eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    opacity: .8;
+}
+.directory-hero h1 { font-size: clamp(25px,4vw,34px); font-weight: 850; margin: 10px 0; }
+.directory-hero p { margin: 0; opacity: .85; }
+.directory-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 23px 0 18px;
+}
+.directory-toolbar h2 { font-size: 20px; font-weight: 800; margin: 0; }
+.directory-count {
+    display: inline-flex;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: #eef0ff;
+    color: #4d57ce;
+    font-size: 12px;
+    font-weight: 800;
+}
+.directory-search { display: flex; gap: 9px; margin-bottom: 22px; }
+.directory-search input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid #dfe5f0;
+    border-radius: 12px;
+    background: white;
+}
+.directory-search input:focus { outline: 2px solid #dfe2ff; border-color: #6872e8; }
+.directory-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 15px;
+    border: 0;
+    border-radius: 11px;
+    background: linear-gradient(110deg,#4b5adc,#7950e8);
+    color: white;
+    font-size: 13px;
+    font-weight: 750;
+    text-decoration: none;
+    cursor: pointer;
+}
+.directory-btn:hover { color: white; opacity: .9; }
+.directory-grid {
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 17px;
+}
+.directory-person {
+    min-width: 0;
+    padding: 22px;
+    border: 1px solid #e5e9f3;
+    border-radius: 19px;
+    background: white;
+    box-shadow: 0 10px 28px #202b4808;
+    transition: transform .2s, box-shadow .2s;
+}
+.directory-person:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 35px #202b4812;
+}
+.directory-person-top { display: flex; align-items: center; gap: 13px; }
+.directory-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg,#e9ecff,#f2e9ff);
+    color: #4a54c8;
+    font-size: 20px;
+    font-weight: 850;
+    overflow: hidden;
+}
+.directory-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.directory-person h3 { font-size: 15px; font-weight: 800; margin: 0 0 5px; overflow-wrap: anywhere; }
+.directory-person small { color: #78849a; font-size: 12px; }
+.directory-divider { height: 1px; background: #edf0f6; margin: 19px 0; }
+.directory-detail { display: flex; gap: 10px; margin: 11px 0; font-size: 12px; overflow-wrap: anywhere; }
+.directory-detail-label { color: #78849a; width: 64px; flex-shrink: 0; }
+.directory-detail-value { color: #303c57; font-weight: 600; }
+.directory-empty {
+    grid-column: 1/-1;
+    padding: 45px 20px;
+    border: 1px dashed #d9dfec;
+    border-radius: 20px;
+    background: white;
+    text-align: center;
+}
+.directory-empty-icon { font-size: 34px; margin-bottom: 10px; }
+.directory-empty h3 { font-size: 18px; font-weight: 800; }
+.directory-empty p { color: #78849a; font-size: 13px; }
+@media(max-width:900px) { .directory-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) {
+    .directory-page { padding: 17px 10px 35px; }
+    .directory-hero { padding: 23px 19px; }
+    .directory-grid { grid-template-columns: 1fr; }
+    .directory-toolbar { align-items: flex-start; }
+    .directory-search { flex-wrap: wrap; }
+    .directory-search input { flex-basis: 100%; }
+    .directory-search button { flex: 1; }
+}
+</style>
+
+<div class="directory-page">
+    <a href="{% url 'dashboard:dashboard' %}" class="directory-back">
+        ← Back to Dashboard
+    </a>
+
+    <header class="directory-hero">
+        <div class="directory-eyebrow">Staff workspace</div>
+        <h1>Department Students</h1>
+        <p>
+            {% if department %}
+                Students belonging to {{ department.name }}.
+            {% else %}
+                Your account has not been assigned to a department yet.
+            {% endif %}
+        </p>
+    </header>
+
+    <div class="directory-toolbar">
+        <h2>Student directory</h2>
+        <span class="directory-count">{{ students|length }} students</span>
+    </div>
+
+    <form method="get" class="directory-search">
+        <input type="search" name="q" value="{{ query|default:'' }}"
+               placeholder="Search by student name, username or email..."
+               aria-label="Search students">
+        <button class="directory-btn" type="submit">⌕ Search</button>
+        {% if query %}
+            <a class="directory-back" href="{% url 'dashboard:department_students' %}">Clear</a>
+        {% endif %}
+    </form>
+
+    <section class="directory-grid">
+        {% for student in students %}
+            <article class="directory-person">
+                <div class="directory-person-top">
+                    <div class="directory-avatar">
+                        {% if student.profile_photo %}
+                            <img src="{{ student.profile_photo.url }}" alt="Student profile photo">
+                        {% else %}
+                            {{ student.first_name|first|default:student.username|first|upper }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3>{{ student.get_full_name|default:student.username }}</h3>
+                        <small>Student · {{ student.username }}</small>
+                    </div>
+                </div>
+
+                <div class="directory-divider"></div>
+
+                <div class="directory-detail">
+                    <span class="directory-detail-label">Email</span>
+                    <span class="directory-detail-value">{{ student.email|default:"Not provided" }}</span>
+                </div>
+                <div class="directory-detail">
+                    <span class="directory-detail-label">Phone</span>
+                    <span class="directory-detail-value">{{ student.phone|default:"Not provided" }}</span>
+                </div>
+                <div class="directory-detail">
+                    <span class="directory-detail-label">Joined</span>
+                    <span class="directory-detail-value">{{ student.date_joined|date:"d M Y" }}</span>
+                </div>
+            </article>
+        {% empty %}
+            <div class="directory-empty">
+                <div class="directory-empty-icon">🎓</div>
+                <h3>No students found</h3>
+                <p>
+                    {% if query %}
+                        Try another name or email address.
+                    {% else %}
+                        No students are assigned to your department yet.
+                    {% endif %}
+                </p>
+            </div>
+        {% endfor %}
+    </section>
+</div>
+{% endblock %}

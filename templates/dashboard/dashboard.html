@@ -788,9 +788,21 @@
                     <span class="hd-nav-icon">✏️</span>
                     <span>Edit Profile</span>
                 </a>
+                
+
 
             {% endif %}
-
+{% if dashboard_type == "student" %}
+    <a href="{% url 'dashboard:department_staff' %}">
+        <span class="hd-nav-icon">👨‍🏫</span>
+        <span>My Department Staff</span>
+    </a>
+{% elif dashboard_type == "staff" %}
+    <a href="{% url 'dashboard:department_students' %}">
+        <span class="hd-nav-icon">🎓</span>
+        <span>Department Students</span>
+    </a>
+{% endif %}
             {% if dashboard_type == "staff" %}
 
                 <a href="{% url 'helpdesk:staff_requests' %}">
@@ -1009,7 +1021,7 @@
                             <small>Report an issue</small>
                         </span>
                     </a>
-
+                   
                     <a
                         href="{% url 'helpdesk:requests' %}"
                         class="hd-action-link"
@@ -1031,6 +1043,17 @@
                             <small>Update your details</small>
                         </span>
                     </a>
+                    
+{% if dashboard_type == "student" %}
+    <a href="{% url 'dashboard:department_staff' %}">
+        View My Department Staff →
+    </a>
+{% elif dashboard_type == "staff" %}
+    <a href="{% url 'dashboard:department_students' %}">
+        View Department Students →
+    </a>
+{% endif %}
+
 
                 </div>
             </section>
@@ -1185,7 +1208,28 @@
 
             </section>
 
+          
+            <section class="hd-card">
+    <div class="hd-card-header">
+        <div>
+            <h3 class="hd-card-title">Department Directory</h3>
+            <p class="hd-card-description">
+                View students assigned to your department.
+            </p>
+        </div>
+    </div>
 
+    <div class="hd-quick-actions">
+        <a href="{% url 'dashboard:department_students' %}"
+           class="hd-action-link">
+            <span class="hd-action-icon">🎓</span>
+            <span>
+                <strong>View Department Students</strong>
+                <small>See student details for your department</small>
+            </span>
+        </a>
+    </div>
+</section>
             <section class="hd-card">
                 <div class="hd-card-header">
                     <div>

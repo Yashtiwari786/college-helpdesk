@@ -1,0 +1,154 @@
+
+{% extends "base.html" %}
+
+{% block title %}My Department Staff | College Help Desk{% endblock %}
+
+{% block content %}
+<style>
+.staff-directory {
+    max-width: 1250px;
+    margin: auto;
+    padding: 28px 20px 50px;
+    color: #202b48;
+}
+.staff-back {
+    display: inline-flex;
+    padding: 10px 15px;
+    margin-bottom: 22px;
+    border: 1px solid #e0e5f1;
+    border-radius: 12px;
+    background: white;
+    color: #4655bd;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+.staff-back:hover { background: #eef0ff; color: #303cae; }
+.staff-hero {
+    padding: 30px;
+    border-radius: 23px;
+    color: white;
+    background: linear-gradient(115deg,#153e49,#168c9d 58%,#5266dc);
+    margin-bottom: 24px;
+}
+.staff-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase; opacity: .8; }
+.staff-hero h1 { font-size: clamp(25px,4vw,34px); font-weight: 850; margin: 10px 0; }
+.staff-hero p { margin: 0; opacity: .87; }
+.staff-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 23px 0 18px; }
+.staff-section-heading h2 { font-size: 20px; font-weight: 800; margin: 0; }
+.staff-count { background: #e0f7f6; color: #147e83; border-radius: 999px; padding: 7px 11px; font-size: 12px; font-weight: 800; }
+.staff-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 17px; }
+.staff-card {
+    padding: 23px;
+    background: white;
+    border: 1px solid #e5e9f3;
+    border-radius: 19px;
+    box-shadow: 0 10px 28px #202b4808;
+    transition: transform .2s, box-shadow .2s;
+}
+.staff-card:hover { transform: translateY(-3px); box-shadow: 0 16px 35px #202b4812; }
+.staff-card-top { display: flex; align-items: center; gap: 13px; }
+.staff-avatar {
+    width: 56px; height: 56px; flex: 0 0 56px;
+    display: grid; place-items: center;
+    border-radius: 17px;
+    overflow: hidden;
+    background: linear-gradient(135deg,#dcf8f3,#e9edff);
+    color: #147e83;
+    font-size: 21px;
+    font-weight: 850;
+}
+.staff-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.staff-card h3 { font-size: 15px; font-weight: 800; margin: 0 0 5px; overflow-wrap: anywhere; }
+.staff-designation { color: #168c9d; font-size: 12px; font-weight: 700; }
+.staff-divider { height: 1px; background: #edf0f6; margin: 19px 0; }
+.staff-detail { display: flex; gap: 10px; margin: 12px 0; font-size: 12px; overflow-wrap: anywhere; }
+.staff-detail-label { color: #78849a; width: 60px; flex-shrink: 0; }
+.staff-detail-value { color: #303c57; font-weight: 600; }
+.staff-empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 45px 20px;
+    background: white;
+    border: 1px dashed #d9dfec;
+    border-radius: 20px;
+}
+.staff-empty h3 { font-size: 18px; font-weight: 800; }
+.staff-empty p { color: #78849a; font-size: 13px; }
+@media(max-width:900px) { .staff-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) {
+    .staff-directory { padding: 17px 10px 35px; }
+    .staff-hero { padding: 23px 19px; }
+    .staff-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="staff-directory">
+    <a href="{% url 'dashboard:dashboard' %}" class="staff-back">
+        ← Back to Dashboard
+    </a>
+
+    <header class="staff-hero">
+        <div class="staff-eyebrow">Your academic support team</div>
+        <h1>My Department Staff</h1>
+        <p>
+            {% if department %}
+                Find staff members and contact details for {{ department.name }}.
+            {% else %}
+                Your account has not been assigned to a department yet.
+            {% endif %}
+        </p>
+    </header>
+
+    <div class="staff-section-heading">
+        <h2>Meet your staff</h2>
+        <span class="staff-count">{{ staff_members|length }} members</span>
+    </div>
+
+    <section class="staff-grid">
+        {% for member in staff_members %}
+            <article class="staff-card">
+                <div class="staff-card-top">
+                    <div class="staff-avatar">
+                        {% if member.profile_photo %}
+                            <img src="{{ member.profile_photo.url }}" alt="Staff profile photo">
+                        {% else %}
+                            {{ member.first_name|first|default:member.username|first|upper }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3>{{ member.get_full_name|default:member.username }}</h3>
+                        <div class="staff-designation">Department Staff</div>
+                    </div>
+                </div>
+
+                <div class="staff-divider"></div>
+
+                <div class="staff-detail">
+                    <span class="staff-detail-label">Email</span>
+                    <span class="staff-detail-value">{{ member.email|default:"Not provided" }}</span>
+                </div>
+                <div class="staff-detail">
+                    <span class="staff-detail-label">Phone</span>
+                    <span class="staff-detail-value">{{ member.phone|default:"Not provided" }}</span>
+                </div>
+                <div class="staff-detail">
+                    <span class="staff-detail-label">Dept.</span>
+                    <span class="staff-detail-value">{{ member.department.name|default:"Not assigned" }}</span>
+                </div>
+            </article>
+        {% empty %}
+            <div class="staff-empty">
+                <h3>No staff members listed yet</h3>
+                <p>
+                    {% if department %}
+                        Please check back later or contact your help desk administrator.
+                    {% else %}
+                        Ask your administrator to assign your account to a department.
+                    {% endif %}
+                </p>
+            </div>
+        {% endfor %}
+    </section>
+</div>
+{% endblock %}
