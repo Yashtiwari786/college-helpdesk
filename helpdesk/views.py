@@ -7,11 +7,8 @@ from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db import models
-
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.db.models import Q
-
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from .forms import (
@@ -23,44 +20,29 @@ from .forms import (
     DepartmentForm,
     CategoryForm,
 )
-
-from .models import Request, Attachment, Message, Notification
-from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import (
     get_object_or_404,
     redirect,
     render,
 )
-
-from .forms import (
-    FeedbackForm,
-    MessageForm,
-    RequestForm,
-)
-
 from .models import (
     Attachment,
     Feedback,
+    Message,
     Notification,
     Request,
     Department,
     Category,
-    Announcement, StaffProfile
+    Announcement, AnnouncementAttachment, StaffProfile, FAQ
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
+import os
+from datetime import datetime
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.utils import timezone
+from django.views.decorators.http import require_http_methods
 
 
 def student_required(view_func):
@@ -1366,3 +1348,500 @@ def faculty_directory(request):
             "staff_profiles": staff_profiles,
         },
     )
+
+
+
+# =========================================================
+# ANNOUNCEMENTS AND FAQS
+# =========================================================
+
+ANNOUNCEMENT_MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB per file
+
+ANNOUNCEMENT_ALLOWED_EXTENSIONS = {
+    ".jpg", ".jpeg", ".png", ".webp",
+    ".pdf",
+    ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+    ".mp4", ".mov", ".webm",
+}
+
+
+def get_staff_department(user):
+    """
+    StaffProfile.department is the primary assignment.
+    Fall back to User.department if no profile department is assigned.
+    """
+    profile = getattr(user, "staff_profile", None)
+
+    if profile and profile.department_id:
+        return profile.department
+
+    if getattr(user, "department_id", None):
+        return user.department
+
+    return None
+
+
+def announcement_is_visible(announcement):
+    return (
+        announcement.is_active
+        and (
+            announcement.expires_at is None
+            or announcement.expires_at > timezone.now()
+        )
+    )
+
+
+def visible_announcements_for(user):
+    announcements = Announcement.objects.filter(
+        is_active=True,
+    ).filter(
+        models.Q(expires_at__isnull=True)
+        | models.Q(expires_at__gt=timezone.now())
+    ).select_related(
+        "department", "created_by",
+    ).prefetch_related(
+        "attachments",
+    )
+
+    if user.role == User.Roles.ADMIN:
+        return announcements
+
+    if user.role == User.Roles.STAFF:
+        department = get_staff_department(user)
+    elif user.role == User.Roles.STUDENT:
+        department = user.department
+    else:
+        return Announcement.objects.none()
+
+    # Department-specific announcements plus college-wide notices.
+    if department:
+        return announcements.filter(
+            models.Q(department=department)
+            | models.Q(department__isnull=True)
+        )
+
+    # Unassigned users see only college-wide announcements.
+    return announcements.filter(department__isnull=True)
+
+
+def validate_announcement_uploads(uploaded_files):
+    errors = []
+
+    for uploaded_file in uploaded_files:
+        extension = os.path.splitext(uploaded_file.name)[1].lower()
+
+        if extension not in ANNOUNCEMENT_ALLOWED_EXTENSIONS:
+            errors.append(
+                f"{uploaded_file.name}: this file type is not allowed."
+            )
+
+        if uploaded_file.size > ANNOUNCEMENT_MAX_FILE_SIZE:
+            errors.append(
+                f"{uploaded_file.name}: maximum file size is 10 MB."
+            )
+
+    return errors
+
+
+@login_required
+def announcement_list(request):
+    announcements = visible_announcements_for(request.user)
+
+    query = request.GET.get("q", "").strip()
+    if query:
+        announcements = announcements.filter(
+            models.Q(title__icontains=query)
+            | models.Q(message__icontains=query)
+            | models.Q(department__name__icontains=query)
+        )
+
+    return render(request, "helpdesk/announcements.html", {
+        "announcements": announcements,
+        "query": query,
+    })
+
+
+@login_required
+def announcement_create(request):
+    is_admin = request.user.role == User.Roles.ADMIN
+    is_staff = request.user.role == User.Roles.STAFF
+
+    if not (is_admin or is_staff):
+        messages.error(request, "You cannot create announcements.")
+        return redirect("helpdesk:announcement_list")
+
+    staff_department = None
+    if is_staff:
+        staff_department = get_staff_department(request.user)
+
+        if staff_department is None:
+            messages.error(
+                request,
+                "Your account has no assigned department. Contact an administrator.",
+            )
+            return redirect("helpdesk:announcement_list")
+
+    departments = Department.objects.filter(is_active=True).order_by("name")
+
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        message_text = request.POST.get("message", "").strip()
+        department_id = request.POST.get("department", "").strip()
+        expires_value = request.POST.get("expires_at", "").strip()
+        uploaded_files = request.FILES.getlist("attachments")
+
+        errors = []
+
+        if not title:
+            errors.append("Enter an announcement title.")
+        if not message_text:
+            errors.append("Enter the announcement message.")
+
+        if is_staff:
+            department = staff_department
+        elif department_id:
+            department = departments.filter(pk=department_id).first()
+            if department is None:
+                errors.append("Select a valid active department.")
+        else:
+            # Admin can publish college-wide announcements.
+            department = None
+
+        errors.extend(validate_announcement_uploads(uploaded_files))
+
+        expires_at = None
+        if expires_value:
+            try:
+                expires_at = datetime.fromisoformat(expires_value)
+                if timezone.is_naive(expires_at):
+                    expires_at = timezone.make_aware(
+                        expires_at, timezone.get_current_timezone()
+                    )
+                if expires_at <= timezone.now():
+                    errors.append("Expiry must be in the future.")
+            except ValueError:
+                errors.append("Enter a valid expiry date and time.")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+
+            return render(request, "helpdesk/announcement_form.html", {
+                "departments": departments,
+                "is_admin": is_admin,
+            })
+
+        announcement = Announcement.objects.create(
+            title=title,
+            message=message_text,
+            department=department,
+            created_by=request.user,
+            is_active=True,  # Staff publishing is immediate.
+            is_pinned=(
+                is_admin and request.POST.get("is_pinned") == "on"
+            ),
+            expires_at=expires_at,
+        )
+
+        upload_errors = []
+        for uploaded_file in uploaded_files:
+            try:
+                AnnouncementAttachment.objects.create(
+                    announcement=announcement,
+                    file=uploaded_file,
+                    original_name=uploaded_file.name,
+                )
+            except Exception:
+                logger.exception(
+                    "Announcement attachment upload failed: %s",
+                    uploaded_file.name,
+                )
+                upload_errors.append(uploaded_file.name)
+
+        if upload_errors:
+            messages.warning(
+                request,
+                "Announcement published, but these uploads failed: "
+                + ", ".join(upload_errors),
+            )
+        else:
+            messages.success(request, "Announcement published successfully.")
+
+        return redirect("helpdesk:announcement_list")
+
+    return render(request, "helpdesk/announcement_form.html", {
+        "departments": departments,
+        "is_admin": is_admin,
+    })
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def announcement_edit(request, announcement_id):
+    announcement = get_object_or_404(
+        Announcement.objects.prefetch_related("attachments"),
+        pk=announcement_id,
+    )
+
+    is_admin = request.user.role == User.Roles.ADMIN
+    is_staff = request.user.role == User.Roles.STAFF
+
+    if is_staff:
+        department = get_staff_department(request.user)
+        allowed = (
+            announcement.created_by_id == request.user.pk
+            and department is not None
+            and announcement.department_id == department.pk
+        )
+    else:
+        allowed = is_admin
+
+    if not allowed:
+        messages.error(request, "You cannot edit this announcement.")
+        return redirect("helpdesk:announcement_list")
+
+    departments = Department.objects.filter(is_active=True).order_by("name")
+
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        message_text = request.POST.get("message", "").strip()
+        department_id = request.POST.get("department", "").strip()
+        expires_value = request.POST.get("expires_at", "").strip()
+        uploaded_files = request.FILES.getlist("attachments")
+
+        errors = []
+        if not title:
+            errors.append("Enter an announcement title.")
+        if not message_text:
+            errors.append("Enter the announcement message.")
+
+        if is_staff:
+            department = get_staff_department(request.user)
+        elif department_id:
+            department = departments.filter(pk=department_id).first()
+            if department is None:
+                errors.append("Select a valid active department.")
+        else:
+            department = None
+
+        errors.extend(validate_announcement_uploads(uploaded_files))
+
+        expires_at = None
+        if expires_value:
+            try:
+                expires_at = datetime.fromisoformat(expires_value)
+                if timezone.is_naive(expires_at):
+                    expires_at = timezone.make_aware(
+                        expires_at, timezone.get_current_timezone()
+                    )
+                if expires_at <= timezone.now():
+                    errors.append("Expiry must be in the future.")
+            except ValueError:
+                errors.append("Enter a valid expiry date and time.")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+        else:
+            announcement.title = title
+            announcement.message = message_text
+            announcement.department = department
+            announcement.expires_at = expires_at
+            announcement.is_active = request.POST.get("is_active") == "on"
+
+            if is_admin:
+                announcement.is_pinned = request.POST.get("is_pinned") == "on"
+
+            announcement.save()
+
+            upload_errors = []
+            for uploaded_file in uploaded_files:
+                try:
+                    AnnouncementAttachment.objects.create(
+                        announcement=announcement,
+                        file=uploaded_file,
+                        original_name=uploaded_file.name,
+                    )
+                except Exception:
+                    logger.exception(
+                        "Announcement attachment upload failed: %s",
+                        uploaded_file.name,
+                    )
+                    upload_errors.append(uploaded_file.name)
+
+            if upload_errors:
+                messages.warning(
+                    request,
+                    "Announcement saved, but some uploads failed: "
+                    + ", ".join(upload_errors),
+                )
+            else:
+                messages.success(request, "Announcement updated successfully.")
+
+            return redirect("helpdesk:announcement_list")
+
+    return render(request, "helpdesk/announcement_form.html", {
+        "announcement": announcement,
+        "departments": departments,
+        "is_admin": is_admin,
+    })
+
+
+@login_required
+@require_POST
+def announcement_delete(request, announcement_id):
+    announcement = get_object_or_404(Announcement, pk=announcement_id)
+
+    is_admin = request.user.role == User.Roles.ADMIN
+    is_staff = request.user.role == User.Roles.STAFF
+
+    if is_staff:
+        department = get_staff_department(request.user)
+        allowed = (
+            announcement.created_by_id == request.user.pk
+            and department is not None
+            and announcement.department_id == department.pk
+        )
+    else:
+        allowed = is_admin
+
+    if not allowed:
+        messages.error(request, "You cannot delete this announcement.")
+        return redirect("helpdesk:announcement_list")
+
+    announcement.delete()
+    messages.success(request, "Announcement deleted.")
+    return redirect("helpdesk:announcement_list")
+
+
+@login_required
+def faq_list(request):
+    faqs = FAQ.objects.filter(is_active=True).select_related("department")
+
+    if request.user.role == User.Roles.STUDENT:
+        department = request.user.department
+    elif request.user.role == User.Roles.STAFF:
+        department = get_staff_department(request.user)
+    else:
+        department = None
+
+    if request.user.role != User.Roles.ADMIN:
+        if department:
+            faqs = faqs.filter(
+                models.Q(department=department)
+                | models.Q(department__isnull=True)
+            )
+        else:
+            faqs = faqs.filter(department__isnull=True)
+
+    query = request.GET.get("q", "").strip()
+    if query:
+        faqs = faqs.filter(
+            models.Q(question__icontains=query)
+            | models.Q(answer__icontains=query)
+        )
+
+    return render(request, "helpdesk/faqs.html", {
+        "faqs": faqs,
+        "query": query,
+    })
+
+
+@admin_required
+def admin_faqs(request):
+    faqs = FAQ.objects.select_related("department").order_by(
+        "department__name", "question"
+    )
+    return render(request, "admin_panel/faqs.html", {"faqs": faqs})
+
+
+@admin_required
+def admin_faq_create(request):
+    departments = Department.objects.filter(is_active=True).order_by("name")
+
+    if request.method == "POST":
+        question = request.POST.get("question", "").strip()
+        answer = request.POST.get("answer", "").strip()
+        department_id = request.POST.get("department", "").strip()
+
+        department = None
+        errors = []
+
+        if not question:
+            errors.append("Enter a question.")
+        if not answer:
+            errors.append("Enter an answer.")
+
+        if department_id:
+            department = departments.filter(pk=department_id).first()
+            if department is None:
+                errors.append("Select a valid active department.")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+        else:
+            FAQ.objects.create(
+                question=question,
+                answer=answer,
+                department=department,
+                is_active=request.POST.get("is_active") == "on",
+            )
+            messages.success(request, "FAQ created successfully.")
+            return redirect("helpdesk:admin_faqs")
+
+    return render(request, "admin_panel/faq_form.html", {
+        "departments": departments,
+        "page_title": "Add FAQ",
+    })
+
+
+@admin_required
+def admin_faq_edit(request, faq_id):
+    faq = get_object_or_404(FAQ, pk=faq_id)
+    departments = Department.objects.filter(is_active=True).order_by("name")
+
+    if request.method == "POST":
+        question = request.POST.get("question", "").strip()
+        answer = request.POST.get("answer", "").strip()
+        department_id = request.POST.get("department", "").strip()
+
+        department = None
+        errors = []
+
+        if not question:
+            errors.append("Enter a question.")
+        if not answer:
+            errors.append("Enter an answer.")
+
+        if department_id:
+            department = departments.filter(pk=department_id).first()
+            if department is None:
+                errors.append("Select a valid active department.")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+        else:
+            faq.question = question
+            faq.answer = answer
+            faq.department = department
+            faq.is_active = request.POST.get("is_active") == "on"
+            faq.save()
+            messages.success(request, "FAQ updated successfully.")
+            return redirect("helpdesk:admin_faqs")
+
+    return render(request, "admin_panel/faq_form.html", {
+        "faq": faq,
+        "departments": departments,
+        "page_title": "Edit FAQ",
+    })
+
+
+@admin_required
+@require_POST
+def admin_faq_delete(request, faq_id):
+    faq = get_object_or_404(FAQ, pk=faq_id)
+    faq.delete()
+    messages.success(request, "FAQ deleted.")
+    return redirect("helpdesk:admin_faqs")

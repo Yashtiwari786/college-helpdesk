@@ -1,0 +1,97 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+.notice-page { max-width: 1120px; margin: auto; padding: 28px 16px 50px; }
+.notice-hero { padding: 30px; border-radius: 22px; color: white; background: linear-gradient(125deg,#172554,#4f46e5,#0891b2); box-shadow: 0 15px 40px #17255422; }
+.notice-hero h1 { font-weight: 800; }
+.notice-card { border: 1px solid #e5e7eb; border-radius: 18px; background: white; padding: 23px; margin-top: 18px; box-shadow: 0 7px 24px #0f172a08; transition: transform .2s,box-shadow .2s; }
+.notice-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px #0f172a12; }
+.notice-message { white-space: pre-wrap; overflow-wrap: anywhere; }
+.notice-file { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; background: #eff6ff; margin: 5px 5px 0 0; overflow-wrap: anywhere; }
+@media(max-width:600px) { .notice-hero { padding: 22px; } .notice-card { padding: 17px; } }
+</style>
+
+<div class="notice-page">
+  <section class="notice-hero">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <div class="small text-uppercase mb-2">College Help Desk</div>
+        <h1 class="h2 mb-2">Announcements</h1>
+        <p class="mb-0">Important updates from your college and department.</p>
+      </div>
+      {% if user.role == "ADMIN" or user.role == "STAFF" %}
+      <a href="{% url 'helpdesk:announcement_create' %}" class="btn btn-light fw-semibold">
+        + Create announcement
+      </a>
+      {% endif %}
+    </div>
+  </section>
+
+  <form method="get" class="mt-4">
+    <div class="input-group">
+      <input class="form-control" name="q" value="{{ query }}" placeholder="Search announcements...">
+      <button class="btn btn-primary">Search</button>
+    </div>
+  </form>
+
+  {% for announcement in announcements %}
+  <article class="notice-card">
+    <div class="d-flex flex-wrap justify-content-between gap-2 align-items-start">
+      <div>
+        {% if announcement.is_pinned %}
+          <span class="badge text-bg-warning mb-2">Pinned</span>
+        {% endif %}
+        <h2 class="h4 fw-bold mb-2">{{ announcement.title }}</h2>
+        <div class="small text-secondary">
+          {% if announcement.department %}
+            {{ announcement.department.name }} department
+          {% else %}
+            College-wide
+          {% endif %}
+          · {{ announcement.created_at|date:"M d, Y · g:i A" }}
+        </div>
+      </div>
+      {% if user.role == "ADMIN" or announcement.created_by_id == user.id %}
+      <a class="btn btn-sm btn-outline-primary"
+         href="{% url 'helpdesk:announcement_edit' announcement.id %}">Edit</a>
+      {% endif %}
+    </div>
+
+    <div class="notice-message mt-3">{{ announcement.message }}</div>
+
+    {% if announcement.attachments.all %}
+    <div class="mt-3">
+      <div class="small fw-bold mb-1">Attachments</div>
+      {% for attachment in announcement.attachments.all %}
+        <a class="notice-file" href="{{ attachment.file.url }}" target="_blank" rel="noopener">
+          <span>📎</span>
+          <span>{{ attachment.original_name|default:attachment.file.name }}</span>
+        </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if user.role == "ADMIN" or announcement.created_by_id == user.id %}
+    <form method="post" action="{% url 'helpdesk:announcement_delete' announcement.id %}" class="mt-3"
+          onsubmit="return confirm('Delete this announcement and its attachments?');">
+      {% csrf_token %}
+      <button class="btn btn-sm btn-outline-danger">Delete announcement</button>
+    </form>
+    {% endif %}
+  </article>
+  {% empty %}
+  <div class="text-center p-5 mt-4 border rounded-4">
+    <div class="display-6 mb-2">📣</div>
+    <h2 class="h5">No announcements found</h2>
+    <p class="text-secondary mb-0">New notices will appear here when published.</p>
+  </div>
+  {% endfor %}
+
+  <div class="mt-4 d-flex flex-wrap gap-2">
+    <a href="{% url 'helpdesk:faq_list' %}" class="btn btn-outline-primary">Browse FAQs →</a>
+    <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline-secondary">Back to dashboard</a>
+  </div>
+</div>
+{% endblock %}

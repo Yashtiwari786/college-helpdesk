@@ -1,0 +1,101 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+.announcement-form-wrap { max-width: 850px; margin: 35px auto; padding: 0 16px 40px; }
+.announcement-form-card { border: 1px solid #e5e7eb; border-radius: 22px; overflow: hidden; box-shadow: 0 15px 45px #0f172a10; }
+.announcement-form-header { padding: 25px; color: white; background: linear-gradient(120deg,#172554,#4f46e5,#0891b2); }
+.announcement-form-body { padding: 26px; }
+.announcement-form-body label { font-weight: 600; margin-bottom: 7px; }
+.announcement-form-body .form-control,.announcement-form-body .form-select { border-radius: 11px; padding: 12px; }
+@media(max-width:600px) { .announcement-form-body { padding: 18px; } }
+</style>
+
+<div class="announcement-form-wrap">
+  <div class="announcement-form-card">
+    <header class="announcement-form-header">
+      <div class="small text-uppercase">College Help Desk</div>
+      <h1 class="h3 fw-bold mt-2 mb-1">
+        {% if announcement %}Edit announcement{% else %}Create announcement{% endif %}
+      </h1>
+      <p class="mb-0">Share an important update with your college community.</p>
+    </header>
+
+    <div class="announcement-form-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label for="title">Announcement title *</label>
+          <input class="form-control" id="title" name="title" maxlength="255" required
+                 value="{{ announcement.title|default:'' }}">
+        </div>
+
+        <div class="mb-3">
+          <label for="message">Message *</label>
+          <textarea class="form-control" id="message" name="message" rows="7" required>{{ announcement.message|default:'' }}</textarea>
+        </div>
+
+        {% if is_admin %}
+        <div class="mb-3">
+          <label for="department">Department</label>
+          <select class="form-select" id="department" name="department">
+            <option value="">College-wide announcement</option>
+            {% for department in departments %}
+            <option value="{{ department.id }}"
+              {% if announcement.department_id == department.id %}selected{% endif %}>
+              {{ department.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        {% else %}
+          <div class="alert alert-info rounded-3">
+            This announcement will be published immediately to your assigned department.
+          </div>
+        {% endif %}
+
+        <div class="mb-3">
+          <label for="attachments">Attachments (optional)</label>
+          <input class="form-control" id="attachments" name="attachments" type="file" multiple
+                 accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp4,.mov,.webm">
+          <div class="form-text">Images, PDFs, office documents and videos. Maximum 10 MB per file.</div>
+          {% if announcement %}
+            <div class="mt-2 small text-secondary">Existing attachments remain attached when you edit the announcement.</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label for="expires_at">Expiry date and time (optional)</label>
+          <input class="form-control" id="expires_at" name="expires_at" type="datetime-local"
+                 value="{% if announcement.expires_at %}{{ announcement.expires_at|date:'Y-m-d\\TH:i' }}{% endif %}">
+        </div>
+
+        {% if is_admin %}
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="is_pinned" name="is_pinned"
+                 {% if announcement.is_pinned %}checked{% endif %}>
+          <label class="form-check-label" for="is_pinned">Pin this announcement</label>
+        </div>
+        {% endif %}
+
+        {% if announcement %}
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
+                 {% if announcement.is_active %}checked{% endif %}>
+          <label class="form-check-label" for="is_active">Published and visible</label>
+        </div>
+        {% endif %}
+
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-primary px-4" type="submit">
+            {% if announcement %}Save changes{% else %}Publish announcement{% endif %}
+          </button>
+          <a class="btn btn-outline-secondary" href="{% url 'helpdesk:announcement_list' %}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

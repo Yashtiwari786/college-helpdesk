@@ -1,0 +1,60 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+.faq-wrap { max-width: 1000px; margin: 30px auto; padding: 0 16px 45px; }
+.faq-hero { background: linear-gradient(125deg,#172554,#4338ca,#0e7490); color: white; border-radius: 22px; padding: 28px; }
+.faq-item { border: 1px solid #e5e7eb; border-radius: 14px; margin-top: 13px; overflow: hidden; background: white; }
+.faq-question { width: 100%; padding: 19px; background: white; border: 0; text-align: left; font-weight: 700; display: flex; justify-content: space-between; gap: 12px; }
+.faq-answer { padding: 0 19px 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.faq-question:hover { background: #f8fafc; }
+</style>
+
+<div class="faq-wrap">
+  <header class="faq-hero">
+    <div class="small text-uppercase">Help and Support</div>
+    <h1 class="h2 fw-bold mt-2">Frequently Asked Questions</h1>
+    <p class="mb-0">Find quick answers to common helpdesk questions.</p>
+  </header>
+
+  <form method="get" class="mt-4">
+    <div class="input-group">
+      <input class="form-control" name="q" value="{{ query }}" placeholder="Search questions or answers...">
+      <button class="btn btn-primary">Search</button>
+    </div>
+  </form>
+
+  <div class="mt-4">
+    {% for faq in faqs %}
+    <section class="faq-item">
+      <button class="faq-question" type="button"
+              data-bs-toggle="collapse" data-bs-target="#faq-{{ faq.id }}"
+              aria-expanded="false" aria-controls="faq-{{ faq.id }}">
+        <span>{{ faq.question }}</span><span aria-hidden="true">＋</span>
+      </button>
+      <div class="collapse" id="faq-{{ faq.id }}">
+        <div class="faq-answer">
+          {% if faq.department %}
+          <div class="small text-primary mb-2">{{ faq.department.name }}</div>
+          {% else %}
+          <div class="small text-primary mb-2">General</div>
+          {% endif %}
+          {{ faq.answer }}
+        </div>
+      </div>
+    </section>
+    {% empty %}
+    <div class="text-center border rounded-4 p-5">
+      <h2 class="h5">No FAQs found</h2>
+      <p class="text-secondary mb-0">Try a different search term.</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-4 d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-primary" href="{% url 'helpdesk:announcement_list' %}">View announcements</a>
+    <a class="btn btn-outline-secondary" href="{% url 'dashboard:dashboard' %}">Back to dashboard</a>
+  </div>
+</div>
+{% endblock %}

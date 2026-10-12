@@ -172,5 +172,52 @@ path(
     views.department_detail,
     name="department_detail",
 ),
+# Announcements
+path(
+    "announcements/",
+    views.announcement_list,
+    name="announcement_list",
+),
+path(
+    "announcements/create/",
+    views.announcement_create,
+    name="announcement_create",
+),
+path(
+    "announcements/<int:announcement_id>/edit/",
+    views.announcement_edit,
+    name="announcement_edit",
+),
+path(
+    "announcements/<int:announcement_id>/delete/",
+    views.announcement_delete,
+    name="announcement_delete",
+),
 
+# FAQs
+path(
+    "faqs/",
+    views.faq_list,
+    name="faq_list",
+),
+path(
+    "admin-panel/faqs/",
+    views.admin_faqs,
+    name="admin_faqs",
+),
+path(
+    "admin-panel/faqs/add/",
+    views.admin_faq_create,
+    name="admin_faq_create",
+),
+path(
+    "admin-panel/faqs/<int:faq_id>/edit/",
+    views.admin_faq_edit,
+    name="admin_faq_edit",
+),
+path(
+    "admin-panel/faqs/<int:faq_id>/delete/",
+    views.admin_faq_delete,
+    name="admin_faq_delete",
+),
 ]

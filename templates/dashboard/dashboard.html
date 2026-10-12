@@ -789,6 +789,7 @@
                     <span>Edit Profile</span>
                 </a>
                 
+                
 
 
             {% endif %}
@@ -802,6 +803,13 @@
         <span class="hd-nav-icon">🎓</span>
         <span>Department Students</span>
     </a>
+    <a href="{% url 'helpdesk:announcement_list' %}" class="btn btn-outline-primary">
+    📣 Announcements
+</a>
+
+<a href="{% url 'helpdesk:faq_list' %}" class="btn btn-outline-primary">
+    ❓ FAQs
+</a>
 {% endif %}
             {% if dashboard_type == "staff" %}
 
@@ -1044,15 +1052,7 @@
                         </span>
                     </a>
                     
-{% if dashboard_type == "student" %}
-    <a href="{% url 'dashboard:department_staff' %}">
-        View My Department Staff →
-    </a>
-{% elif dashboard_type == "staff" %}
-    <a href="{% url 'dashboard:department_students' %}">
-        View Department Students →
-    </a>
-{% endif %}
+
 
 
                 </div>

@@ -370,21 +370,67 @@ class Announcement(models.Model):
     title = models.CharField(max_length=255)
     message = models.TextField()
 
+    # A NULL department means this is a college-wide announcement.
     department = models.ForeignKey(
         Department,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="announcements"
+        related_name="announcements",
+    )
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_announcements",
     )
 
     is_active = models.BooleanField(default=True)
+    is_pinned = models.BooleanField(default=False)
+
+    expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Optional expiry date and time.",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ["-is_pinned", "-created_at"]
+
     def __str__(self):
         return self.title
+
+    @property
+    def is_expired(self):
+        return self.expires_at is not None and self.expires_at <= timezone.now()
+
+class AnnouncementAttachment(models.Model):
+    announcement = models.ForeignKey(
+        Announcement,
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+
+    file = models.FileField(
+        upload_to="",
+        storage=HelpdeskCloudinaryStorage(),
+    )
+
+    original_name = models.CharField(max_length=255, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.file and not self.original_name:
+            self.original_name = os.path.basename(self.file.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.original_name or self.file.name
 
 
 class StaffProfile(models.Model):
