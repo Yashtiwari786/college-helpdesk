@@ -814,15 +814,17 @@
         <span class="hd-nav-icon">🎓</span>
         <span>Department Students</span>
     </a>
-    <a href="{% url 'helpdesk:announcement_list' %}" class="btn btn-outline-primary">
-    📣 Announcements
+    <a href="{% url 'helpdesk:announcement_list' %}">
+        <span class="hd-nav-icon">🎓</span>
+   <span>📣 Announcements</span>
 </a>
 <a href="{% url 'helpdesk:announcement_create' %}">
     <span class="hd-nav-icon">➕</span>
     <span>Publish Announcement</span>
 </a>
-<a href="{% url 'helpdesk:faq_list' %}" class="btn btn-outline-primary">
-    ❓ FAQs
+<a href="{% url 'helpdesk:faq_list' %}">
+    <span class="hd-nav-icon">🎓</span>
+  <span>❓ FAQs</span>
 </a>
 {% endif %}
             {% if dashboard_type == "staff" %}

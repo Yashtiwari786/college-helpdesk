@@ -1,118 +1,285 @@
+
 {% extends "base.html" %}
 
+{% block title %}My Requests | College HelpDesk{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== Neumorphic Staff Requests ===== */
+.staff-ui {
+    --bg: #e8eef7;
+    --text: #243b64;
+    --muted: #7183a4;
+    --blue: #3978f6;
+    --shadow: 8px 8px 18px #cbd5e3, -8px -8px 18px #ffffff;
+    --inset: inset 4px 4px 8px #ccd6e4,
+             inset -4px -4px 8px #ffffff;
+    color: var(--text);
+    background: var(--bg);
+    border-radius: 24px;
+    padding: 28px;
+    min-height: 80vh;
+}
+.staff-ui * { box-sizing: border-box; }
+
+.staff-ui .page-heading {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -.7px;
+    margin: 0 0 6px;
+}
+.staff-ui .muted { color: var(--muted); }
+
+.staff-ui .neo-card {
+    background: var(--bg);
+    border: 0;
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.staff-ui .neo-card-body { padding: 24px; }
+
+.staff-ui .neo-input,
+.staff-ui .neo-select {
+    background: var(--bg);
+    border: 0;
+    border-radius: 15px;
+    min-height: 48px;
+    padding: 12px 16px;
+    color: var(--text);
+    box-shadow: var(--inset);
+}
+.staff-ui .neo-input:focus,
+.staff-ui .neo-select:focus {
+    outline: 2px solid #a8c6ff;
+    box-shadow: var(--inset);
+}
+.staff-ui .neo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 0;
+    border-radius: 14px;
+    padding: 12px 18px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform .2s, box-shadow .2s;
+    cursor: pointer;
+}
+.staff-ui .neo-btn:hover { transform: translateY(-2px); }
+.staff-ui .neo-primary {
+    background: linear-gradient(135deg, #528dff, #2865e8);
+    color: white;
+    box-shadow: 5px 5px 12px #c0cce0, -3px -3px 10px #fff;
+}
+.staff-ui .neo-secondary {
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+.staff-ui .table-shell {
+    overflow-x: auto;
+    padding: 12px;
+}
+.staff-ui .neo-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+.staff-ui .neo-table thead th {
+    color: var(--muted);
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    font-weight: 800;
+    padding: 15px 13px;
+    white-space: nowrap;
+}
+.staff-ui .neo-table tbody tr {
+    background: linear-gradient(145deg, #edf3fb, #e4ebf5);
+    box-shadow: 4px 4px 10px #d0d9e6, -4px -4px 10px #fff;
+}
+.staff-ui .neo-table tbody td {
+    padding: 17px 13px;
+    vertical-align: middle;
+    border: 0;
+    color: var(--text);
+}
+.staff-ui .neo-table tbody td:first-child {
+    border-radius: 15px 0 0 15px;
+}
+.staff-ui .neo-table tbody td:last-child {
+    border-radius: 0 15px 15px 0;
+}
+.staff-ui .ticket-number {
+    font-weight: 800;
+    color: #2d63c7;
+    white-space: nowrap;
+}
+.staff-ui .subject-cell {
+    min-width: 170px;
+    max-width: 260px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+.staff-ui .neo-badge {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 30px;
+    font-size: .76rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.staff-ui .status-open,
+.staff-ui .priority-low {
+    background: #d9f5e8;
+    color: #168253;
+}
+.staff-ui .status-progress,
+.staff-ui .priority-medium {
+    background: #fff0c9;
+    color: #a96a00;
+}
+.staff-ui .status-resolved {
+    background: #dce9ff;
+    color: #245fc7;
+}
+.staff-ui .status-hold {
+    background: #ffe3d5;
+    color: #b65a24;
+}
+.staff-ui .priority-high {
+    background: #ffdddd;
+    color: #c43c4d;
+}
+.staff-ui .status-default {
+    background: #e5e0ff;
+    color: #6550b5;
+}
+.staff-ui .empty-state {
+    text-align: center;
+    padding: 55px 20px;
+    color: var(--muted);
+}
+.staff-ui .empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 65px;
+    height: 65px;
+    margin-bottom: 18px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    font-size: 28px;
+}
+.staff-ui .filter-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: .82rem;
+    font-weight: 800;
+    color: var(--muted);
+}
+@media (max-width: 767px) {
+    .staff-ui { padding: 17px; border-radius: 18px; }
+    .staff-ui .neo-card-body { padding: 17px; }
+    .staff-ui .filter-actions { display: flex; gap: 10px; }
+    .staff-ui .filter-actions .neo-btn { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .staff-ui .neo-btn { transition: none; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="staff-ui container-fluid my-3">
+    <!-- Back to Staff Dashboard -->
+<div class="mb-4">
+    <a href="{% url 'dashboard:dashboard' %}"
+       class="neo-btn neo-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Staff Dashboard
+    </a>
+</div>
 
-<div class="container-fluid py-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
+    <!-- Page heading -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h2 class="fw-bold">My Requests</h2>
-            <p class="text-muted">
-                Requests assigned to you
-            </p>
+            <h1 class="page-heading">My Requests</h1>
+            <p class="muted mb-0">Manage and track requests assigned to you.</p>
         </div>
-
+        <div class="neo-card px-3 py-2">
+            <span class="muted small">Total shown</span>
+            <div class="fw-bold fs-5">{{ requests|length }}</div>
+        </div>
     </div>
 
-
-    <!-- Search / Filter -->
-
-    <div class="card border-0 shadow-sm mb-4">
-
-        <div class="card-body">
-
+    <!-- Search and filters -->
+    <div class="neo-card mb-4">
+        <div class="neo-card-body">
             <form method="GET">
+                <div class="row g-3 align-items-end">
 
-                <div class="row g-3">
-
-                    <div class="col-md-5">
-
+                    <div class="col-12 col-lg-5">
+                        <label class="filter-label" for="request-search">Search requests</label>
                         <input
+                            id="request-search"
                             type="text"
                             name="search"
-                            value="{{ search }}"
-                            class="form-control"
-                            placeholder="Search ticket, subject or student..."
+                            value="{{ search|default:'' }}"
+                            class="form-control neo-input"
+                            placeholder="Ticket, subject or student..."
                         >
-
                     </div>
 
-                    <div class="col-md-3">
-
-                        <select name="status"
-                                class="form-select">
-
-                            <option value="">
-                                All Statuses
-                            </option>
-
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <label class="filter-label" for="request-status">Status</label>
+                        <select id="request-status" name="status" class="form-select neo-select">
+                            <option value="">All Statuses</option>
                             {% for value, label in status_choices %}
-
                             <option value="{{ value }}"
-                                {% if selected_status == value %}
-                                    selected
-                                {% endif %}>
+                                {% if selected_status == value %}selected{% endif %}>
                                 {{ label }}
                             </option>
-
                             {% endfor %}
-
                         </select>
-
                     </div>
 
-                    <div class="col-md-2">
-
-                        <select name="priority"
-                                class="form-select">
-
-                            <option value="">
-                                All Priorities
-                            </option>
-
+                    <div class="col-12 col-sm-6 col-lg-2">
+                        <label class="filter-label" for="request-priority">Priority</label>
+                        <select id="request-priority" name="priority" class="form-select neo-select">
+                            <option value="">All Priorities</option>
                             {% for value, label in priority_choices %}
-
                             <option value="{{ value }}"
-                                {% if selected_priority == value %}
-                                    selected
-                                {% endif %}>
+                                {% if selected_priority == value %}selected{% endif %}>
                                 {{ label }}
                             </option>
-
                             {% endfor %}
-
                         </select>
-
                     </div>
 
-                    <div class="col-md-2">
-
-                        <button class="btn btn-primary w-100">
-                            Search
+                    <div class="col-12 col-lg-2 filter-actions">
+                        <button type="submit" class="neo-btn neo-primary w-100">
+                            <i class="bi bi-search"></i> Search
                         </button>
-
                     </div>
 
                 </div>
-
             </form>
-
         </div>
-
     </div>
 
+    <!-- Requests table -->
+    <div class="neo-card">
+        <div class="p-4 pb-0">
+            <h5 class="fw-bold mb-1">Assigned Tickets</h5>
+            <p class="muted small mb-0">Select a ticket to view details and respond.</p>
+        </div>
 
-    <!-- Requests -->
-
-    <div class="card border-0 shadow-sm">
-
-        <div class="table-responsive">
-
-            <table class="table table-hover align-middle mb-0">
-
+        <div class="table-shell">
+            <table class="neo-table">
                 <thead>
-
                     <tr>
                         <th>Ticket</th>
                         <th>Student</th>
@@ -121,75 +288,77 @@
                         <th>Priority</th>
                         <th>Status</th>
                         <th>Created</th>
-                        <th></th>
+                        <th>Action</th>
                     </tr>
-
                 </thead>
-
                 <tbody>
-
                     {% for item in requests %}
-
                     <tr>
+                        <td>
+                            <span class="ticket-number">{{ item.ticket_number }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">
+                                {{ item.student.get_full_name|default:item.student.username }}
+                            </div>
+                        </td>
+                        <td class="subject-cell">{{ item.subject }}</td>
+                        <td>{{ item.department.name|default:"—" }}</td>
 
                         <td>
-                            <strong>
-                                {{ item.ticket_number }}
-                            </strong>
+                            {% if item.priority == "high" %}
+                                <span class="neo-badge priority-high">{{ item.get_priority_display }}</span>
+                            {% elif item.priority == "medium" %}
+                                <span class="neo-badge priority-medium">{{ item.get_priority_display }}</span>
+                            {% elif item.priority == "low" %}
+                                <span class="neo-badge priority-low">{{ item.get_priority_display }}</span>
+                            {% else %}
+                                <span class="neo-badge status-default">{{ item.get_priority_display }}</span>
+                            {% endif %}
                         </td>
 
                         <td>
-                            {{ item.student.get_full_name|default:item.student.username }}
+                            {% if item.status == "open" %}
+                                <span class="neo-badge status-open">{{ item.get_status_display }}</span>
+                            {% elif item.status == "in_progress" %}
+                                <span class="neo-badge status-progress">{{ item.get_status_display }}</span>
+                            {% elif item.status == "resolved" %}
+                                <span class="neo-badge status-resolved">{{ item.get_status_display }}</span>
+                            {% elif item.status == "on_hold" %}
+                                <span class="neo-badge status-hold">{{ item.get_status_display }}</span>
+                            {% else %}
+                                <span class="neo-badge status-default">{{ item.get_status_display }}</span>
+                            {% endif %}
                         </td>
 
-                        <td>
-                            {{ item.subject }}
-                        </td>
+                        <td class="text-nowrap">{{ item.created_at|date:"d M Y" }}</td>
 
                         <td>
-                            {{ item.department.name }}
-                        </td>
-
-                        <td>
-                            {{ item.get_priority_display }}
-                        </td>
-
-                        <td>
-                            {{ item.get_status_display }}
-                        </td>
-
-                        <td>
-                            {{ item.created_at|date:"d M Y" }}
-                        </td>
-
-                        <td>
-                            <a href="{% url 'helpdesk:staff_request_detail' item.ticket_number %}"
-                               class="btn btn-sm btn-primary">
-                                Open
+                            <a
+                                href="{% url 'helpdesk:staff_request_detail' item.ticket_number %}"
+                                class="neo-btn neo-primary btn-sm"
+                            >
+                                Open <i class="bi bi-arrow-up-right"></i>
                             </a>
                         </td>
-
                     </tr>
-
                     {% empty %}
-
                     <tr>
-                        <td colspan="8"
-                            class="text-center py-5 text-muted">
-                            No requests found.
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="bi bi-inbox"></i>
+                                </div>
+                                <h5 class="fw-bold">No requests found</h5>
+                                <p class="mb-0">Try changing your search or filter options.</p>
+                            </div>
                         </td>
                     </tr>
-
                     {% endfor %}
-
                 </tbody>
-
             </table>
-
         </div>
-
     </div>
 
 </div>
-
 {% endblock %}

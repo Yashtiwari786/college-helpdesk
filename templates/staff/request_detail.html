@@ -1,328 +1,439 @@
+
 {% extends "base.html" %}
 
+{% block title %}Request Details | College HelpDesk{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== Neumorphic Request Details ===== */
+.staff-detail {
+    --bg: #e8eef7;
+    --text: #243b64;
+    --muted: #7183a4;
+    --shadow: 8px 8px 18px #cbd5e3, -8px -8px 18px #ffffff;
+    --inset: inset 4px 4px 8px #ccd6e4,
+             inset -4px -4px 8px #ffffff;
+    color: var(--text);
+    background: var(--bg);
+    border-radius: 24px;
+    padding: 26px;
+}
+.staff-detail * { box-sizing: border-box; }
+.staff-detail .page-title {
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    font-weight: 800;
+    letter-spacing: -.5px;
+    overflow-wrap: anywhere;
+}
+.staff-detail .muted { color: var(--muted); }
+.staff-detail .neo-card {
+    background: var(--bg);
+    border: 0;
+    border-radius: 21px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.staff-detail .neo-body { padding: 23px; }
+.staff-detail .neo-header {
+    padding: 18px 23px;
+    border-bottom: 1px solid #d7e0ec;
+    font-weight: 800;
+}
+.staff-detail .section-title {
+    font-weight: 800;
+    font-size: 1.04rem;
+    margin: 0;
+}
+.staff-detail .icon-tile {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    color: #3978f6;
+    font-size: 19px;
+}
+.staff-detail .neo-input,
+.staff-detail .neo-select,
+.staff-detail textarea,
+.staff-detail input[type="file"] {
+    width: 100%;
+    border: 0;
+    border-radius: 14px;
+    background: var(--bg);
+    color: var(--text);
+    padding: 12px 14px;
+    box-shadow: var(--inset);
+}
+.staff-detail textarea { min-height: 130px; }
+.staff-detail .neo-input:focus,
+.staff-detail .neo-select:focus,
+.staff-detail textarea:focus {
+    outline: 2px solid #a8c6ff;
+}
+.staff-detail .neo-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    border-radius: 14px;
+    padding: 12px 17px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform .2s;
+}
+.staff-detail .neo-btn:hover { transform: translateY(-2px); }
+.staff-detail .neo-primary {
+    color: #fff;
+    background: linear-gradient(135deg, #528dff, #2865e8);
+    box-shadow: 5px 5px 12px #c0cce0, -3px -3px 10px #fff;
+}
+.staff-detail .neo-secondary {
+    color: var(--text);
+    background: var(--bg);
+    box-shadow: var(--shadow);
+}
+.staff-detail .neo-success {
+    color: #fff;
+    background: linear-gradient(135deg, #42c99a, #20a878);
+    box-shadow: 5px 5px 12px #c0cce0, -3px -3px 10px #fff;
+}
+.staff-detail .info-box {
+    height: 100%;
+    border-radius: 15px;
+    padding: 14px;
+    box-shadow: var(--inset);
+}
+.staff-detail .info-label {
+    color: var(--muted);
+    font-size: .77rem;
+    margin-bottom: 5px;
+}
+.staff-detail .info-value { font-weight: 700; overflow-wrap: anywhere; }
+.staff-detail .file-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 15px;
+    box-shadow: 4px 4px 10px #d0d9e6, -4px -4px 10px #fff;
+}
+.staff-detail .file-row + .file-row { margin-top: 12px; }
+.staff-detail .file-name { font-weight: 700; overflow-wrap: anywhere; }
+.staff-detail .message-bubble {
+    padding: 15px 17px;
+    border-radius: 18px;
+    max-width: 90%;
+    overflow-wrap: anywhere;
+    box-shadow: 4px 4px 10px #d0d9e6, -4px -4px 10px #fff;
+}
+.staff-detail .message-own {
+    margin-left: auto;
+    background: #dce9ff;
+}
+.staff-detail .message-other {
+    margin-right: auto;
+    background: #edf3fb;
+}
+.staff-detail .student-avatar {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #dce9ff;
+    box-shadow: var(--shadow);
+    font-size: 25px;
+    color: #3978f6;
+}
+.staff-detail .form-label {
+    font-size: .83rem;
+    font-weight: 800;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+.staff-detail .student-email { overflow-wrap: anywhere; }
+.staff-detail .attachment-list { display: grid; gap: 12px; }
+@media (max-width: 767px) {
+    .staff-detail { padding: 16px; border-radius: 18px; }
+    .staff-detail .neo-body { padding: 17px; }
+    .staff-detail .neo-header { padding: 16px 17px; }
+    .staff-detail .message-bubble { max-width: 100%; }
+    .staff-detail .file-row { align-items: flex-start; flex-direction: column; }
+    .staff-detail .file-row .neo-btn { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .staff-detail .neo-btn { transition: none; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="staff-detail container-fluid my-3">
 
-<div class="container-fluid py-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
+    <!-- Page heading -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h2 class="fw-bold">
-                {{ help_request.ticket_number }}
-            </h2>
-
-            <p class="text-muted mb-0">
-                {{ help_request.subject }}
-            </p>
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <a href="{% url 'helpdesk:staff_requests' %}" class="neo-btn neo-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Back to Requests
+                </a>
+            </div>
+            <h1 class="page-title mb-1">{{ help_request.ticket_number }}</h1>
+            <p class="muted mb-0">{{ help_request.subject }}</p>
         </div>
 
-        <a href="{% url 'helpdesk:staff_requests' %}"
-           class="btn btn-outline-secondary">
-            ← Back
-        </a>
-
+        <div class="neo-card px-3 py-2">
+            <div class="muted small">Created on</div>
+            <div class="fw-bold">{{ help_request.created_at|date:"d M Y, H:i" }}</div>
+        </div>
     </div>
-
 
     <div class="row g-4">
 
-        <!-- Main -->
+        <!-- Main column -->
+        <div class="col-12 col-xl-8">
 
-        <div class="col-lg-8">
-
-            <!-- Request -->
-
-            <div class="card border-0 shadow-sm mb-4">
-
-                <div class="card-body">
-
-                    <h5 class="fw-bold mb-3">
-                        Request Details
-                    </h5>
-
-                    <p>
-                        {{ help_request.description|linebreaks }}
-                    </p>
-
-                    <hr>
-
-                    <div class="row">
-
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                Department
-                            </small>
-                            <p>
-                                {{ help_request.department.name }}
-                            </p>
-                        </div>
-
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                Category
-                            </small>
-                            <p>
-                                {{ help_request.category.name }}
-                            </p>
-                        </div>
-
-                        <div class="col-md-4">
-                            <small class="text-muted">
-                                Created
-                            </small>
-                            <p>
-                                {{ help_request.created_at|date:"d M Y H:i" }}
-                            </p>
-                        </div>
-
-                    </div>
-
+            <!-- Request details -->
+            <section class="neo-card mb-4">
+                <div class="neo-header d-flex align-items-center gap-3">
+                    <span class="icon-tile"><i class="bi bi-file-earmark-text"></i></span>
+                    <h2 class="section-title">Request Details</h2>
                 </div>
 
-            </div>
-<div class="card mt-4">
-    <div class="card-body">
-        <h5 class="card-title">
-            <i class="bi bi-paperclip"></i>
-            Student Attachments
-        </h5>
+                <div class="neo-body">
+                    <div class="mb-4" style="line-height: 1.8;">
+                        {{ help_request.description|linebreaks }}
+                    </div>
 
-        {% if attachments %}
-            <div class="list-group">
-                {% for attachment in attachments %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-
-                        <div>
-                            <i class="bi bi-file-earmark"></i>
-
-                            <strong>
-                                {{ attachment.original_name|default:attachment.file.name }}
-                            </strong>
-
-                            <small class="text-muted d-block">
-                                Uploaded by {{ attachment.uploaded_by.username }}
-                                · {{ attachment.uploaded_at|date:"d M Y, h:i A" }}
-                            </small>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <div class="info-box">
+                                <div class="info-label"><i class="bi bi-building me-1"></i> Department</div>
+                                <div class="info-value">{{ help_request.department.name|default:"—" }}</div>
+                            </div>
                         </div>
 
-                        <a
-                            href="{{ attachment.file.url }}"
-                            target="_blank"
-                            class="btn btn-primary btn-sm"
-                        >
-                            <i class="bi bi-eye"></i>
-                            View / Download
-                        </a>
+                        <div class="col-12 col-md-4">
+                            <div class="info-box">
+                                <div class="info-label"><i class="bi bi-folder me-1"></i> Category</div>
+                                <div class="info-value">{{ help_request.category.name|default:"—" }}</div>
+                            </div>
+                        </div>
 
+                        <div class="col-12 col-md-4">
+                            <div class="info-box">
+                                <div class="info-label"><i class="bi bi-calendar3 me-1"></i> Created</div>
+                                <div class="info-value">{{ help_request.created_at|date:"d M Y H:i" }}</div>
+                            </div>
+                        </div>
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="text-muted mb-0">
-                No attachments uploaded for this request.
-            </p>
-        {% endif %}
-    </div>
-</div>
+                </div>
+            </section>
+
+            <!-- Student attachments -->
+            <section class="neo-card mb-4">
+                <div class="neo-header d-flex align-items-center gap-3">
+                    <span class="icon-tile"><i class="bi bi-paperclip"></i></span>
+                    <h2 class="section-title">Student Attachments</h2>
+                </div>
+
+                <div class="neo-body">
+                    {% if attachments %}
+                        <div class="attachment-list">
+                            {% for attachment in attachments %}
+                            <div class="file-row">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="icon-tile"><i class="bi bi-file-earmark"></i></span>
+                                    <div>
+                                        <div class="file-name">
+                                            {{ attachment.original_name|default:attachment.file.name }}
+                                        </div>
+                                        <small class="muted">
+                                            Uploaded by {{ attachment.uploaded_by.username }}
+                                            · {{ attachment.uploaded_at|date:"d M Y, h:i A" }}
+                                        </small>
+                                    </div>
+                                </div>
+
+                                {% if attachment.file %}
+                                <a href="{{ attachment.file.url }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="neo-btn neo-primary btn-sm">
+                                    <i class="bi bi-download"></i> View / Download
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <span class="icon-tile mb-3"><i class="bi bi-folder2-open"></i></span>
+                            <p class="muted mb-0">No attachments uploaded for this request.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
 
             <!-- Conversation -->
-
-            <div class="card border-0 shadow-sm mb-4">
-
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
-                        Conversation
-                    </h5>
+            <section class="neo-card mb-4">
+                <div class="neo-header d-flex align-items-center gap-3">
+                    <span class="icon-tile"><i class="bi bi-chat-dots"></i></span>
+                    <h2 class="section-title">Conversation</h2>
                 </div>
 
-                <div class="card-body">
-
+                <div class="neo-body">
                     {% for message in messages_list %}
-
-                    <div class="message-box
-                        {% if message.sender == request.user %}
-                            message-own
-                        {% else %}
-                            message-other
-                        {% endif %}
-                    ">
-
-                        <div class="small text-muted mb-1">
+                    <div class="message-bubble mb-3
+                        {% if message.sender == request.user %}message-own{% else %}message-other{% endif %}">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
                             <strong>
                                 {{ message.sender.get_full_name|default:message.sender.username }}
                             </strong>
-
-                            ·
-
-                            {{ message.created_at|date:"d M Y H:i" }}
+                            <small class="muted">{{ message.created_at|date:"d M Y, H:i" }}</small>
                         </div>
 
-                        <div>
-                            {{ message.message|linebreaks }}
-                        </div>
+                        <div>{{ message.message|linebreaks }}</div>
 
                         {% if message.attachment %}
-
                         <div class="mt-2">
                             <a href="{{ message.attachment.url }}"
-                               target="_blank">
-                                View Attachment
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <i class="bi bi-paperclip"></i> View attachment
                             </a>
                         </div>
-
                         {% endif %}
-
                     </div>
-
                     {% empty %}
-
-                    <p class="text-muted">
-                        No messages yet.
-                    </p>
-
+                    <div class="text-center py-4">
+                        <span class="icon-tile mb-3"><i class="bi bi-chat-left-text"></i></span>
+                        <p class="muted mb-0">No messages yet. Start the conversation below.</p>
+                    </div>
                     {% endfor %}
-
                 </div>
-
-            </div>
-
+            </section>
 
             <!-- Reply -->
-
-            <div class="card border-0 shadow-sm">
-
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
-                        Reply to Student
-                    </h5>
+            <section class="neo-card">
+                <div class="neo-header d-flex align-items-center gap-3">
+                    <span class="icon-tile"><i class="bi bi-reply"></i></span>
+                    <h2 class="section-title">Reply to Student</h2>
                 </div>
 
-                <div class="card-body">
-
-                    <form
-                        method="POST"
-                        enctype="multipart/form-data"
-                        action="{% url 'helpdesk:staff_send_message' help_request.ticket_number %}"
-                    >
-
+                <div class="neo-body">
+                    <form method="POST"
+                          enctype="multipart/form-data"
+                          action="{% url 'helpdesk:staff_send_message' help_request.ticket_number %}">
                         {% csrf_token %}
 
-                        {{ message_form.message }}
-
-                        <div class="mt-3">
-                            {{ message_form.attachment }}
+                        <div class="mb-3">
+                            {{ message_form.message }}
+                            {% if message_form.message.errors %}
+                                <div class="text-danger small mt-2">{{ message_form.message.errors }}</div>
+                            {% endif %}
                         </div>
 
-                        <button class="btn btn-primary mt-3">
-                            Send Reply
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ message_form.attachment.id_for_label }}">
+                                Attach a file (optional)
+                            </label>
+                            {{ message_form.attachment }}
+                            {% if message_form.attachment.errors %}
+                                <div class="text-danger small mt-2">{{ message_form.attachment.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="neo-btn neo-primary">
+                            <i class="bi bi-send"></i> Send Reply
                         </button>
-
                     </form>
-
                 </div>
-
-            </div>
+            </section>
 
         </div>
-
 
         <!-- Sidebar -->
+        <aside class="col-12 col-xl-4">
 
-        <div class="col-lg-4">
-
-            <!-- Student -->
-
-            <div class="card border-0 shadow-sm mb-4">
-
-                <div class="card-body">
-
-                    <h5 class="fw-bold">
-                        Student
-                    </h5>
-
-                    <p class="mb-1">
-                        <strong>
-                            {{ help_request.student.get_full_name|default:help_request.student.username }}
-                        </strong>
-                    </p>
-
-                    <p class="text-muted">
-                        {{ help_request.student.email }}
-                    </p>
-
+            <!-- Student information -->
+            <section class="neo-card mb-4">
+                <div class="neo-header d-flex align-items-center gap-3">
+                    
+                    <h2 class="section-title">Student Information</h2>
                 </div>
 
-            </div>
+                <div class="neo-body">
+                    <div class="d-flex align-items-center gap-3">
+                       
+                        <div class="min-w-0">
+                            <div class="fw-bold">
+                                {{ help_request.student.get_full_name|default:help_request.student.username }}
+                            </div>
+                            <div class="muted small student-email">{{ help_request.student.email|default:"No email provided" }}</div>
+                            <div class="muted small mt-1">
+                                Username: {{ help_request.student.username }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-
-            <!-- Update -->
-
-            <div class="card border-0 shadow-sm">
-
-                <div class="card-header bg-white">
-
-                    <h5 class="mb-0">
-                        Update Request
-                    </h5>
-
+            <!-- Update request -->
+            <section class="neo-card">
+                <div class="neo-header d-flex align-items-center gap-3">
+                    <span class="icon-tile"><i class="bi bi-sliders"></i></span>
+                    <h2 class="section-title">Update Request</h2>
                 </div>
 
-                <div class="card-body">
-
-                    <form
-                        method="POST"
-                        action="{% url 'helpdesk:staff_update_request' help_request.ticket_number %}"
-                    >
-
+                <div class="neo-body">
+                    <form method="POST"
+                          action="{% url 'helpdesk:staff_update_request' help_request.ticket_number %}">
                         {% csrf_token %}
 
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Status
-                            </label>
-
+                        <div class="mb-4">
+                            <label class="form-label" for="{{ update_form.status.id_for_label }}">Status</label>
                             {{ update_form.status }}
-
+                            {% if update_form.status.errors %}
+                                <div class="text-danger small mt-2">{{ update_form.status.errors }}</div>
+                            {% endif %}
                         </div>
 
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Priority
-                            </label>
-
+                        <div class="mb-4">
+                            <label class="form-label" for="{{ update_form.priority.id_for_label }}">Priority</label>
                             {{ update_form.priority }}
-
+                            {% if update_form.priority.errors %}
+                                <div class="text-danger small mt-2">{{ update_form.priority.errors }}</div>
+                            {% endif %}
                         </div>
 
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
+                        <div class="mb-4">
+                            <label class="form-label" for="{{ update_form.assigned_staff.id_for_label }}">
                                 Assigned Staff
                             </label>
-
                             {{ update_form.assigned_staff }}
-
+                            {% if update_form.assigned_staff.errors %}
+                                <div class="text-danger small mt-2">{{ update_form.assigned_staff.errors }}</div>
+                            {% endif %}
                         </div>
 
-
-                        <button class="btn btn-success w-100">
-                            Update Request
+                        <button type="submit" class="neo-btn neo-success w-100">
+                            <i class="bi bi-check2-circle"></i> Update Request
                         </button>
-
                     </form>
-
                 </div>
+            </section>
 
-            </div>
-
-        </div>
-
+        </aside>
     </div>
-
 </div>
-
 {% endblock %}
